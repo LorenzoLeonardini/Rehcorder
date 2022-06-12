@@ -5,6 +5,26 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/FirstFragment">
 
+    <action
+        android:id="@+id/to_first_fragment"
+        app:destination="@id/FirstFragment"
+        app:enterAnim="@anim/slide_in_left"
+        app:exitAnim="@anim/slide_out_right"
+        app:popEnterAnim="@anim/slide_in_left"
+        app:popExitAnim="@anim/slide_out_right"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="true" />
+
+    <action
+        android:id="@+id/to_second_fragment"
+        app:destination="@id/SecondFragment"
+        app:enterAnim="@anim/slide_in_right"
+        app:exitAnim="@anim/slide_out_left"
+        app:popEnterAnim="@anim/slide_in_right"
+        app:popExitAnim="@anim/slide_out_left"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="true" />
+
     <fragment
         android:id="@+id/FirstFragment"
         android:name="dev.leonardini.rehcorder.FirstFragment"
@@ -18,7 +38,7 @@
     <fragment
         android:id="@+id/SecondFragment"
         android:name="dev.leonardini.rehcorder.SecondFragment"
-        android:label="@string/second_fragment_label"
+        android:label="@string/app_name"
         tools:layout="@layout/fragment_second">
 
         <action

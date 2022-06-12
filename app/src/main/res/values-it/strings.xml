@@ -10,6 +10,9 @@
 
     <string name="record">Registra</string>
 
+    <string name="permission_required_title">Permessi necessari</string>
+    <string name="permission_required">Questa app ha bisogno di accedere al microfono per registrare</string>
+
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
         volutpat, dolor id interdum ullamcorper, risus dolor egestas lectus, sit amet mattis purus

@@ -9,6 +9,9 @@
 
     <string name="record">Record</string>
 
+    <string name="permission_required_title">Permission required</string>
+    <string name="permission_required">This app needs to access your microphone to record rehearsals</string>
+
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
         volutpat, dolor id interdum ullamcorper, risus dolor egestas lectus, sit amet mattis purus
