@@ -22,7 +22,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.get
 import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.snackbar.BaseTransientBottomBar
-import dev.leonardini.alarm.MaterialInfoDialogFragment
+import dev.leonardini.rehcorder.MaterialInfoDialogFragment
 import dev.leonardini.rehcorder.databinding.ActivityMainBinding
 import java.io.IOException
 
