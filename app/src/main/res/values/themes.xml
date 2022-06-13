@@ -6,4 +6,17 @@
     </style>
 
     <style name="Theme.Rehcorder" parent="Base.Theme.Rehcorder" />
+
+    <style name="Widget.App.Button.List.IconOnly" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="iconPadding">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:paddingLeft">6dp</item>
+        <item name="android:paddingRight">6dp</item>
+        <item name="android:minWidth">32dp</item>
+        <item name="android:minHeight">32dp</item>
+        <item name="strokeWidth">2dp</item>
+        <item name="iconTint">?android:attr/colorPrimary</item>
+        <item name="strokeColor">?android:attr/colorPrimary</item>
+    </style>
 </resources>

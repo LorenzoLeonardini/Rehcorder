@@ -19,11 +19,7 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.PackageManagerCompat
 import androidx.core.view.get
-import androidx.navigation.fragment.findNavController
-import com.google.android.material.navigation.NavigationBarView
-import dev.leonardini.alarm.MaterialDialogFragment
 import dev.leonardini.alarm.MaterialInfoDialogFragment
 import dev.leonardini.rehcorder.databinding.ActivityMainBinding
 import java.io.IOException
@@ -48,8 +44,12 @@ class MainActivity : AppCompatActivity() {
 
         setSupportActionBar(binding.toolbar)
 
+        val topLevelDestinations = HashSet<Int>()
+        topLevelDestinations.add(R.id.SongsFragment)
+        topLevelDestinations.add(R.id.RehearsalsFragment)
+
         val navController = findNavController(R.id.nav_host_fragment_content_main)
-        appBarConfiguration = AppBarConfiguration(navController.graph)
+        appBarConfiguration = AppBarConfiguration.Builder(topLevelDestinations).build()
         setupActionBarWithNavController(navController, appBarConfiguration)
 
         val bottomNavigation = binding.bottomNavigation
@@ -64,11 +64,11 @@ class MainActivity : AppCompatActivity() {
         bottomNavigation.setOnItemSelectedListener { item ->
             when(item.itemId) {
                 R.id.page_songs -> {
-                    findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.to_first_fragment)
+                    findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.to_songs_fragment)
                     true
                 }
                 R.id.page_rehearsals -> {
-                    findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.to_second_fragment)
+                    findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.to_rehearsals_fragment)
                     true
                 }
                 else -> {

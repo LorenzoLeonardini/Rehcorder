@@ -1,17 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Generic -->
     <string name="app_name">Rehcorder</string>
     <string name="action_settings">Impostazioni</string>
-    <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">Primo Fragment</string>
-    <string name="second_fragment_label">Secondo Fragment</string>
     <string name="next">Avanti</string>
     <string name="previous">Indietro</string>
-
     <string name="record">Registra</string>
 
+    <!-- Recording -->
     <string name="permission_required_title">Permessi necessari</string>
     <string name="permission_required">Questa app ha bisogno di accedere al microfono per registrare</string>
+
+    <!-- Songs -->
+
+    <!-- Rehearsals -->
+    <string name="r_card_title">Processa La Tua Ultima Registrazione</string>
+    <string name="r_card_description">Hai una registrazione delle prove da processare</string>
+    <string name="r_card_action">Processa Ora</string>
 
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
