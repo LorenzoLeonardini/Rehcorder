@@ -25,6 +25,16 @@
         app:popUpTo="@id/nav_graph"
         app:popUpToInclusive="true" />
 
+    <action
+        android:id="@+id/to_recording_fragment"
+        app:destination="@id/RecordingFragment"
+        app:enterAnim="@anim/slide_in_bottom"
+        app:exitAnim="@anim/slide_out_top"
+        app:popEnterAnim="@anim/slide_in_bottom"
+        app:popExitAnim="@anim/slide_out_top"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="true" />
+
     <fragment
         android:id="@+id/SongsFragment"
         android:name="dev.leonardini.rehcorder.SongsFragment"
@@ -35,10 +45,16 @@
             android:id="@+id/action_Songs_to_Rehearsals"
             app:destination="@id/RehearsalsFragment" />
     </fragment>
+
     <fragment
         android:id="@+id/RehearsalsFragment"
         android:name="dev.leonardini.rehcorder.RehearsalsFragment"
         android:label="@string/app_name"
-        tools:layout="@layout/fragment_rehearsals">
-    </fragment>
+        tools:layout="@layout/fragment_rehearsals"></fragment>
+
+    <fragment
+        android:id="@+id/RecordingFragment"
+        android:name="dev.leonardini.rehcorder.RecordingFragment"
+        android:label="@string/app_name"
+        tools:layout="@layout/fragment_recording"></fragment>
 </navigation>

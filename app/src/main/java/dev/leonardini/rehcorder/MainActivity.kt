@@ -20,6 +20,8 @@ import android.view.MenuItem
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.get
+import com.google.android.material.bottomappbar.BottomAppBar
+import com.google.android.material.snackbar.BaseTransientBottomBar
 import dev.leonardini.alarm.MaterialInfoDialogFragment
 import dev.leonardini.rehcorder.databinding.ActivityMainBinding
 import java.io.IOException
@@ -47,6 +49,7 @@ class MainActivity : AppCompatActivity() {
         val topLevelDestinations = HashSet<Int>()
         topLevelDestinations.add(R.id.SongsFragment)
         topLevelDestinations.add(R.id.RehearsalsFragment)
+        topLevelDestinations.add(R.id.RecordingFragment)
 
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         appBarConfiguration = AppBarConfiguration.Builder(topLevelDestinations).build()
@@ -55,20 +58,22 @@ class MainActivity : AppCompatActivity() {
         val bottomNavigation = binding.bottomNavigation
         bottomNavigation.menu[1].isEnabled = false
         bottomNavigation.setOnItemReselectedListener { item ->
-            when(item.itemId) {
+            when (item.itemId) {
                 R.id.page_songs -> true
                 R.id.page_rehearsals -> true
                 else -> false
             }
         }
         bottomNavigation.setOnItemSelectedListener { item ->
-            when(item.itemId) {
+            when (item.itemId) {
                 R.id.page_songs -> {
-                    findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.to_songs_fragment)
+                    if (!recording)
+                        findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.to_songs_fragment)
                     true
                 }
                 R.id.page_rehearsals -> {
-                    findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.to_rehearsals_fragment)
+                    if (!recording)
+                        findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.to_rehearsals_fragment)
                     true
                 }
                 else -> {
@@ -85,6 +90,7 @@ class MainActivity : AppCompatActivity() {
                 binding.fab.setImageResource(R.drawable.ic_stop)
 
                 if (recordingPermissionsGranted()) {
+                    permissionToRecordAccepted = true
                     startRecording()
                 } else {
                     ActivityCompat.requestPermissions(
@@ -145,7 +151,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startRecording() {
-        if (!this.permissionToRecordAccepted) return
+        if (!permissionToRecordAccepted) return
+        binding.bottomNavigation.selectedItemId = R.id.page_record
+        binding.bottomNavigation.menu[0].isEnabled = false
+        binding.bottomNavigation.menu[2].isEnabled = false
+        findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.to_recording_fragment)
+        return
         recorder = MediaRecorder(applicationContext).apply {
             setAudioSource(getBestAudioSource())
             setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
@@ -174,6 +185,8 @@ class MainActivity : AppCompatActivity() {
 
         Snackbar.make(binding.root, "Stopped recording", Snackbar.LENGTH_LONG)
             .setAnchorView(R.id.fab).show()
+        binding.bottomNavigation.menu[0].isEnabled = true
+        binding.bottomNavigation.menu[2].isEnabled = true
 
         startPlaying()
     }

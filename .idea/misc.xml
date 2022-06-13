@@ -16,6 +16,7 @@
         <entry key="app/src/main/res/layout/content_main.xml" value="0.1693840579710145" />
         <entry key="app/src/main/res/layout/dialog_loading.xml" value="0.1693840579710145" />
         <entry key="app/src/main/res/layout/fragment_first.xml" value="0.1693840579710145" />
+        <entry key="app/src/main/res/layout/fragment_recording.xml" value="0.1693840579710145" />
         <entry key="app/src/main/res/layout/fragment_rehearsals.xml" value="0.25" />
         <entry key="app/src/main/res/layout/fragment_second.xml" value="0.1693840579710145" />
         <entry key="app/src/main/res/layout/fragment_songs.xml" value="0.1693840579710145" />

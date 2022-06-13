@@ -30,7 +30,8 @@ class RehearsalsAdapter : RecyclerView.Adapter<RehearsalsAdapter.DemoViewHolder>
             holder.binding.rehearsalTitle.text = it.title
             holder.binding.rehearsalDate.text = it.date
             holder.binding.rehearsalSongs.text = it.songs.toString() + " Songs"
-            holder.binding.divider.visibility = if (position != rehearsals.size - 1) View.VISIBLE else View.INVISIBLE
+            holder.binding.divider.visibility =
+                if (position != rehearsals.size - 1) View.VISIBLE else View.INVISIBLE
         }
     }
 

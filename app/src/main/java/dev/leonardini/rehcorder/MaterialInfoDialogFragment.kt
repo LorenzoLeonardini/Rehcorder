@@ -1,4 +1,4 @@
-package dev.leonardini.alarm
+package dev.leonardini.rehcorder
 
 import android.app.Dialog
 import android.content.DialogInterface

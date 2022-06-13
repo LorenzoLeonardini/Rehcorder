@@ -1,4 +1,4 @@
-package dev.leonardini.alarm
+package dev.leonardini.rehcorder
 
 import android.app.Dialog
 import android.os.Bundle
@@ -10,7 +10,7 @@ import dev.leonardini.rehcorder.R
 
 class MaterialLoadingDialogFragment : AppCompatDialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val v :View = LayoutInflater.from(activity).inflate(R.layout.dialog_loading, null)
+        val v: View = LayoutInflater.from(activity).inflate(R.layout.dialog_loading, null)
 
         isCancelable = false
         return MaterialAlertDialogBuilder(requireContext(), theme)

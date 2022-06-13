@@ -8,11 +8,11 @@ import androidx.appcompat.app.AppCompatDialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class MaterialDialogFragment(
-        private val title :Int,
-        private val message :Int,
-        private val positiveListener :DialogInterface.OnClickListener?,
-        private val negativeListener :DialogInterface.OnClickListener?
-    ) : AppCompatDialogFragment() {
+    private val title: Int,
+    private val message: Int,
+    private val positiveListener: DialogInterface.OnClickListener?,
+    private val negativeListener: DialogInterface.OnClickListener?
+) : AppCompatDialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return MaterialAlertDialogBuilder(requireContext(), theme)
