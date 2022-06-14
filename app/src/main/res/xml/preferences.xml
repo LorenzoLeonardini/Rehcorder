@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <androidx.preference.SwitchPreferenceCompat
+        android:defaultValue="true"
+        android:icon="@drawable/ic_mic"
+        android:key="unprocessed_microphone"
+        android:summary="Use, if available, the cleanest microphone input"
+        android:title="Unprocessed microphone" />
+
+    <androidx.preference.SwitchPreferenceCompat
+        android:defaultValue="true"
+        android:icon="@drawable/ic_sd_storage"
+        android:key="delete_recording"
+        android:summary="Delete full recording after processing to save space"
+        android:title="Delete processed recordings" />
+</androidx.preference.PreferenceScreen>

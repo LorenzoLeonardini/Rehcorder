@@ -1,9 +1,8 @@
-package dev.leonardini.rehcorder
+package dev.leonardini.rehcorder.utils
 
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
-import android.view.View
 import androidx.appcompat.app.AppCompatDialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
