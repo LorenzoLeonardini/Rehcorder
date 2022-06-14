@@ -1,14 +1,11 @@
-package dev.leonardini.rehcorder
+package dev.leonardini.rehcorder.ui
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
 import dev.leonardini.rehcorder.databinding.FragmentRecordingBinding
-import dev.leonardini.rehcorder.databinding.FragmentRehearsalsBinding
 
 /**
  * A simple [Fragment] subclass as the second destination in the navigation.
@@ -24,15 +21,11 @@ class RecordingFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         _binding = FragmentRecordingBinding.inflate(inflater, container, false)
         return binding.root
 
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
     }
 
     override fun onDestroyView() {

@@ -1,6 +1,7 @@
 package dev.leonardini.rehcorder
 
 import android.Manifest
+import android.content.ContentValues
 import android.content.Context
 import android.content.pm.PackageManager
 import android.media.AudioManager
@@ -20,11 +21,13 @@ import android.view.MenuItem
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.get
-import com.google.android.material.bottomappbar.BottomAppBar
-import com.google.android.material.snackbar.BaseTransientBottomBar
-import dev.leonardini.rehcorder.MaterialInfoDialogFragment
+import androidx.loader.app.LoaderManager
+import dev.leonardini.rehcorder.utils.MaterialInfoDialogFragment
 import dev.leonardini.rehcorder.databinding.ActivityMainBinding
+import dev.leonardini.rehcorder.db.Database
+import java.io.File
 import java.io.IOException
+import java.time.Instant
 
 class MainActivity : AppCompatActivity() {
 
@@ -36,6 +39,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private var recording: Boolean = false
+
+    private lateinit var database :Database
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -102,6 +107,8 @@ class MainActivity : AppCompatActivity() {
             }
             recording = !recording
         }
+
+        database = Database(this)
     }
 
     private var permissionToRecordAccepted: Boolean = false
@@ -156,11 +163,21 @@ class MainActivity : AppCompatActivity() {
         binding.bottomNavigation.menu[0].isEnabled = false
         binding.bottomNavigation.menu[2].isEnabled = false
         findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.to_recording_fragment)
-        return
+
+        val contentValues = ContentValues()
+        val fileName = Instant.now().epochSecond
+        contentValues.put("date", fileName)
+        database.writableDatabase.insert("Rehearsals", null, contentValues)
+        database.close()
+
+        val folder = File("${filesDir.absolutePath}/recordings/")
+        if(!folder.exists())
+            folder.mkdirs()
+
         recorder = MediaRecorder(applicationContext).apply {
             setAudioSource(getBestAudioSource())
             setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
-            setOutputFile("${externalCacheDir?.absolutePath}/audiorecordtest.3gp")
+            setOutputFile("${filesDir.absolutePath}/recordings/$fileName.3gp")
             setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
 
             try {
@@ -194,7 +211,7 @@ class MainActivity : AppCompatActivity() {
     private fun startPlaying() {
         player = MediaPlayer().apply {
             try {
-                setDataSource("${externalCacheDir?.absolutePath}/audiorecordtest.3gp")
+                setDataSource("${filesDir.absolutePath}/recordings/audiorecordtest.3gp")
                 prepare()
                 start()
                 setOnCompletionListener { stopPlaying() }
@@ -220,7 +237,6 @@ class MainActivity : AppCompatActivity() {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
-            R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)
         }
     }

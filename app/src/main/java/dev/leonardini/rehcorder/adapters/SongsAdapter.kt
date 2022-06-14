@@ -1,9 +1,11 @@
-package dev.leonardini.rehcorder
+package dev.leonardini.rehcorder.adapters
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import dev.leonardini.rehcorder.R
+import dev.leonardini.rehcorder.Song
 import dev.leonardini.rehcorder.databinding.SongLayoutBinding
 
 class SongsAdapter : RecyclerView.Adapter<SongsAdapter.DemoViewHolder>() {
