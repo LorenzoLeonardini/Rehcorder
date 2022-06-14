@@ -21,7 +21,6 @@ import android.view.MenuItem
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.get
-import androidx.loader.app.LoaderManager
 import dev.leonardini.rehcorder.utils.MaterialInfoDialogFragment
 import dev.leonardini.rehcorder.databinding.ActivityMainBinding
 import dev.leonardini.rehcorder.db.Database

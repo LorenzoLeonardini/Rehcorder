@@ -1,26 +1,17 @@
 package dev.leonardini.rehcorder.adapters
 
-import android.content.ContentValues
 import android.database.Cursor
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.database.getStringOrNull
 import androidx.recyclerview.widget.RecyclerView
-import dev.leonardini.rehcorder.MainActivity
 import dev.leonardini.rehcorder.R
-import dev.leonardini.rehcorder.Rehearsal
 import dev.leonardini.rehcorder.databinding.RehearsalLayoutBinding
-import dev.leonardini.rehcorder.db.Database
-import dev.leonardini.rehcorder.db.TABLE_REHEARSALS
-import dev.leonardini.rehcorder.ui.RenameDialogFragment
-import dev.leonardini.rehcorder.utils.MaterialInfoDialogFragment
 import java.text.DateFormat
-import java.text.SimpleDateFormat
 import java.util.*
 
-class RehearsalsAdapter(val editElementListener: OnRehearsalEditClick, cursor :Cursor?) : RecyclerViewCursorAdapter<RehearsalsAdapter.DemoViewHolder>(cursor) {
+class RehearsalsAdapter(private val editElementListener: OnRehearsalEditClick, cursor :Cursor?) : RecyclerViewCursorAdapter<RehearsalsAdapter.DemoViewHolder>(cursor) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DemoViewHolder {
         val v =
@@ -36,6 +27,7 @@ class RehearsalsAdapter(val editElementListener: OnRehearsalEditClick, cursor :C
         val formattedDate = "${DateFormat.getDateInstance().format(Date(date * 1000))} - ${DateFormat.getTimeInstance().format(Date(date * 1000))}"
 
         holder.id = id
+        holder.name = name
         holder.binding.rehearsalTitle.text = name ?: formattedDate
         holder.binding.rehearsalDate.text = formattedDate
         holder.binding.rehearsalSongs.text = songsCount.toString() + " Songs"
@@ -46,18 +38,19 @@ class RehearsalsAdapter(val editElementListener: OnRehearsalEditClick, cursor :C
     class DemoViewHolder(itemView: View, private val editElementListener:OnRehearsalEditClick) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
         val binding: RehearsalLayoutBinding = RehearsalLayoutBinding.bind(itemView)
         var id :Long = -1
+        var name :String? = null
 
         init {
             binding.rehearsalEditButton.setOnClickListener(this)
         }
 
         override fun onClick(v: View?) {
-            editElementListener.onEdit(id, binding.rehearsalTitle.text.toString())
+            editElementListener.onEdit(id, name)
         }
     }
 
     interface OnRehearsalEditClick {
-        fun onEdit(id :Long, currentName :String)
+        fun onEdit(id :Long, currentName :String?)
     }
 
 }

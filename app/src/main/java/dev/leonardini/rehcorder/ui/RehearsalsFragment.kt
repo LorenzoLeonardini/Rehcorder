@@ -1,7 +1,6 @@
 package dev.leonardini.rehcorder.ui
 
 import android.content.ContentValues
-import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.util.Log
@@ -11,9 +10,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import androidx.cursoradapter.widget.CursorAdapter
-import androidx.cursoradapter.widget.SimpleCursorAdapter
-import androidx.loader.app.LoaderManager
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.leonardini.rehcorder.R
@@ -59,7 +55,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClick {
             null,
             null,
             null,
-            null
+            "date DESC"
         )
         Log.i("CURSOR", cursor.toString())
         adapter = RehearsalsAdapter(this, null)
@@ -83,7 +79,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClick {
         database.close()
     }
 
-    override fun onEdit(id: Long, currentName: String) {
+    override fun onEdit(id: Long, currentName: String?) {
         (activity!! as AppCompatActivity).let { activity ->
             RenameDialogFragment(currentName) { name ->
                 val contentValues = ContentValues()
@@ -96,7 +92,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClick {
                     null,
                     null,
                     null,
-                    null
+                    "date DESC"
                 )
                 adapter.swapCursor(cursor)
             }.show(activity.supportFragmentManager, "RenameDialog")

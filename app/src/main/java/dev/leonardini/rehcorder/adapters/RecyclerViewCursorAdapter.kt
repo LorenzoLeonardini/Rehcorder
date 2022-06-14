@@ -1,7 +1,6 @@
 package dev.leonardini.rehcorder.adapters
 
 import android.database.Cursor
-import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 
 // https://androidwave.com/implementation-of-recyclerview-with-cursor-adapter/
@@ -12,10 +11,10 @@ abstract class RecyclerViewCursorAdapter<V : RecyclerView.ViewHolder>(c: Cursor?
     private var dataValid: Boolean = false
     private var rowIDColumn = -1
 
-    abstract fun onBindViewHolder(holder: V, cursor: Cursor, position :Int);
+    abstract fun onBindViewHolder(holder: V, cursor: Cursor, position :Int)
 
     init {
-        setHasStableIds(true)
+//        setHasStableIds(true)
         swapCursor(c)
     }
 
