@@ -3,30 +3,31 @@ package dev.leonardini.rehcorder
 import android.Manifest
 import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
-import android.media.AudioManager
-import android.media.MediaPlayer
-import android.media.MediaRecorder
+import android.media.*
 import android.os.Bundle
 import android.util.Log
-import com.google.android.material.snackbar.Snackbar
+import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.view.WindowCompat
+import androidx.core.view.get
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
-import android.view.Menu
-import android.view.MenuItem
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.core.view.get
-import dev.leonardini.rehcorder.utils.MaterialInfoDialogFragment
+import com.google.android.material.snackbar.Snackbar
 import dev.leonardini.rehcorder.databinding.ActivityMainBinding
 import dev.leonardini.rehcorder.db.Database
+import dev.leonardini.rehcorder.utils.MaterialInfoDialogFragment
 import java.io.File
 import java.io.IOException
 import java.time.Instant
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -38,6 +39,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private var recording: Boolean = false
+    private var currentlyRecording :String = ""
 
     private lateinit var database: Database
 
@@ -113,7 +115,6 @@ class MainActivity : AppCompatActivity() {
     private var permissionToRecordAccepted: Boolean = false
     private var permissions = arrayOf(Manifest.permission.RECORD_AUDIO)
     private var recorder: MediaRecorder? = null
-    private var player: MediaPlayer? = null
 
     private fun recordingPermissionsGranted() = permissions.all {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
@@ -173,6 +174,7 @@ class MainActivity : AppCompatActivity() {
         if (!folder.exists())
             folder.mkdirs()
 
+        currentlyRecording = "$fileName.3gp"
         recorder = MediaRecorder(applicationContext).apply {
             setAudioSource(getBestAudioSource())
             setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
@@ -208,21 +210,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startPlaying() {
-        player = MediaPlayer().apply {
-            try {
-                setDataSource("${filesDir.absolutePath}/recordings/audiorecordtest.3gp")
-                prepare()
-                start()
-                setOnCompletionListener { stopPlaying() }
-            } catch (e: IOException) {
-                Log.e("Player", "prepare() failed")
-            }
-        }
-    }
+        val uri = FileProvider.getUriForFile(this, "${this.packageName}.provider", File("${filesDir.absolutePath}/recordings/$currentlyRecording"))
 
-    private fun stopPlaying() {
-        player?.release()
-        player = null
+        val viewMediaIntent = Intent()
+        viewMediaIntent.action = Intent.ACTION_VIEW
+        viewMediaIntent.setDataAndType(uri, "audio/*")
+        viewMediaIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        startActivity(viewMediaIntent)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

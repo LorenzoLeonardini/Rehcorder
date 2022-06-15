@@ -52,6 +52,7 @@ abstract class RecyclerViewCursorAdapter<V : RecyclerView.ViewHolder>(c: Cursor?
         }
 
         if (newCursor !== null) {
+            cursor?.close()
             cursor = newCursor
             dataValid = true
             rowIDColumn = cursor!!.getColumnIndex("_ID")
