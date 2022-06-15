@@ -8,9 +8,11 @@
         <entry key="app/src/main/res/drawable/ic_edit.xml" value="0.1665" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_launcher_foreground.xml" value="0.194" />
+        <entry key="app/src/main/res/drawable/ic_mic.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_music.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_piano.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_record.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_sd_storage.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_settings.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_stop.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.1" />
