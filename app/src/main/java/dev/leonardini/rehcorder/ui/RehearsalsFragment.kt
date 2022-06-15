@@ -3,6 +3,7 @@ package dev.leonardini.rehcorder.ui
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -20,7 +21,8 @@ import dev.leonardini.rehcorder.db.TABLE_REHEARSALS
 /**
  * A simple [Fragment] subclass as the second destination in the navigation.
  */
-class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClick {
+class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClick,
+    RehearsalsAdapter.OnHeaderBound {
 
     private var _binding: FragmentRehearsalsBinding? = null
 
@@ -29,6 +31,8 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClick {
     private val binding get() = _binding!!
     private lateinit var database: SQLiteDatabase
     private lateinit var adapter: RehearsalsAdapter
+
+    private var showCard: Boolean = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -51,9 +55,8 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClick {
             null,
             "date DESC"
         )
-        val showCard = needProcessing.count == 0
-        binding.card.post {
-            binding.card.visibility = if (showCard) View.GONE else View.VISIBLE
+        synchronized(showCard) {
+            showCard = needProcessing.count == 0
         }
         needProcessing.close()
 
@@ -76,7 +79,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClick {
         setHasOptionsMenu(true)
 
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
-        adapter = RehearsalsAdapter(this, null)
+        adapter = RehearsalsAdapter(this, this, null)
         Thread {
             database = Database(context!!).writableDatabase
             updateDbData()
@@ -117,5 +120,11 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClick {
             }.show(activity.supportFragmentManager, "RenameDialog")
         }
 
+    }
+
+    override fun onBound(holder: RehearsalsAdapter.HeaderViewHolder) {
+        synchronized(showCard) {
+            holder.binding.card.visibility = if (showCard) View.GONE else View.VISIBLE
+        }
     }
 }

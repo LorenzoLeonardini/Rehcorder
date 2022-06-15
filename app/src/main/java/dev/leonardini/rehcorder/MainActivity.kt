@@ -23,6 +23,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.material.snackbar.Snackbar
 import dev.leonardini.rehcorder.databinding.ActivityMainBinding
 import dev.leonardini.rehcorder.db.Database
+import dev.leonardini.rehcorder.db.TABLE_REHEARSALS
 import dev.leonardini.rehcorder.utils.MaterialInfoDialogFragment
 import java.io.File
 import java.io.IOException
@@ -39,7 +40,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private var recording: Boolean = false
-    private var currentlyRecording: String = ""
+    private var currentlyRecording: Long = -1
 
     private lateinit var database: Database
 
@@ -167,14 +168,13 @@ class MainActivity : AppCompatActivity() {
         val contentValues = ContentValues()
         val fileName = Instant.now().epochSecond
         contentValues.put("date", fileName)
-        database.writableDatabase.insert("Rehearsals", null, contentValues)
+        currentlyRecording = database.writableDatabase.insert(TABLE_REHEARSALS, null, contentValues)
         database.close()
 
         val folder = File("${filesDir.absolutePath}/recordings/")
         if (!folder.exists())
             folder.mkdirs()
 
-        currentlyRecording = "$fileName.3gp"
         recorder = MediaRecorder(applicationContext).apply {
             setAudioSource(getBestAudioSource())
             setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
@@ -210,17 +210,24 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startPlaying() {
-        val uri = FileProvider.getUriForFile(
-            this,
-            "${this.packageName}.provider",
-            File("${filesDir.absolutePath}/recordings/$currentlyRecording")
-        )
+        Thread {
+            val cursor = database.readableDatabase.query(TABLE_REHEARSALS, arrayOf("date"), null, null, null, null, null)
+            cursor.moveToFirst()
+            val timestamp = cursor.getInt(cursor.getColumnIndex("date"))
+            database.close()
 
-        val viewMediaIntent = Intent()
-        viewMediaIntent.action = Intent.ACTION_VIEW
-        viewMediaIntent.setDataAndType(uri, "audio/*")
-        viewMediaIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        startActivity(viewMediaIntent)
+            val uri = FileProvider.getUriForFile(
+                this,
+                "${this.packageName}.provider",
+                File("${filesDir.absolutePath}/recordings/$timestamp.3gp")
+            )
+
+            val viewMediaIntent = Intent()
+            viewMediaIntent.action = Intent.ACTION_VIEW
+            viewMediaIntent.setDataAndType(uri, "audio/*")
+            viewMediaIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            startActivity(viewMediaIntent)
+        }.start()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

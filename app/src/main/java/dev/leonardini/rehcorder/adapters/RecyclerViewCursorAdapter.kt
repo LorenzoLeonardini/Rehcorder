@@ -12,6 +12,20 @@ abstract class RecyclerViewCursorAdapter<V : RecyclerView.ViewHolder>(c: Cursor?
     private var rowIDColumn = -1
 
     abstract fun onBindViewHolder(holder: V, cursor: Cursor, position: Int)
+    abstract fun onBindHeaderViewHolder(holder: V)
+
+    companion object ViewTypes {
+        const val HEADER_VIEW = 0
+        const val ITEM_VIEW = 1
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        if (position == 0) {
+            return HEADER_VIEW
+        } else {
+            return ITEM_VIEW
+        }
+    }
 
     init {
 //        setHasStableIds(true)
@@ -28,21 +42,31 @@ abstract class RecyclerViewCursorAdapter<V : RecyclerView.ViewHolder>(c: Cursor?
     }
 
     override fun onBindViewHolder(holder: V, position: Int) {
-        checkValidity(position)
-        onBindViewHolder(holder, cursor!!, position)
+        if (position == 0) {
+            onBindHeaderViewHolder(holder)
+        } else {
+            checkValidity(position - 1)
+            onBindViewHolder(holder, cursor!!, position - 1)
+        }
     }
 
     override fun getItemCount(): Int {
-        return if (dataValid) cursor!!.count else 0
+        return 1 + if (dataValid) cursor!!.count else 0
     }
 
     override fun getItemId(position: Int): Long {
-        checkValidity(position)
+        if (position == 0) {
+            return -1
+        }
+        checkValidity(position - 1)
         return cursor!!.getLong(rowIDColumn)
     }
 
     fun getItem(position: Int): Cursor? {
-        checkValidity(position)
+        if (position == 0) {
+            return null
+        }
+        checkValidity(position - 1)
         return cursor
     }
 
