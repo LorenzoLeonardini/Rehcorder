@@ -4,15 +4,15 @@
         android:id="@+id/page_songs"
         android:enabled="true"
         android:icon="@drawable/ic_music"
-        android:title="Songs" />
+        android:title="@string/menu_songs" />
     <item
         android:id="@+id/page_record"
         android:enabled="true"
         android:icon="@drawable/ic_record"
-        android:title="Record" />
+        android:title="@string/menu_record" />
     <item
         android:id="@+id/page_rehearsals"
         android:enabled="true"
         android:icon="@drawable/ic_piano"
-        android:title="Rehearsals" />
+        android:title="@string/menu_rehearsals" />
 </menu>

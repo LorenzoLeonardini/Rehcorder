@@ -5,15 +5,33 @@
     <string name="next">Next</string>
     <string name="previous">Previous</string>
     <string name="record">Record</string>
+    <string name="rename">Rename</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Menu -->
+    <string name="menu_songs">Songs</string>
+    <string name="menu_record">Record</string>
+    <string name="menu_rehearsals">Rehearsals</string>
+
+    <!-- Settings -->
+    <string name="s_mic_title">Unprocessed microphone</string>
+    <string name="s_mic_summary">Use, if available, the cleanest microphone input</string>
+    <string name="s_storage_title">Delete processed recordings</string>
+    <string name="s_storage_summary">Delete full recording after processing to save space</string>
 
     <!-- Recording -->
     <string name="permission_required_title">Permission required</string>
     <string name="permission_required">This app needs to access your microphone to record rehearsals</string>
 
     <!-- Songs -->
+    <string name="s_title">Your songs</string>
 
     <!-- Rehearsals -->
     <string name="r_card_title">Process Your Latest Recording</string>
     <string name="r_card_description">You have an unprocessed rehearsal recording</string>
     <string name="r_card_action">Process Now</string>
+    <string name="r_rename">Rehearsal name</string>
+    <string name="r_title">Your rehearsals</string>
+
 </resources>

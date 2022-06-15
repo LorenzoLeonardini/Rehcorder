@@ -6,15 +6,33 @@
     <string name="next">Avanti</string>
     <string name="previous">Indietro</string>
     <string name="record">Registra</string>
+    <string name="rename">Rinomina</string>
+    <string name="save">Salva</string>
+    <string name="cancel">Annulla</string>
+
+    <!-- Menu -->
+    <string name="menu_songs">Brani</string>
+    <string name="menu_record">Registra</string>
+    <string name="menu_rehearsals">Prove</string>
+
+    <!-- Settings -->
+    <string name="s_mic_title">Microfono non processato</string>
+    <string name="s_mic_summary">Usa, se disponibile, l\'input di microfono senza post processing</string>
+    <string name="s_storage_title">Elimina registrazioni processate</string>
+    <string name="s_storage_summary">Elimina le registrazioni complete dopo averle processate per risparmiare spazio sul dispositivo</string>
 
     <!-- Recording -->
     <string name="permission_required_title">Permessi necessari</string>
     <string name="permission_required">Questa app ha bisogno di accedere al microfono per registrare</string>
 
     <!-- Songs -->
+    <string name="s_title">I tuoi brani</string>
 
     <!-- Rehearsals -->
     <string name="r_card_title">Processa La Tua Ultima Registrazione</string>
     <string name="r_card_description">Hai una registrazione delle prove da processare</string>
     <string name="r_card_action">Processa Ora</string>
+    <string name="r_rename">Nome registrazione</string>
+    <string name="r_title">Le tue prove</string>
+
 </resources>

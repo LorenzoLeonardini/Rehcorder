@@ -4,13 +4,13 @@
         android:defaultValue="true"
         android:icon="@drawable/ic_mic"
         android:key="unprocessed_microphone"
-        android:summary="Use, if available, the cleanest microphone input"
-        android:title="Unprocessed microphone" />
+        android:summary="@string/s_mic_summary"
+        android:title="@string/s_mic_title" />
 
     <androidx.preference.SwitchPreferenceCompat
         android:defaultValue="true"
         android:icon="@drawable/ic_sd_storage"
         android:key="delete_recording"
-        android:summary="Delete full recording after processing to save space"
-        android:title="Delete processed recordings" />
+        android:summary="@string/s_storage_summary"
+        android:title="@string/s_storage_title" />
 </androidx.preference.PreferenceScreen>

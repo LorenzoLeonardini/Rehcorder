@@ -71,14 +71,13 @@
 
         <TextView
             android:id="@+id/textview_title"
-            style="@style/TextAppearance.Material3.TitleLarge"
+            style="@style/Widget.Rehcorder.Title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="8dp"
             android:layout_marginTop="16dp"
             android:layout_marginBottom="4dp"
-            android:text="Your rehearsals"
-            android:textFontWeight="500"
+            android:text="@string/r_title"
             app:layout_constraintBottom_toTopOf="@id/recycler_view"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

@@ -102,7 +102,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClick {
 
     override fun onEdit(id: Long, currentName: String?) {
         (activity!! as AppCompatActivity).let { activity ->
-            RenameDialogFragment(currentName) { name ->
+            RenameDialogFragment(currentName, R.string.r_rename) { name ->
                 val contentValues = ContentValues()
                 contentValues.put("name", name)
                 Thread {
