@@ -3,7 +3,6 @@ package dev.leonardini.rehcorder.ui
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -42,12 +41,22 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClick {
 
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        setHasOptionsMenu(true)
+    private fun updateDbData() {
+        val needProcessing = database.query(
+            TABLE_REHEARSALS,
+            arrayOf("_id", "processed"),
+            "processed=FALSE",
+            null,
+            null,
+            null,
+            "date DESC"
+        )
+        val showCard = needProcessing.count == 0
+        binding.card.post {
+            binding.card.visibility = if (showCard) View.GONE else View.VISIBLE
+        }
+        needProcessing.close()
 
-        binding.recyclerView.layoutManager = LinearLayoutManager(context)
-        database = Database(context!!).writableDatabase
         val cursor = database.query(
             TABLE_REHEARSALS,
             arrayOf("_id", "name", "date", "songsCount"),
@@ -57,9 +66,21 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClick {
             null,
             "date DESC"
         )
-        Log.i("CURSOR", cursor.toString())
+        binding.recyclerView.post {
+            adapter.swapCursor(cursor)
+        }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setHasOptionsMenu(true)
+
+        binding.recyclerView.layoutManager = LinearLayoutManager(context)
         adapter = RehearsalsAdapter(this, null)
-        adapter.swapCursor(cursor)
+        Thread {
+            database = Database(context!!).writableDatabase
+            updateDbData()
+        }.start()
         binding.recyclerView.adapter = adapter
     }
 
@@ -84,17 +105,15 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClick {
             RenameDialogFragment(currentName) { name ->
                 val contentValues = ContentValues()
                 contentValues.put("name", name)
-                database.update(TABLE_REHEARSALS, contentValues, "_ID=?", arrayOf(id.toString()))
-                val cursor = database.query(
-                    TABLE_REHEARSALS,
-                    arrayOf("_id", "name", "date", "songsCount"),
-                    null,
-                    null,
-                    null,
-                    null,
-                    "date DESC"
-                )
-                adapter.swapCursor(cursor)
+                Thread {
+                    database.update(
+                        TABLE_REHEARSALS,
+                        contentValues,
+                        "_ID=?",
+                        arrayOf(id.toString())
+                    )
+                    updateDbData()
+                }.start()
             }.show(activity.supportFragmentManager, "RenameDialog")
         }
 
