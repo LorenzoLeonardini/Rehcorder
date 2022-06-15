@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private var recording: Boolean = false
-    private var currentlyRecording :String = ""
+    private var currentlyRecording: String = ""
 
     private lateinit var database: Database
 
@@ -210,7 +210,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startPlaying() {
-        val uri = FileProvider.getUriForFile(this, "${this.packageName}.provider", File("${filesDir.absolutePath}/recordings/$currentlyRecording"))
+        val uri = FileProvider.getUriForFile(
+            this,
+            "${this.packageName}.provider",
+            File("${filesDir.absolutePath}/recordings/$currentlyRecording")
+        )
 
         val viewMediaIntent = Intent()
         viewMediaIntent.action = Intent.ACTION_VIEW
