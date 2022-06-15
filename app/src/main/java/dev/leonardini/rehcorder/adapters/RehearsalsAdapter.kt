@@ -33,7 +33,8 @@ class RehearsalsAdapter(private val editElementListener: OnRehearsalEditClick, c
         holder.name = name
         holder.binding.rehearsalTitle.text = name ?: formattedDate
         holder.binding.rehearsalDate.text = formattedDate
-        holder.binding.rehearsalSongs.text = songsCount.toString() + " Songs"
+        holder.binding.rehearsalSongs.text =
+            holder.binding.rehearsalSongs.resources.getString(R.string.r_count, songsCount)
         holder.binding.divider.visibility =
             if (position != itemCount - 1) View.VISIBLE else View.INVISIBLE
     }

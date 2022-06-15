@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Generic -->
-    <string name="app_name">Rehcorder</string>
     <string name="action_settings">Impostazioni</string>
     <string name="next">Avanti</string>
     <string name="previous">Indietro</string>
@@ -34,5 +33,6 @@
     <string name="r_card_action">Processa Ora</string>
     <string name="r_rename">Nome registrazione</string>
     <string name="r_title">Le tue prove</string>
+    <string name="r_count">%1$d Brani</string>
 
 </resources>
