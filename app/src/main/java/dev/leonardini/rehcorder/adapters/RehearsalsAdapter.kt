@@ -11,7 +11,8 @@ import dev.leonardini.rehcorder.databinding.RehearsalLayoutBinding
 import java.text.DateFormat
 import java.util.*
 
-class RehearsalsAdapter(private val editElementListener: OnRehearsalEditClick, cursor :Cursor?) : RecyclerViewCursorAdapter<RehearsalsAdapter.DemoViewHolder>(cursor) {
+class RehearsalsAdapter(private val editElementListener: OnRehearsalEditClick, cursor: Cursor?) :
+    RecyclerViewCursorAdapter<RehearsalsAdapter.DemoViewHolder>(cursor) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DemoViewHolder {
         val v =
@@ -19,12 +20,14 @@ class RehearsalsAdapter(private val editElementListener: OnRehearsalEditClick, c
         return DemoViewHolder(v, editElementListener)
     }
 
-    override fun onBindViewHolder(holder: DemoViewHolder, cursor: Cursor, position :Int) {
-        val id :Long = cursor.getLong(cursor.getColumnIndex("_ID"))
-        val name :String? = cursor.getStringOrNull(cursor.getColumnIndex("name"))
-        val date :Long = cursor.getLong(cursor.getColumnIndex("date"))
-        val songsCount :Int = cursor.getInt(cursor.getColumnIndex("songsCount"))
-        val formattedDate = "${DateFormat.getDateInstance().format(Date(date * 1000))} - ${DateFormat.getTimeInstance().format(Date(date * 1000))}"
+    override fun onBindViewHolder(holder: DemoViewHolder, cursor: Cursor, position: Int) {
+        val id: Long = cursor.getLong(cursor.getColumnIndex("_ID"))
+        val name: String? = cursor.getStringOrNull(cursor.getColumnIndex("name"))
+        val date: Long = cursor.getLong(cursor.getColumnIndex("date"))
+        val songsCount: Int = cursor.getInt(cursor.getColumnIndex("songsCount"))
+        val formattedDate = "${
+            DateFormat.getDateInstance().format(Date(date * 1000))
+        } - ${DateFormat.getTimeInstance().format(Date(date * 1000))}"
 
         holder.id = id
         holder.name = name
@@ -35,10 +38,11 @@ class RehearsalsAdapter(private val editElementListener: OnRehearsalEditClick, c
             if (position != itemCount - 1) View.VISIBLE else View.INVISIBLE
     }
 
-    class DemoViewHolder(itemView: View, private val editElementListener:OnRehearsalEditClick) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
+    class DemoViewHolder(itemView: View, private val editElementListener: OnRehearsalEditClick) :
+        RecyclerView.ViewHolder(itemView), View.OnClickListener {
         val binding: RehearsalLayoutBinding = RehearsalLayoutBinding.bind(itemView)
-        var id :Long = -1
-        var name :String? = null
+        var id: Long = -1
+        var name: String? = null
 
         init {
             binding.rehearsalEditButton.setOnClickListener(this)
@@ -50,7 +54,7 @@ class RehearsalsAdapter(private val editElementListener: OnRehearsalEditClick, c
     }
 
     interface OnRehearsalEditClick {
-        fun onEdit(id :Long, currentName :String?)
+        fun onEdit(id: Long, currentName: String?)
     }
 
 }

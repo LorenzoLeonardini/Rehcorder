@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private var recording: Boolean = false
 
-    private lateinit var database :Database
+    private lateinit var database: Database
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -170,7 +170,7 @@ class MainActivity : AppCompatActivity() {
         database.close()
 
         val folder = File("${filesDir.absolutePath}/recordings/")
-        if(!folder.exists())
+        if (!folder.exists())
             folder.mkdirs()
 
         recorder = MediaRecorder(applicationContext).apply {

@@ -11,14 +11,14 @@ abstract class RecyclerViewCursorAdapter<V : RecyclerView.ViewHolder>(c: Cursor?
     private var dataValid: Boolean = false
     private var rowIDColumn = -1
 
-    abstract fun onBindViewHolder(holder: V, cursor: Cursor, position :Int)
+    abstract fun onBindViewHolder(holder: V, cursor: Cursor, position: Int)
 
     init {
 //        setHasStableIds(true)
         swapCursor(c)
     }
 
-    private fun checkValidity(position :Int) {
+    private fun checkValidity(position: Int) {
         if (!dataValid) {
             throw IllegalStateException("Cannot bind view holder when cursor is in invalid state.")
         }
@@ -41,17 +41,17 @@ abstract class RecyclerViewCursorAdapter<V : RecyclerView.ViewHolder>(c: Cursor?
         return cursor!!.getLong(rowIDColumn)
     }
 
-    fun getItem(position :Int) :Cursor? {
+    fun getItem(position: Int): Cursor? {
         checkValidity(position)
         return cursor
     }
 
-    fun swapCursor(newCursor :Cursor?) {
+    fun swapCursor(newCursor: Cursor?) {
         if (newCursor == cursor) {
             return
         }
 
-        if(newCursor !== null) {
+        if (newCursor !== null) {
             cursor = newCursor
             dataValid = true
             rowIDColumn = cursor!!.getColumnIndex("_ID")
