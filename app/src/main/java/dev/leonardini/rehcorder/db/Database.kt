@@ -11,7 +11,17 @@ const val TABLE_REHEARSALS = "Rehearsals"
 class Database(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION) {
     override fun onCreate(db: SQLiteDatabase?) {
         db!!.apply {
-            execSQL("CREATE TABLE IF NOT EXISTS $TABLE_REHEARSALS (_ID INTEGER PRIMARY KEY, name TEXT, date INTEGER NOT NULL, songsCount INTEGER NOT NULL DEFAULT(0), processed INTEGER NOT NULL DEFAULT(FALSE))")
+            execSQL(
+                "CREATE TABLE IF NOT EXISTS $TABLE_REHEARSALS (" +
+                        "_ID INTEGER PRIMARY KEY, " +
+                        "name TEXT, " +
+                        "date INTEGER NOT NULL, " +
+                        "songsCount INTEGER NOT NULL DEFAULT(0), " +
+                        "processed INTEGER NOT NULL DEFAULT(FALSE), " +
+                        "fileName TEXT, " +
+                        "externalStorage INTEGER NOT NULL" +
+                        ")"
+            )
         }
     }
 

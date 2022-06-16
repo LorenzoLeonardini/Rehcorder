@@ -69,6 +69,13 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClick,
             "date DESC"
         )
         binding.recyclerView.post {
+            if (cursor.count > 0 && adapter.itemCount == 0) {
+                binding.recyclerView.visibility = View.VISIBLE
+                binding.emptyView.visibility = View.GONE
+            } else if(cursor.count == 0 && adapter.itemCount > 0) {
+                binding.recyclerView.visibility = View.GONE
+                binding.emptyView.visibility = View.VISIBLE
+            }
             adapter.swapCursor(cursor)
         }
     }

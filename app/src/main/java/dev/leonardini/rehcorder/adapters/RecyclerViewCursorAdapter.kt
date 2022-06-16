@@ -47,7 +47,7 @@ abstract class RecyclerViewCursorAdapter<V : RecyclerView.ViewHolder>(c: Cursor?
     }
 
     override fun getItemCount(): Int {
-        return 1 + if (dataValid) cursor!!.count else 0
+        return if (dataValid) 1 + cursor!!.count else 0
     }
 
     override fun getItemId(position: Int): Long {

@@ -34,5 +34,6 @@
     <string name="r_rename">Rehearsal name</string>
     <string name="r_title">Your rehearsals</string>
     <string name="r_count">%1$d Songs</string>
+    <string name="r_no_recordings">No recordings yet, tap the record button to start!</string>
 
 </resources>

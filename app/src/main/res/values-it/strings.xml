@@ -34,5 +34,6 @@
     <string name="r_rename">Nome registrazione</string>
     <string name="r_title">Le tue prove</string>
     <string name="r_count">%1$d Brani</string>
+    <string name="r_no_recordings">Ancora nessuna registrazione, premi il pulsante per iniziare!</string>
 
 </resources>

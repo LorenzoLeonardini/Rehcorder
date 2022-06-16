@@ -86,11 +86,8 @@ class MainActivity : AppCompatActivity() {
 
         binding.fab.setOnClickListener {
             if (recording) {
-                binding.fab.setImageResource(R.drawable.ic_record)
                 stopRecording()
             } else {
-                binding.fab.setImageResource(R.drawable.ic_stop)
-
                 if (recordingPermissionsGranted()) {
                     permissionToRecordAccepted = true
                     startRecording()
@@ -102,14 +99,13 @@ class MainActivity : AppCompatActivity() {
                     )
                 }
             }
-            recording = !recording
         }
 
         database = Database(this)
 
-        if(savedInstanceState != null) {
+        if (savedInstanceState != null) {
             recording = savedInstanceState.getBoolean("recording")
-        } else if(savedInstanceState == null && intent.getBooleanExtra("Recording", false)) {
+        } else if (savedInstanceState == null && intent.getBooleanExtra("Recording", false)) {
             binding.bottomNavigation.selectedItemId = R.id.page_record
             binding.bottomNavigation.menu[0].isEnabled = false
             binding.bottomNavigation.menu[2].isEnabled = false
@@ -117,7 +113,7 @@ class MainActivity : AppCompatActivity() {
 
             recording = true
         }
-        if(recording) {
+        if (recording) {
             binding.fab.setImageResource(R.drawable.ic_stop)
         }
     }
@@ -162,14 +158,21 @@ class MainActivity : AppCompatActivity() {
 
     private fun startRecording() {
         if (!permissionToRecordAccepted) return
+
+        binding.fab.setImageResource(R.drawable.ic_stop)
         binding.bottomNavigation.selectedItemId = R.id.page_record
         binding.bottomNavigation.menu[0].isEnabled = false
         binding.bottomNavigation.menu[2].isEnabled = false
         findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.to_recording_fragment)
 
+        recording = true
+
         val contentValues = ContentValues()
-        val fileName = Instant.now().epochSecond
-        contentValues.put("date", fileName)
+        val timestamp = Instant.now().epochSecond
+        val fileName = "$timestamp.aac"
+        contentValues.put("date", timestamp)
+        contentValues.put("fileName", fileName)
+        contentValues.put("externalStorage", false)
         currentlyRecording = database.writableDatabase.insert(TABLE_REHEARSALS, null, contentValues)
         database.close()
 
@@ -179,7 +182,7 @@ class MainActivity : AppCompatActivity() {
 
         val intent = Intent(this, RecorderService::class.java)
         intent.action = "RECORD"
-        intent.putExtra("file", "${filesDir.absolutePath}/recordings/$fileName.aac")
+        intent.putExtra("file", "${filesDir.absolutePath}/recordings/$fileName")
         startForegroundService(intent)
     }
 
@@ -188,13 +191,24 @@ class MainActivity : AppCompatActivity() {
         intent.action = "STOP"
         startForegroundService(intent)
 
+        binding.fab.setImageResource(R.drawable.ic_record)
+        recording = false
+
         binding.bottomNavigation.menu[0].isEnabled = true
         binding.bottomNavigation.menu[2].isEnabled = true
     }
 
     private fun startPlaying() {
         Thread {
-            val cursor = database.readableDatabase.query(TABLE_REHEARSALS, arrayOf("date"), null, null, null, null, null)
+            val cursor = database.readableDatabase.query(
+                TABLE_REHEARSALS,
+                arrayOf("date"),
+                null,
+                null,
+                null,
+                null,
+                null
+            )
             cursor.moveToFirst()
             val timestamp = cursor.getInt(cursor.getColumnIndex("date"))
             database.close()
