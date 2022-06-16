@@ -1,7 +1,6 @@
 package dev.leonardini.rehcorder.adapters
 
 import android.database.Cursor
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +9,6 @@ import androidx.recyclerview.widget.RecyclerView
 import dev.leonardini.rehcorder.R
 import dev.leonardini.rehcorder.databinding.RehearsalHeaderBinding
 import dev.leonardini.rehcorder.databinding.RehearsalLayoutBinding
-import java.lang.ref.WeakReference
 import java.text.DateFormat
 import java.util.*
 

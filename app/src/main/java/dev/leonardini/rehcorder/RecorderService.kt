@@ -9,8 +9,7 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import androidx.core.content.FileProvider
-import com.google.android.material.snackbar.Snackbar
+import androidx.preference.PreferenceManager
 import java.io.File
 import java.io.IOException
 
@@ -23,6 +22,11 @@ class RecorderService : Service() {
     private var fileName :String? = null
 
     private fun getBestAudioSource(): Int {
+        val preference = PreferenceManager.getDefaultSharedPreferences(this)
+        if(!preference.getBoolean("unprocessed_microphone", true)) {
+            return MediaRecorder.AudioSource.MIC
+        }
+
         val audioManager: AudioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         return if (audioManager.getProperty(AudioManager.PROPERTY_SUPPORT_AUDIO_SOURCE_UNPROCESSED) != null) {
             Log.i("Recorder", "Using unprocessed mic")
@@ -35,17 +39,17 @@ class RecorderService : Service() {
 
     private fun requestForeground() {
         val nm : NotificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager;
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel : NotificationChannel = NotificationChannel(
+            val channel = NotificationChannel(
                 "dev.leonardini.rehcorder",
                 "Rehcorder",
                 NotificationManager.IMPORTANCE_HIGH
-            );
-            nm.createNotificationChannel(channel);
+            )
+            nm.createNotificationChannel(channel)
         }
 
-        val int = Intent(this, MainActivity::class.java);
+        val int = Intent(this, MainActivity::class.java)
         int.putExtra("Recording", true)
         val pendingIntent = PendingIntent.getActivity(this, 0, int, PendingIntent.FLAG_IMMUTABLE)
 
@@ -57,7 +61,7 @@ class RecorderService : Service() {
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setContentIntent(pendingIntent)
             .setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
-            .build();
+            .build()
 
         startForeground(1337, notification)
     }

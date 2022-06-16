@@ -20,11 +20,7 @@ abstract class RecyclerViewCursorAdapter<V : RecyclerView.ViewHolder>(c: Cursor?
     }
 
     override fun getItemViewType(position: Int): Int {
-        if (position == 0) {
-            return HEADER_VIEW
-        } else {
-            return ITEM_VIEW
-        }
+        return if (position == 0) HEADER_VIEW else ITEM_VIEW
     }
 
     init {

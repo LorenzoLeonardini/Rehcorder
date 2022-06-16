@@ -2,12 +2,9 @@ package dev.leonardini.rehcorder
 
 import android.Manifest
 import android.content.ContentValues
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.media.*
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
@@ -17,17 +14,14 @@ import androidx.core.content.FileProvider
 import androidx.core.view.WindowCompat
 import androidx.core.view.get
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
-import com.google.android.material.snackbar.Snackbar
 import dev.leonardini.rehcorder.databinding.ActivityMainBinding
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.TABLE_REHEARSALS
 import dev.leonardini.rehcorder.utils.MaterialInfoDialogFragment
 import java.io.File
-import java.io.IOException
 import java.time.Instant
 
 
@@ -39,7 +33,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private lateinit var appBarConfiguration: AppBarConfiguration
-    lateinit var binding: ActivityMainBinding
+    private lateinit var binding: ActivityMainBinding
     private var recording: Boolean = false
     private var currentlyRecording: Long = -1
 
@@ -126,7 +120,6 @@ class MainActivity : AppCompatActivity() {
 
     private var permissionToRecordAccepted: Boolean = false
     private var permissions = arrayOf(Manifest.permission.RECORD_AUDIO)
-    private var recorder: MediaRecorder? = null
 
     private fun recordingPermissionsGranted() = permissions.all {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
@@ -155,17 +148,6 @@ class MainActivity : AppCompatActivity() {
             }.show(supportFragmentManager, PERMISSION_DIALOG_TAG)
         } else {
             startRecording()
-        }
-    }
-
-    private fun getBestAudioSource(): Int {
-        val audioManager: AudioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        return if (audioManager.getProperty(AudioManager.PROPERTY_SUPPORT_AUDIO_SOURCE_UNPROCESSED) != null) {
-            Log.i("Recorder", "Using unprocessed mic")
-            MediaRecorder.AudioSource.UNPROCESSED
-        } else {
-            Log.i("Recorder", "Using voice recognition mic")
-            MediaRecorder.AudioSource.VOICE_RECOGNITION
         }
     }
 

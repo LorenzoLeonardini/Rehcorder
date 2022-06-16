@@ -2,15 +2,9 @@ package dev.leonardini.rehcorder.ui
 
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.drawable.Drawable
-import android.text.TextPaint
 import android.util.AttributeSet
-import android.util.Log
 import android.util.TypedValue
-import android.view.View
-import android.widget.TextView
 import dev.leonardini.rehcorder.R
 import kotlin.math.sin
 
