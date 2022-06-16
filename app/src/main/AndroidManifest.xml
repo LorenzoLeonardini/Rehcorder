@@ -4,6 +4,7 @@
     package="dev.leonardini.rehcorder">
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:name=".RehcorderApplication"
@@ -16,6 +17,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Rehcorder"
         tools:targetApi="31">
+        <service
+            android:foregroundServiceType="microphone"
+            android:name=".RecorderService"
+            android:enabled="true"
+            android:exported="false" />
+
         <activity
             android:name=".ProcessActivity"
             android:exported="false" />

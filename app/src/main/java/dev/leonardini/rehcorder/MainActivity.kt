@@ -112,6 +112,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         database = Database(this)
+
+        if(intent.getBooleanExtra("Recording", false)) {
+            binding.bottomNavigation.selectedItemId = R.id.page_record
+            binding.bottomNavigation.menu[0].isEnabled = false
+            binding.bottomNavigation.menu[2].isEnabled = false
+            findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.to_recording_fragment)
+
+            binding.fab.setImageResource(R.drawable.ic_stop)
+            recording = true
+        }
     }
 
     private var permissionToRecordAccepted: Boolean = false
@@ -176,38 +186,19 @@ class MainActivity : AppCompatActivity() {
         if (!folder.exists())
             folder.mkdirs()
 
-        recorder = MediaRecorder(applicationContext).apply {
-            setAudioSource(getBestAudioSource())
-            setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
-            setOutputFile("${filesDir.absolutePath}/recordings/$fileName.3gp")
-            setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-
-            try {
-                prepare()
-            } catch (e: IOException) {
-                Log.e("Recorder", "prepare() failed")
-            }
-
-            start()
-        }
-
-        Snackbar.make(binding.root, "Started recording", Snackbar.LENGTH_LONG)
-            .setAnchorView(R.id.fab).show()
+        val intent = Intent(this, RecorderService::class.java)
+        intent.action = "RECORD"
+        intent.putExtra("file", "${filesDir.absolutePath}/recordings/$fileName.aac")
+        startForegroundService(intent)
     }
 
     private fun stopRecording() {
-        recorder?.apply {
-            stop()
-            release()
-        }
-        recorder = null
+        val intent = Intent(this, RecorderService::class.java)
+        intent.action = "STOP"
+        startForegroundService(intent)
 
-        Snackbar.make(binding.root, "Stopped recording", Snackbar.LENGTH_LONG)
-            .setAnchorView(R.id.fab).show()
         binding.bottomNavigation.menu[0].isEnabled = true
         binding.bottomNavigation.menu[2].isEnabled = true
-
-        startPlaying()
     }
 
     private fun startPlaying() {
@@ -220,7 +211,7 @@ class MainActivity : AppCompatActivity() {
             val uri = FileProvider.getUriForFile(
                 this,
                 "${this.packageName}.provider",
-                File("${filesDir.absolutePath}/recordings/$timestamp.3gp")
+                File("${filesDir.absolutePath}/recordings/$timestamp.aac")
             )
 
             val viewMediaIntent = Intent()
