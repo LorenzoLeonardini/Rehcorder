@@ -17,6 +17,9 @@
         android:theme="@style/Theme.Rehcorder"
         tools:targetApi="31">
         <activity
+            android:name=".ProcessActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Rehcorder">

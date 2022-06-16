@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <attr name="animation_duration">150</attr>
+    <attr name="colorSurfaceTint"></attr>
+    <attr name="colorSurfaceTintColor"></attr>
 </resources>

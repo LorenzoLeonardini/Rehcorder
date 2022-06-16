@@ -15,9 +15,14 @@
         <entry key="app/src/main/res/drawable/ic_sd_storage.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_settings.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_stop.xml" value="0.1" />
+        <entry key="app/src/main/res/layout-land/activity_process.xml" value="0.1" />
+        <entry key="app/src/main/res/layout-land/content_process.xml" value="0.1" />
+        <entry key="app/src/main/res/layout-large-land/content_process.xml" value="0.11981258366800536" />
         <entry key="app/src/main/res/layout-v28/fragment_rehearsals.xml" value="0.1693840579710145" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_process.xml" value="0.1" />
         <entry key="app/src/main/res/layout/content_main.xml" value="0.1693840579710145" />
+        <entry key="app/src/main/res/layout/content_process.xml" value="0.14991181657848324" />
         <entry key="app/src/main/res/layout/dialog_loading.xml" value="0.1693840579710145" />
         <entry key="app/src/main/res/layout/dialog_rename.xml" value="0.1" />
         <entry key="app/src/main/res/layout/fragment_first.xml" value="0.1693840579710145" />
@@ -28,6 +33,7 @@
         <entry key="app/src/main/res/layout/reharsal_layout.xml" value="0.1693840579710145" />
         <entry key="app/src/main/res/layout/rehearsal_header.xml" value="0.1693840579710145" />
         <entry key="app/src/main/res/layout/rehearsal_layout.xml" value="0.22" />
+        <entry key="app/src/main/res/layout/sample_waveform_view.xml" value="0.1693840579710145" />
         <entry key="app/src/main/res/layout/settings_activity.xml" value="0.1" />
         <entry key="app/src/main/res/layout/song_layout.xml" value="0.1" />
         <entry key="app/src/main/res/menu/bottom_navigation_menu.xml" value="0.1875" />
