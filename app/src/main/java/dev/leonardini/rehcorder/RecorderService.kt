@@ -105,6 +105,9 @@ class RecorderService : Service() {
         }
 
         if(intent.action == "RECORD") {
+            if(fileName != null) {
+                return START_NOT_STICKY
+            }
             requestForeground()
             startRecording(intent.getStringExtra("file")!!)
         } else if(intent.action == "STOP") {

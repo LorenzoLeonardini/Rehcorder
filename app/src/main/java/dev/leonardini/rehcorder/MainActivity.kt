@@ -107,14 +107,18 @@ class MainActivity : AppCompatActivity() {
 
         database = Database(this)
 
-        if(intent.getBooleanExtra("Recording", false)) {
+        if(savedInstanceState != null) {
+            recording = savedInstanceState.getBoolean("recording")
+        } else if(savedInstanceState == null && intent.getBooleanExtra("Recording", false)) {
             binding.bottomNavigation.selectedItemId = R.id.page_record
             binding.bottomNavigation.menu[0].isEnabled = false
             binding.bottomNavigation.menu[2].isEnabled = false
             findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.to_recording_fragment)
 
-            binding.fab.setImageResource(R.drawable.ic_stop)
             recording = true
+        }
+        if(recording) {
+            binding.fab.setImageResource(R.drawable.ic_stop)
         }
     }
 
@@ -123,6 +127,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun recordingPermissionsGranted() = permissions.all {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean("recording", recording)
     }
 
     override fun onRequestPermissionsResult(
