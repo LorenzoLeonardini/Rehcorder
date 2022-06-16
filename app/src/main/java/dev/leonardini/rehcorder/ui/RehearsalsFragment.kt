@@ -72,7 +72,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClick,
             if (cursor.count > 0 && adapter.itemCount == 0) {
                 binding.recyclerView.visibility = View.VISIBLE
                 binding.emptyView.visibility = View.GONE
-            } else if(cursor.count == 0 && adapter.itemCount > 0) {
+            } else if (cursor.count == 0 && adapter.itemCount > 0) {
                 binding.recyclerView.visibility = View.GONE
                 binding.emptyView.visibility = View.VISIBLE
             }

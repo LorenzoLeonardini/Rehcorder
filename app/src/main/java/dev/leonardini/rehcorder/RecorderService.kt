@@ -18,12 +18,12 @@ class RecorderService : Service() {
         TODO("Not yet implemented")
     }
 
-    private var recorder :MediaRecorder? = null
-    private var fileName :String? = null
+    private var recorder: MediaRecorder? = null
+    private var fileName: String? = null
 
     private fun getBestAudioSource(): Int {
         val preference = PreferenceManager.getDefaultSharedPreferences(this)
-        if(!preference.getBoolean("unprocessed_microphone", true)) {
+        if (!preference.getBoolean("unprocessed_microphone", true)) {
             return MediaRecorder.AudioSource.MIC
         }
 
@@ -38,9 +38,9 @@ class RecorderService : Service() {
     }
 
     private fun requestForeground() {
-        val nm : NotificationManager =
+        val nm: NotificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 "dev.leonardini.rehcorder",
                 "Rehcorder",
@@ -66,7 +66,7 @@ class RecorderService : Service() {
         startForeground(1337, notification)
     }
 
-    private fun startRecording(fileName :String) {
+    private fun startRecording(fileName: String) {
         this.fileName = fileName
 
         val folder = File("${filesDir.absolutePath}/recordings/")
@@ -100,17 +100,17 @@ class RecorderService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if(intent == null) {
+        if (intent == null) {
             return START_NOT_STICKY
         }
 
-        if(intent.action == "RECORD") {
-            if(fileName != null) {
+        if (intent.action == "RECORD") {
+            if (fileName != null) {
                 return START_NOT_STICKY
             }
             requestForeground()
             startRecording(intent.getStringExtra("file")!!)
-        } else if(intent.action == "STOP") {
+        } else if (intent.action == "STOP") {
             stopRecording()
         }
 

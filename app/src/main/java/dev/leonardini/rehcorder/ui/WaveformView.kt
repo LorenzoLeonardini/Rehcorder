@@ -11,7 +11,7 @@ import kotlin.math.sin
 // Extending TextView to exploit its onMeasure
 class WaveformView : androidx.appcompat.widget.AppCompatTextView {
 
-    private val paint :Paint = Paint()
+    private val paint: Paint = Paint()
 
     constructor(context: Context) : super(context) {
         init(null, 0)
@@ -47,7 +47,15 @@ class WaveformView : androidx.appcompat.widget.AppCompatTextView {
     override fun onDraw(canvas: Canvas) {
         for (i in 0..width step 20) {
             val value = (sin(i.toDouble() * 3.14 * 3.14 / width.toDouble()) * (height / 2)) + 30
-            canvas.drawRoundRect(i.toFloat(), (height - value).toFloat() / 2f, i.toFloat() + 16f, (height - value).toFloat() / 2f + value.toFloat(), 8f, 8f, paint)
+            canvas.drawRoundRect(
+                i.toFloat(),
+                (height - value).toFloat() / 2f,
+                i.toFloat() + 16f,
+                (height - value).toFloat() / 2f + value.toFloat(),
+                8f,
+                8f,
+                paint
+            )
         }
 
         super.onDraw(canvas)

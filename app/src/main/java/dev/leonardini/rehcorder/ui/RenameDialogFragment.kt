@@ -12,7 +12,7 @@ import dev.leonardini.rehcorder.R
 
 class RenameDialogFragment(
     private val currentName: String?,
-    private val hintString :Int,
+    private val hintString: Int,
     private val positiveListener: (name: String?) -> Unit
 ) : AppCompatDialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {

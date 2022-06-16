@@ -16,8 +16,8 @@
 
         <GridLayout
             android:layout_width="match_parent"
-            android:paddingHorizontal="40dp"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="40dp">
 
             <dev.leonardini.rehcorder.ui.WaveformView
                 android:id="@+id/waveform"
@@ -65,31 +65,31 @@
                 style="@style/Widget.App.Button.Player"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                app:icon="@drawable/ic_play"
                 android:layout_row="3"
                 android:layout_column="2"
                 android:layout_columnWeight="1"
                 android:layout_marginLeft="12dp"
-                android:layout_marginRight="12dp" />
+                android:layout_marginRight="12dp"
+                app:icon="@drawable/ic_play" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/seek_back"
                 style="@style/Widget.App.Button.Player.TonalButton"
                 android:layout_width="0dp"
-                android:layout_columnWeight="1"
                 android:layout_height="wrap_content"
                 android:layout_row="3"
                 android:layout_column="1"
+                android:layout_columnWeight="1"
                 app:icon="@drawable/ic_replay_10" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/seek_forward"
                 style="@style/Widget.App.Button.Player.TonalButton"
                 android:layout_width="0dp"
-                android:layout_columnWeight="1"
                 android:layout_height="wrap_content"
                 android:layout_row="3"
                 android:layout_column="3"
+                android:layout_columnWeight="1"
                 app:icon="@drawable/ic_forward_10" />
 
             <com.google.android.material.button.MaterialButton
