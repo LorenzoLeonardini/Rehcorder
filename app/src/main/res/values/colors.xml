@@ -7,6 +7,9 @@
     <color name="gray_400">#FFBDBDBD</color>
     <color name="gray_600">#FF757575</color>
 
+    <color name="appRed">#ee675c</color>
+    <color name="appColorOnRed">#601410</color>
+
     <color name="md_theme_light_primary">#006B57</color>
     <color name="md_theme_light_onPrimary">#FFFFFF</color>
     <color name="md_theme_light_primaryContainer">#7CF8D6</color>

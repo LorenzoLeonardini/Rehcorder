@@ -29,10 +29,10 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center"
         android:layout_marginBottom="10pt"
-        android:backgroundTint="#ee675c"
+        android:backgroundTint="@color/appRed"
         android:contentDescription="@string/record"
         app:srcCompat="@drawable/ic_record"
-        app:tint="#601410" />
+        app:tint="@color/appColorOnRed" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"

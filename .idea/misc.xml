@@ -11,6 +11,7 @@
         <entry key="app/src/main/res/drawable/ic_launcher_foreground.xml" value="0.194" />
         <entry key="app/src/main/res/drawable/ic_mic.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_music.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_pause.xml" value="0.194" />
         <entry key="app/src/main/res/drawable/ic_piano.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_play.xml" value="0.194" />
         <entry key="app/src/main/res/drawable/ic_record.xml" value="0.1" />
@@ -25,7 +26,7 @@
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_process.xml" value="0.1" />
         <entry key="app/src/main/res/layout/content_main.xml" value="0.1693840579710145" />
-        <entry key="app/src/main/res/layout/content_process.xml" value="0.14991181657848324" />
+        <entry key="app/src/main/res/layout/content_process.xml" value="0.584192439862543" />
         <entry key="app/src/main/res/layout/dialog_loading.xml" value="0.1693840579710145" />
         <entry key="app/src/main/res/layout/dialog_rename.xml" value="0.1" />
         <entry key="app/src/main/res/layout/fragment_first.xml" value="0.1693840579710145" />
@@ -36,6 +37,7 @@
         <entry key="app/src/main/res/layout/reharsal_layout.xml" value="0.1693840579710145" />
         <entry key="app/src/main/res/layout/rehearsal_header.xml" value="0.1693840579710145" />
         <entry key="app/src/main/res/layout/rehearsal_layout.xml" value="0.22" />
+        <entry key="app/src/main/res/layout/sample_my_view.xml" value="0.1" />
         <entry key="app/src/main/res/layout/sample_waveform_view.xml" value="0.1693840579710145" />
         <entry key="app/src/main/res/layout/settings_activity.xml" value="0.1" />
         <entry key="app/src/main/res/layout/song_layout.xml" value="0.1" />

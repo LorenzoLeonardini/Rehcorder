@@ -45,21 +45,24 @@
                     android:layout_columnSpan="3">
 
                     <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/current_time"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_row="1"
                         android:layout_column="1"
                         android:text="00:00" />
 
-                    <androidx.appcompat.widget.AppCompatSeekBar
+                    <dev.leonardini.rehcorder.ui.HighlightedSeekBar
                         android:id="@+id/seek_bar"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_row="1"
                         android:layout_column="2"
-                        android:layout_columnWeight="1" />
+                        android:layout_columnWeight="1"
+                        app:selectionColor="@color/appRed" />
 
                     <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/audio_length"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_row="1"

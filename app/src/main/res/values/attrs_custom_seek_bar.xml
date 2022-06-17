@@ -1,0 +1,5 @@
+<resources>
+    <declare-styleable name="HighlightedSeekBar">
+        <attr name="selectionColor" format="color" />
+    </declare-styleable>
+</resources>

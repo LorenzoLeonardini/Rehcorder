@@ -136,6 +136,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
     override fun onItemClicked(holder: RehearsalsAdapter.RehearsalViewHolder) {
         val intent = Intent(context, ProcessActivity::class.java)
         intent.putExtra("fileName", holder.fileName)
+        intent.putExtra("rehearsalId", holder.id)
         startActivity(intent)
     }
 }
