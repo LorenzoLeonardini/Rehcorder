@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -17,6 +18,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
+import com.google.android.material.navigation.NavigationBarView
 import dev.leonardini.rehcorder.databinding.ActivityMainBinding
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.TABLE_REHEARSALS
@@ -25,7 +27,8 @@ import java.io.File
 import java.time.Instant
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedListener,
+    NavigationBarView.OnItemSelectedListener, View.OnClickListener {
 
     companion object {
         private const val REQUEST_RECORD_AUDIO_PERMISSION = 42
@@ -59,53 +62,16 @@ class MainActivity : AppCompatActivity() {
 
         val bottomNavigation = binding.bottomNavigation
         bottomNavigation.menu[1].isEnabled = false
-        bottomNavigation.setOnItemReselectedListener { item ->
-            when (item.itemId) {
-                R.id.page_songs -> true
-                R.id.page_rehearsals -> true
-                else -> false
-            }
-        }
-        bottomNavigation.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.page_songs -> {
-                    if (!recording)
-                        findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.to_songs_fragment)
-                    true
-                }
-                R.id.page_rehearsals -> {
-                    if (!recording)
-                        findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.to_rehearsals_fragment)
-                    true
-                }
-                else -> {
-                    false
-                }
-            }
-        }
+        bottomNavigation.setOnItemReselectedListener(this)
+        bottomNavigation.setOnItemSelectedListener(this)
 
-        binding.fab.setOnClickListener {
-            if (recording) {
-                stopRecording()
-            } else {
-                if (recordingPermissionsGranted()) {
-                    permissionToRecordAccepted = true
-                    startRecording()
-                } else {
-                    ActivityCompat.requestPermissions(
-                        this,
-                        permissions,
-                        REQUEST_RECORD_AUDIO_PERMISSION
-                    )
-                }
-            }
-        }
+        binding.fab.setOnClickListener(this)
 
         database = Database(this)
 
         if (savedInstanceState != null) {
             recording = savedInstanceState.getBoolean("recording")
-        } else if (savedInstanceState == null && intent.getBooleanExtra("Recording", false)) {
+        } else if (intent.getBooleanExtra("Recording", false)) {
             binding.bottomNavigation.selectedItemId = R.id.page_record
             binding.bottomNavigation.menu[0].isEnabled = false
             binding.bottomNavigation.menu[2].isEnabled = false
@@ -246,5 +212,46 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration)
                 || super.onSupportNavigateUp()
+    }
+
+    override fun onNavigationItemReselected(item: MenuItem) {
+        // needed to avoid reselection
+    }
+
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.page_songs -> {
+                if (!recording)
+                    findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.to_songs_fragment)
+                true
+            }
+            R.id.page_rehearsals -> {
+                if (!recording)
+                    findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.to_rehearsals_fragment)
+                true
+            }
+            else -> {
+                false
+            }
+        }
+    }
+
+    override fun onClick(v: View?) {
+        if (v == binding.fab) {
+            if (recording) {
+                stopRecording()
+            } else {
+                if (recordingPermissionsGranted()) {
+                    permissionToRecordAccepted = true
+                    startRecording()
+                } else {
+                    ActivityCompat.requestPermissions(
+                        this,
+                        permissions,
+                        REQUEST_RECORD_AUDIO_PERMISSION
+                    )
+                }
+            }
+        }
     }
 }
