@@ -1,16 +1,15 @@
 package dev.leonardini.rehcorder.ui
 
 import android.content.ContentValues
+import android.content.Intent
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import dev.leonardini.rehcorder.ProcessActivity
 import dev.leonardini.rehcorder.R
 import dev.leonardini.rehcorder.adapters.RehearsalsAdapter
 import dev.leonardini.rehcorder.databinding.FragmentRehearsalsBinding
@@ -20,8 +19,8 @@ import dev.leonardini.rehcorder.db.TABLE_REHEARSALS
 /**
  * A simple [Fragment] subclass as the second destination in the navigation.
  */
-class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClick,
-    RehearsalsAdapter.OnHeaderBound {
+class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickListener,
+    RehearsalsAdapter.OnHeaderBoundListener, RehearsalsAdapter.OnItemClickListener {
 
     private var _binding: FragmentRehearsalsBinding? = null
 
@@ -61,7 +60,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClick,
 
         val cursor = database.query(
             TABLE_REHEARSALS,
-            arrayOf("_id", "name", "date", "songsCount"),
+            arrayOf("_id", "name", "date", "songsCount", "fileName"),
             null,
             null,
             null,
@@ -85,7 +84,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClick,
         setHasOptionsMenu(true)
 
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
-        adapter = RehearsalsAdapter(this, this, null)
+        adapter = RehearsalsAdapter(this, this, this, null)
         Thread {
             database = Database(context!!).writableDatabase
             updateDbData()
@@ -132,5 +131,11 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClick,
         synchronized(showCard) {
             holder.binding.card.visibility = if (showCard) View.GONE else View.VISIBLE
         }
+    }
+
+    override fun onItemClicked(holder: RehearsalsAdapter.RehearsalViewHolder) {
+        val intent = Intent(context, ProcessActivity::class.java)
+        intent.putExtra("fileName", holder.fileName)
+        startActivity(intent)
     }
 }

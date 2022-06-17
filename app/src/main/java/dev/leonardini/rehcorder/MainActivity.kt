@@ -11,7 +11,6 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
 import androidx.core.view.WindowCompat
 import androidx.core.view.get
 import androidx.navigation.findNavController
@@ -25,7 +24,6 @@ import dev.leonardini.rehcorder.db.TABLE_REHEARSALS
 import dev.leonardini.rehcorder.utils.MaterialInfoDialogFragment
 import java.io.File
 import java.time.Instant
-
 
 class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedListener,
     NavigationBarView.OnItemSelectedListener, View.OnClickListener {
@@ -162,35 +160,6 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
 
         binding.bottomNavigation.menu[0].isEnabled = true
         binding.bottomNavigation.menu[2].isEnabled = true
-    }
-
-    private fun startPlaying() {
-        Thread {
-            val cursor = database.readableDatabase.query(
-                TABLE_REHEARSALS,
-                arrayOf("date"),
-                null,
-                null,
-                null,
-                null,
-                null
-            )
-            cursor.moveToFirst()
-            val timestamp = cursor.getInt(cursor.getColumnIndex("date"))
-            database.close()
-
-            val uri = FileProvider.getUriForFile(
-                this,
-                "${this.packageName}.provider",
-                File("${filesDir.absolutePath}/recordings/$timestamp.aac")
-            )
-
-            val viewMediaIntent = Intent()
-            viewMediaIntent.action = Intent.ACTION_VIEW
-            viewMediaIntent.setDataAndType(uri, "audio/*")
-            viewMediaIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            startActivity(viewMediaIntent)
-        }.start()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
