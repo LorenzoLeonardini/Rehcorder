@@ -10,10 +10,12 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
+import com.arthenica.ffmpegkit.*
 import java.io.File
 import java.io.IOException
 
-class RecorderService : Service() {
+
+class RecorderService : Service(), FFmpegSessionCompleteCallback, LogCallback, StatisticsCallback {
     override fun onBind(intent: Intent?): IBinder? {
         TODO("Not yet implemented")
     }
@@ -96,7 +98,29 @@ class RecorderService : Service() {
         }
         recorder = null
 
-        stopSelf()
+        val preference = PreferenceManager.getDefaultSharedPreferences(this)
+        if (!preference.getBoolean("unprocessed_microphone", true)) {
+            stopSelf()
+            return
+        }
+
+        val notification = NotificationCompat.Builder(this, "dev.leonardini.rehcorder")
+            .setContentTitle("Normalizing audio...")
+            .setSmallIcon(R.drawable.ic_mic)
+            .setContentText("Audio is being normalized in the background")
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            .setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
+            .build()
+
+        startForeground(1337, notification)
+
+        FFmpegKit.executeAsync(
+            "-y -i $fileName -af loudnorm ${filesDir.absolutePath}/tmp.aac",
+            this,
+            this,
+            this
+        )
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -115,6 +139,23 @@ class RecorderService : Service() {
         }
 
         return START_NOT_STICKY
+    }
+
+    // End callback
+    override fun apply(session: FFmpegSession?) {
+        // TODO: should probably check exit code, but we've seen it's not really relevant
+        val file = File("${filesDir.absolutePath}/tmp.aac")
+        file.renameTo(File(fileName!!))
+
+        stopSelf()
+    }
+
+    // Log callback
+    override fun apply(log: com.arthenica.ffmpegkit.Log?) {
+    }
+
+    // Statistics callback
+    override fun apply(statistics: Statistics?) {
     }
 
 }
