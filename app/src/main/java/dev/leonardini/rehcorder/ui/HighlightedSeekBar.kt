@@ -3,16 +3,14 @@ package dev.leonardini.rehcorder.ui
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.os.Build
 import android.util.AttributeSet
-import android.util.Log
 import android.util.TypedValue
 import androidx.appcompat.widget.AppCompatSeekBar
 import dev.leonardini.rehcorder.R
 
 class HighlightedSeekBar : AppCompatSeekBar {
 
-    private val paint :Paint = Paint()
+    private val paint: Paint = Paint()
     private val regions = ArrayList<Pair<Float, Float>>()
 
     constructor(context: Context) : super(context) {
@@ -38,7 +36,11 @@ class HighlightedSeekBar : AppCompatSeekBar {
         )
 
         val typedValue = TypedValue()
-        context.theme.resolveAttribute(com.google.android.material.R.attr.colorError, typedValue, true)
+        context.theme.resolveAttribute(
+            com.google.android.material.R.attr.colorError,
+            typedValue,
+            true
+        )
         paint.color = a.getColor(R.styleable.HighlightedSeekBar_selectionColor, typedValue.data)
         // Read attributes
 
@@ -52,8 +54,14 @@ class HighlightedSeekBar : AppCompatSeekBar {
         val height = measuredHeight - paddingTop - paddingBottom
         val top = (height - currentDrawable!!.intrinsicHeight) / 2f
 
-        for(region in regions) {
-            canvas?.drawRect(paddingLeft + region.first * width, top, paddingLeft + region.second * width, top + currentDrawable!!.intrinsicHeight.toFloat(), paint)
+        for (region in regions) {
+            canvas?.drawRect(
+                paddingLeft + region.first * width,
+                top,
+                paddingLeft + region.second * width,
+                top + currentDrawable!!.intrinsicHeight.toFloat(),
+                paint
+            )
         }
 
         drawThumb(canvas!!)
@@ -71,7 +79,7 @@ class HighlightedSeekBar : AppCompatSeekBar {
         }
     }
 
-    fun highlightRegion(start :Int, end :Int) {
+    fun highlightRegion(start: Int, end: Int) {
         regions.add(Pair(start.toFloat() / max, end.toFloat() / max))
         invalidate()
     }

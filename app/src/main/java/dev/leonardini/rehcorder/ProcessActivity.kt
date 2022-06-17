@@ -83,9 +83,9 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
                 }
             }
             val startArr = savedInstanceState.getIntegerArrayList(SONG_STARTS)
-            songStarts = startArr ?: ArrayList<Int>()
+            songStarts = startArr ?: ArrayList()
             val endArr = savedInstanceState.getIntegerArrayList(SONG_ENDS)
-            songEnds = endArr ?: ArrayList<Int>()
+            songEnds = endArr ?: ArrayList()
         }
         if (!::songStarts.isInitialized) {
             songStarts = ArrayList()
