@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.content.Intent
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -16,7 +17,7 @@ import dev.leonardini.rehcorder.databinding.FragmentRehearsalsBinding
 import dev.leonardini.rehcorder.db.*
 
 class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickListener,
-    RehearsalsAdapter.OnHeaderBoundListener, RehearsalsAdapter.OnItemClickListener {
+    RehearsalsAdapter.OnHeaderBoundListener, RehearsalsAdapter.OnItemClickListener, View.OnClickListener {
 
     private var _binding: FragmentRehearsalsBinding? = null
 
@@ -51,7 +52,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
             null,
             "$REHEARSALS_DATE DESC"
         )
-        val newShowCard = needProcessing.count == 0
+        val newShowCard = needProcessing.count != 0
         needProcessing.moveToFirst()
         if(newShowCard) {
             inNeedOfProcessingId = needProcessing.getLong(needProcessing.getColumnIndex(
@@ -132,7 +133,8 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
     }
 
     override fun onBound(holder: RehearsalsAdapter.HeaderViewHolder) {
-        holder.binding.card.visibility = if (showCard) View.GONE else View.VISIBLE
+        holder.binding.card.visibility = if (showCard) View.VISIBLE else View.GONE
+        holder.binding.processNow.setOnClickListener(this)
     }
 
     override fun onItemClicked(holder: RehearsalsAdapter.RehearsalViewHolder) {
@@ -146,6 +148,13 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
         val intent = Intent(context, ProcessActivity::class.java)
         intent.putExtra("fileName", holder.fileName)
         intent.putExtra("rehearsalId", holder.id)
+        startActivity(intent)
+    }
+
+    override fun onClick(v: View?) {
+        val intent = Intent(context, ProcessActivity::class.java)
+        intent.putExtra("fileName", inNeedOfProcessingFileName)
+        intent.putExtra("rehearsalId", inNeedOfProcessingId)
         startActivity(intent)
     }
 }
