@@ -53,9 +53,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
             null,
             "date DESC"
         )
-        synchronized(showCard) {
-            showCard = needProcessing.count == 0
-        }
+        val newShowCard = needProcessing.count == 0
         needProcessing.close()
 
         val cursor = database.query(
@@ -68,6 +66,8 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
             "date DESC"
         )
         binding.recyclerView.post {
+            showCard = newShowCard
+
             if (cursor.count > 0 && adapter.itemCount == 0) {
                 binding.recyclerView.visibility = View.VISIBLE
                 binding.emptyView.visibility = View.GONE
@@ -128,9 +128,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
     }
 
     override fun onBound(holder: RehearsalsAdapter.HeaderViewHolder) {
-        synchronized(showCard) {
-            holder.binding.card.visibility = if (showCard) View.GONE else View.VISIBLE
-        }
+        holder.binding.card.visibility = if (showCard) View.GONE else View.VISIBLE
     }
 
     override fun onItemClicked(holder: RehearsalsAdapter.RehearsalViewHolder) {
