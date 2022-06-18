@@ -79,7 +79,8 @@ class RecorderService : Service(), FFmpegSessionCompleteCallback, LogCallback, S
             setAudioSource(getBestAudioSource())
             setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS)
             setOutputFile(fileName)
-            setAudioSamplingRate(32000)
+            setAudioSamplingRate(44100)
+            setAudioEncodingBitRate(192000)
             setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
 
             try {
