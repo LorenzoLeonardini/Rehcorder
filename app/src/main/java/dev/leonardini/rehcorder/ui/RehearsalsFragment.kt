@@ -13,12 +13,8 @@ import dev.leonardini.rehcorder.ProcessActivity
 import dev.leonardini.rehcorder.R
 import dev.leonardini.rehcorder.adapters.RehearsalsAdapter
 import dev.leonardini.rehcorder.databinding.FragmentRehearsalsBinding
-import dev.leonardini.rehcorder.db.Database
-import dev.leonardini.rehcorder.db.TABLE_REHEARSALS
+import dev.leonardini.rehcorder.db.*
 
-/**
- * A simple [Fragment] subclass as the second destination in the navigation.
- */
 class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickListener,
     RehearsalsAdapter.OnHeaderBoundListener, RehearsalsAdapter.OnItemClickListener {
 
@@ -31,6 +27,8 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
     private lateinit var adapter: RehearsalsAdapter
 
     private var showCard: Boolean = false
+    private var inNeedOfProcessingId :Long = -1
+    private var inNeedOfProcessingFileName :String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -46,24 +44,30 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
     private fun updateDbData() {
         val needProcessing = database.query(
             TABLE_REHEARSALS,
-            arrayOf("_id", "processed"),
-            "processed=FALSE",
+            arrayOf(REHEARSALS_ID, REHEARSALS_PROCESSED, REHEARSALS_FILE_NAME),
+            "$REHEARSALS_PROCESSED=FALSE",
             null,
             null,
             null,
-            "date DESC"
+            "$REHEARSALS_DATE DESC"
         )
         val newShowCard = needProcessing.count == 0
+        needProcessing.moveToFirst()
+        if(newShowCard) {
+            inNeedOfProcessingId = needProcessing.getLong(needProcessing.getColumnIndex(
+                REHEARSALS_ID))
+            inNeedOfProcessingFileName = needProcessing.getString(needProcessing.getColumnIndex(REHEARSALS_FILE_NAME))
+        }
         needProcessing.close()
 
         val cursor = database.query(
             TABLE_REHEARSALS,
-            arrayOf("_id", "name", "date", "songsCount", "fileName"),
+            arrayOf(REHEARSALS_ID, REHEARSALS_NAME, REHEARSALS_DATE, REHEARSALS_SONGS_COUNT, REHEARSALS_FILE_NAME),
             null,
             null,
             null,
             null,
-            "date DESC"
+            "$REHEARSALS_DATE DESC"
         )
         binding.recyclerView.post {
             showCard = newShowCard
@@ -112,12 +116,12 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
         (activity!! as AppCompatActivity).let { activity ->
             RenameDialogFragment(currentName, R.string.r_rename) { name ->
                 val contentValues = ContentValues()
-                contentValues.put("name", name)
+                contentValues.put(REHEARSALS_NAME, name)
                 Thread {
                     database.update(
                         TABLE_REHEARSALS,
                         contentValues,
-                        "_ID=?",
+                        "$REHEARSALS_ID=?",
                         arrayOf(id.toString())
                     )
                     updateDbData()

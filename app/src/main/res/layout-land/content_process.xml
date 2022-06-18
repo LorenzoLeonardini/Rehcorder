@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
+    android:fitsSystemWindows="false"
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
     <GridLayout
@@ -31,11 +31,11 @@
                 <dev.leonardini.rehcorder.ui.WaveformView
                     android:id="@+id/waveform"
                     android:layout_width="match_parent"
-                    android:layout_height="90pt"
+                    android:layout_height="60pt"
                     android:layout_row="1"
                     android:layout_column="1"
                     android:layout_columnSpan="3"
-                    android:layout_marginBottom="24dp" />
+                    android:layout_marginBottom="30dp" />
 
                 <GridLayout
                     android:layout_width="match_parent"
@@ -129,6 +129,17 @@
                     android:layout_columnSpan="3"
                     android:layout_marginTop="24dp"
                     android:text="Begin song" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/save"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_row="3"
+                    android:layout_column="1"
+                    android:layout_columnSpan="3"
+                    android:layout_marginTop="8dp"
+                    android:text="Save and exit" />
 
             </GridLayout>
 
