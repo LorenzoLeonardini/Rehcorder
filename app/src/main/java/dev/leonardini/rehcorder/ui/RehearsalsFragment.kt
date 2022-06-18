@@ -5,8 +5,8 @@ import android.content.Intent
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.view.*
-import androidx.fragment.app.Fragment
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.leonardini.rehcorder.ProcessActivity
@@ -134,6 +134,13 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
     }
 
     override fun onItemClicked(holder: RehearsalsAdapter.RehearsalViewHolder) {
+        // SHARING
+//        val uri = FileProvider.getUriForFile(context!!, "${context!!.applicationContext.packageName}.provider", File("${context!!.filesDir.absolutePath}/recordings/${holder.fileName}"))
+//        val builder = ShareCompat.IntentBuilder(activity as AppCompatActivity)
+//        builder.addStream(uri)
+//        builder.setType("audio/*")
+//        builder.startChooser()
+
         val intent = Intent(context, ProcessActivity::class.java)
         intent.putExtra("fileName", holder.fileName)
         intent.putExtra("rehearsalId", holder.id)

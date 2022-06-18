@@ -1,11 +1,14 @@
 package dev.leonardini.rehcorder
 
+import android.content.Context
+import android.media.AudioAttributes
+import android.media.AudioManager
 import android.media.MediaPlayer
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.View
 import android.widget.SeekBar
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -14,7 +17,7 @@ import dev.leonardini.rehcorder.databinding.ActivityProcessBinding
 import kotlin.math.min
 
 class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeListener,
-    View.OnClickListener {
+    View.OnClickListener, MediaPlayer.OnCompletionListener {
 
     companion object {
         private const val PLAYING = "playing"
@@ -30,6 +33,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
 
     private var rehearsalId: Long = -1
     private lateinit var fileName: String
+    private lateinit var audioManager: AudioManager
     private lateinit var mediaPlayer: MediaPlayer
     private var stopped: Boolean = false
 
@@ -53,9 +57,19 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
 
         rehearsalId = intent.getLongExtra("rehearsalId", -1)
         fileName = intent.getStringExtra("fileName")!!
+
+        audioManager = applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        audioManager.mode = AudioManager.STREAM_MUSIC
+
         mediaPlayer = MediaPlayer()
         mediaPlayer.setDataSource("${filesDir.absolutePath}/recordings/$fileName")
+        mediaPlayer.setAudioAttributes(
+            AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                .setUsage(AudioAttributes.USAGE_MEDIA).build()
+        )
+        mediaPlayer.setOnCompletionListener(this)
         mediaPlayer.prepare()
+
         val minutes = mediaPlayer.duration / 60000
         val seconds = (mediaPlayer.duration / 1000) % 60
         binding.content.audioLength.text = String.format("%02d:%02d", minutes, seconds)
@@ -117,6 +131,10 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         }
     }
 
+    override fun onCompletion(mp: MediaPlayer?) {
+        binding.content.playPause.setIconResource(R.drawable.ic_play)
+    }
+
     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
         if (fromUser) {
             mediaPlayer.seekTo(progress)
@@ -168,6 +186,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         stopped = true
         mediaPlayer.stop()
         mediaPlayer.release()
+        audioManager.mode = AudioManager.USE_DEFAULT_STREAM_TYPE
         super.onDestroy()
     }
 
