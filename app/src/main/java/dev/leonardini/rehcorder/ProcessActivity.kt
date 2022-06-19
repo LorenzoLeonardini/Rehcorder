@@ -70,6 +70,8 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         mediaPlayer.setOnCompletionListener(this)
         mediaPlayer.prepare()
 
+        binding.content.waveform.setAudioSession(mediaPlayer.audioSessionId)
+
         val minutes = mediaPlayer.duration / 60000
         val seconds = (mediaPlayer.duration / 1000) % 60
         binding.content.audioLength.text = String.format("%02d:%02d", minutes, seconds)
@@ -159,7 +161,8 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
             binding.content.seekBar.progress = position
             mediaPlayer.seekTo(position)
         } else if (v == binding.content.seekForward) {
-            val position = (mediaPlayer.currentPosition + 10000).coerceAtMost(mediaPlayer.duration)
+            val position =
+                (mediaPlayer.currentPosition + 10000).coerceAtMost(mediaPlayer.duration - 10)
             binding.content.seekBar.progress = position
             mediaPlayer.seekTo(position)
         } else if (v == binding.content.toggleSong) {
@@ -183,6 +186,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
     override fun onStopTrackingTouch(seekBar: SeekBar?) {}
 
     override fun onDestroy() {
+        binding.content.waveform.cleanAudioVisualizer()
         stopped = true
         mediaPlayer.stop()
         mediaPlayer.release()
