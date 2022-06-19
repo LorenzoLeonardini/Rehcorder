@@ -1,10 +1,7 @@
 package dev.leonardini.rehcorder.ui
 
-import android.content.ContentValues
 import android.content.Intent
-import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -17,19 +14,20 @@ import dev.leonardini.rehcorder.databinding.FragmentRehearsalsBinding
 import dev.leonardini.rehcorder.db.*
 
 class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickListener,
-    RehearsalsAdapter.OnHeaderBoundListener, RehearsalsAdapter.OnItemClickListener, View.OnClickListener {
+    RehearsalsAdapter.OnHeaderBoundListener, RehearsalsAdapter.OnItemClickListener,
+    View.OnClickListener {
 
     private var _binding: FragmentRehearsalsBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
-    private lateinit var database: SQLiteDatabase
+    private lateinit var database: AppDatabase
     private lateinit var adapter: RehearsalsAdapter
 
     private var showCard: Boolean = false
-    private var inNeedOfProcessingId :Long = -1
-    private var inNeedOfProcessingFileName :String = ""
+    private var inNeedOfProcessingId: Long = -1
+    private var inNeedOfProcessingFileName: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,33 +41,15 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
     }
 
     private fun updateDbData() {
-        val needProcessing = database.query(
-            TABLE_REHEARSALS,
-            arrayOf(REHEARSALS_ID, REHEARSALS_PROCESSED, REHEARSALS_FILE_NAME),
-            "$REHEARSALS_PROCESSED=FALSE",
-            null,
-            null,
-            null,
-            "$REHEARSALS_DATE DESC"
-        )
-        val newShowCard = needProcessing.count != 0
-        needProcessing.moveToFirst()
-        if(newShowCard) {
-            inNeedOfProcessingId = needProcessing.getLong(needProcessing.getColumnIndex(
-                REHEARSALS_ID))
-            inNeedOfProcessingFileName = needProcessing.getString(needProcessing.getColumnIndex(REHEARSALS_FILE_NAME))
+        val needProcessing = database.rehearsalDao().getUnprocessedRehearsal()
+        var newShowCard = false
+        if (needProcessing != null) {
+            newShowCard = true
+            inNeedOfProcessingId = needProcessing.uid
+            inNeedOfProcessingFileName = needProcessing.fileName
         }
-        needProcessing.close()
 
-        val cursor = database.query(
-            TABLE_REHEARSALS,
-            arrayOf(REHEARSALS_ID, REHEARSALS_NAME, REHEARSALS_DATE, REHEARSALS_SONGS_COUNT, REHEARSALS_FILE_NAME),
-            null,
-            null,
-            null,
-            null,
-            "$REHEARSALS_DATE DESC"
-        )
+        val cursor = database.rehearsalDao().getAllCursor()
         binding.recyclerView.post {
             showCard = newShowCard
 
@@ -91,7 +71,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
         adapter = RehearsalsAdapter(this, this, this, null)
         Thread {
-            database = Database(context!!).writableDatabase
+            database = Database.getInstance(context!!)
             updateDbData()
         }.start()
         binding.recyclerView.adapter = adapter
@@ -110,21 +90,13 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        database.close()
     }
 
     override fun onEdit(id: Long, currentName: String?) {
         (activity!! as AppCompatActivity).let { activity ->
             RenameDialogFragment(currentName, R.string.r_rename) { name ->
-                val contentValues = ContentValues()
-                contentValues.put(REHEARSALS_NAME, name)
                 Thread {
-                    database.update(
-                        TABLE_REHEARSALS,
-                        contentValues,
-                        "$REHEARSALS_ID=?",
-                        arrayOf(id.toString())
-                    )
+                    database.rehearsalDao().updateName(id, name)
                     updateDbData()
                 }.start()
             }.show(activity.supportFragmentManager, "RenameDialog")

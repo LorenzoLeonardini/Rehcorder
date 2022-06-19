@@ -35,11 +35,11 @@ class RehearsalsAdapter(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, cursor: Cursor, position: Int) {
-        val id: Long = cursor.getLong(cursor.getColumnIndex("_ID"))
+        val id: Long = cursor.getLong(cursor.getColumnIndex("uid"))
         val name: String? = cursor.getStringOrNull(cursor.getColumnIndex("name"))
         val date: Long = cursor.getLong(cursor.getColumnIndex("date"))
-        val songsCount: Int = cursor.getInt(cursor.getColumnIndex("songsCount"))
-        val fileName: String = cursor.getString(cursor.getColumnIndex("fileName"))
+        val songsCount: Int = cursor.getInt(cursor.getColumnIndex("songs_count"))
+        val fileName: String = cursor.getString(cursor.getColumnIndex("file_name"))
         val formattedDate = "${
             DateFormat.getDateInstance().format(Date(date * 1000))
         } - ${DateFormat.getTimeInstance().format(Date(date * 1000))}"

@@ -22,6 +22,10 @@
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="microphone" />
+        <service
+            android:name=".NormalizerService"
+            android:enabled="true"
+            android:exported="false" />
 
         <activity
             android:name=".ProcessActivity"

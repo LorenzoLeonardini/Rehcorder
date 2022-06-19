@@ -75,7 +75,7 @@ abstract class RecyclerViewCursorAdapter<V : RecyclerView.ViewHolder>(c: Cursor?
             cursor?.close()
             cursor = newCursor
             dataValid = true
-            rowIDColumn = cursor!!.getColumnIndex("_ID")
+            rowIDColumn = cursor!!.getColumnIndex("uid")
             notifyDataSetChanged()
         } else {
             notifyItemRangeRemoved(0, itemCount)

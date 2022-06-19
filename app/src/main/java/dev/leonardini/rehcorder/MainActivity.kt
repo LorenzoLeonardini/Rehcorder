@@ -1,7 +1,6 @@
 package dev.leonardini.rehcorder
 
 import android.Manifest
-import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -19,8 +18,9 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.material.navigation.NavigationBarView
 import dev.leonardini.rehcorder.databinding.ActivityMainBinding
+import dev.leonardini.rehcorder.db.AppDatabase
 import dev.leonardini.rehcorder.db.Database
-import dev.leonardini.rehcorder.db.TABLE_REHEARSALS
+import dev.leonardini.rehcorder.db.Rehearsal
 import dev.leonardini.rehcorder.utils.MaterialInfoDialogFragment
 import java.io.File
 import java.time.Instant
@@ -36,9 +36,8 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private var recording: Boolean = false
-    private var currentlyRecording: Long = -1
 
-    private lateinit var database: Database
+    private lateinit var database: AppDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -65,7 +64,7 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
 
         binding.fab.setOnClickListener(this)
 
-        database = Database(this)
+        database = Database.getInstance(applicationContext)
 
         if (savedInstanceState != null) {
             recording = savedInstanceState.getBoolean("recording")
@@ -131,23 +130,27 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
 
         recording = true
 
-        val contentValues = ContentValues()
         val timestamp = Instant.now().epochSecond
         val fileName = "$timestamp.aac"
-        contentValues.put("date", timestamp)
-        contentValues.put("fileName", fileName)
-        contentValues.put("externalStorage", false)
-        currentlyRecording = database.writableDatabase.insert(TABLE_REHEARSALS, null, contentValues)
-        database.close()
+        Thread {
+            val id = database.rehearsalDao().insert(
+                Rehearsal(
+                    date = timestamp,
+                    fileName = fileName,
+                    externalStorage = false
+                )
+            )
 
-        val folder = File("${filesDir.absolutePath}/recordings/")
-        if (!folder.exists())
-            folder.mkdirs()
+            val folder = File("${filesDir.absolutePath}/recordings/")
+            if (!folder.exists())
+                folder.mkdirs()
 
-        val intent = Intent(this, RecorderService::class.java)
-        intent.action = "RECORD"
-        intent.putExtra("file", "${filesDir.absolutePath}/recordings/$fileName")
-        startForegroundService(intent)
+            val intent = Intent(this, RecorderService::class.java)
+            intent.action = "RECORD"
+            intent.putExtra("id", id)
+            intent.putExtra("file", "${filesDir.absolutePath}/recordings/$fileName")
+            startForegroundService(intent)
+        }.start()
     }
 
     private fun stopRecording() {

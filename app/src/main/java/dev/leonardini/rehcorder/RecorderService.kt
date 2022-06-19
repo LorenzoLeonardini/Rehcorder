@@ -10,22 +10,26 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
-import com.arthenica.ffmpegkit.*
+import dev.leonardini.rehcorder.db.Database
+import dev.leonardini.rehcorder.db.Rehearsal
 import java.io.File
 import java.io.IOException
 
-
-class RecorderService : Service(), FFmpegSessionCompleteCallback, LogCallback, StatisticsCallback {
+class RecorderService : Service() {
     override fun onBind(intent: Intent?): IBinder? {
-        TODO("Not yet implemented")
+        return null
     }
 
     private var recorder: MediaRecorder? = null
+    private var id: Long = -1
     private var fileName: String? = null
+    private var unprocessedMicrophone: Boolean = true
 
     private fun getBestAudioSource(): Int {
         val preference = PreferenceManager.getDefaultSharedPreferences(this)
-        if (!preference.getBoolean("unprocessed_microphone", true)) {
+        unprocessedMicrophone = preference.getBoolean("unprocessed_microphone", true)
+        if (!unprocessedMicrophone) {
+            Log.i("Recorder", "Using default mic")
             return MediaRecorder.AudioSource.MIC
         }
 
@@ -68,9 +72,7 @@ class RecorderService : Service(), FFmpegSessionCompleteCallback, LogCallback, S
         startForeground(1337, notification)
     }
 
-    private fun startRecording(fileName: String) {
-        this.fileName = fileName
-
+    private fun startRecording() {
         val folder = File("${filesDir.absolutePath}/recordings/")
         if (!folder.exists())
             folder.mkdirs()
@@ -100,32 +102,26 @@ class RecorderService : Service(), FFmpegSessionCompleteCallback, LogCallback, S
         }
         recorder = null
 
-        val preference = PreferenceManager.getDefaultSharedPreferences(this)
-        if (!preference.getBoolean("unprocessed_microphone", true)) {
-            stopSelf()
-            return
+        if (!unprocessedMicrophone) {
+            Thread {
+                Database.getInstance(applicationContext).rehearsalDao()
+                    .updateStatus(id, Rehearsal.NORMALIZED)
+            }.start()
+        } else {
+            Thread {
+                Database.getInstance(applicationContext).rehearsalDao()
+                    .updateStatus(id, Rehearsal.RECORDED)
+            }.start()
+            val intent = Intent(this, NormalizerService::class.java)
+            intent.putExtra("id", id)
+            intent.putExtra("file", "${filesDir.absolutePath}/recordings/$fileName")
+            startForegroundService(intent)
         }
-
-        val notification = NotificationCompat.Builder(this, "dev.leonardini.rehcorder")
-            .setContentTitle("Normalizing audio...")
-            .setSmallIcon(R.drawable.ic_mic)
-            .setContentText("Audio is being normalized in the background")
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setCategory(NotificationCompat.CATEGORY_SERVICE)
-            .setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
-            .build()
-
-        startForeground(1337, notification)
-
-        FFmpegKit.executeAsync(
-            "-y -i $fileName -af loudnorm ${filesDir.absolutePath}/tmp.aac",
-            this,
-            this,
-            this
-        )
+        stopSelf()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        requestForeground()
         if (intent == null) {
             return START_NOT_STICKY
         }
@@ -134,30 +130,17 @@ class RecorderService : Service(), FFmpegSessionCompleteCallback, LogCallback, S
             if (fileName != null) {
                 return START_NOT_STICKY
             }
-            requestForeground()
-            startRecording(intent.getStringExtra("file")!!)
+            id = intent.getLongExtra("id", -1L)
+            if (id == -1L) {
+                throw IllegalArgumentException("Missing id in start service intent")
+            }
+            fileName = intent.getStringExtra("file")!!
+            startRecording()
         } else if (intent.action == "STOP") {
             stopRecording()
         }
 
         return START_NOT_STICKY
-    }
-
-    // End callback
-    override fun apply(session: FFmpegSession?) {
-        // TODO: should probably check exit code, but we've seen it's not really relevant
-        val file = File("${filesDir.absolutePath}/tmp.aac")
-        file.renameTo(File(fileName!!))
-
-        stopSelf()
-    }
-
-    // Log callback
-    override fun apply(log: com.arthenica.ffmpegkit.Log?) {
-    }
-
-    // Statistics callback
-    override fun apply(statistics: Statistics?) {
     }
 
 }
