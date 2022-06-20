@@ -13,7 +13,7 @@ import dev.leonardini.rehcorder.R
 class RenameDialogFragment(
     private val currentName: String?,
     private val hintString: Int,
-    private val positiveListener: (name: String?) -> Unit
+    private val positiveListener: (name: String) -> Unit
 ) : AppCompatDialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val v: View = LayoutInflater.from(activity).inflate(R.layout.dialog_rename, null)
@@ -22,9 +22,11 @@ class RenameDialogFragment(
 
         return MaterialAlertDialogBuilder(requireContext(), theme)
             .setTitle(R.string.rename)
-            .setPositiveButton(R.string.save, if (positiveListener != null) { _, _ ->
-                positiveListener(v.findViewById<TextInputEditText>(R.id.text_field_input).text.toString())
-            } else null)
+            .setPositiveButton(R.string.save) { _, _ ->
+                positiveListener(
+                    v.findViewById<TextInputEditText>(R.id.text_field_input).text.toString().trim()
+                )
+            }
             .setNegativeButton(R.string.cancel, null)
             .setView(v)
             .create()

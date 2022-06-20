@@ -28,12 +28,14 @@
         <entry key="app/src/main/res/layout/content_main.xml" value="0.1693840579710145" />
         <entry key="app/src/main/res/layout/content_process.xml" value="0.14" />
         <entry key="app/src/main/res/layout/dialog_loading.xml" value="0.1693840579710145" />
+        <entry key="app/src/main/res/layout/dialog_pick_song.xml" value="0.1" />
         <entry key="app/src/main/res/layout/dialog_rename.xml" value="0.1" />
         <entry key="app/src/main/res/layout/fragment_first.xml" value="0.1693840579710145" />
         <entry key="app/src/main/res/layout/fragment_recording.xml" value="0.1693840579710145" />
         <entry key="app/src/main/res/layout/fragment_rehearsals.xml" value="0.1027450980392157" />
         <entry key="app/src/main/res/layout/fragment_second.xml" value="0.1693840579710145" />
         <entry key="app/src/main/res/layout/fragment_songs.xml" value="0.1693840579710145" />
+        <entry key="app/src/main/res/layout/list_item.xml" value="0.15305686190679776" />
         <entry key="app/src/main/res/layout/reharsal_layout.xml" value="0.1693840579710145" />
         <entry key="app/src/main/res/layout/rehearsal_header.xml" value="0.1693840579710145" />
         <entry key="app/src/main/res/layout/rehearsal_layout.xml" value="0.22" />

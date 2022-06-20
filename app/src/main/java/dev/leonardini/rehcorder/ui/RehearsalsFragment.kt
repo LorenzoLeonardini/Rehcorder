@@ -12,10 +12,17 @@ import dev.leonardini.rehcorder.R
 import dev.leonardini.rehcorder.adapters.RehearsalsAdapter
 import dev.leonardini.rehcorder.databinding.FragmentRehearsalsBinding
 import dev.leonardini.rehcorder.db.*
+import dev.leonardini.rehcorder.utils.MaterialInfoDialogFragment
 
 class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickListener,
     RehearsalsAdapter.OnHeaderBoundListener, RehearsalsAdapter.OnItemClickListener,
     View.OnClickListener {
+
+    companion object {
+        private const val RECORDED_DIALOG_TAG = "RecordedDialog"
+        private const val PROCESSING_DIALOG_TAG = "ProcessingDialog"
+        private const val ERROR_STATE_DIALOG_TAG = "ErrorStateDialog"
+    }
 
     private var _binding: FragmentRehearsalsBinding? = null
 
@@ -96,7 +103,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
         (activity!! as AppCompatActivity).let { activity ->
             RenameDialogFragment(currentName, R.string.r_rename) { name ->
                 Thread {
-                    database.rehearsalDao().updateName(id, name)
+                    database.rehearsalDao().updateName(id, name.ifBlank { null })
                     updateDbData()
                 }.start()
             }.show(activity.supportFragmentManager, "RenameDialog")
@@ -117,10 +124,52 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
 //        builder.setType("audio/*")
 //        builder.startChooser()
 
-        val intent = Intent(context, ProcessActivity::class.java)
-        intent.putExtra("fileName", holder.fileName)
-        intent.putExtra("rehearsalId", holder.id)
-        startActivity(intent)
+        Thread {
+            val status = database.rehearsalDao().getRehearsal(holder.id)?.status
+            activity!!.runOnUiThread {
+                when (status) {
+                    Rehearsal.RECORDED -> {
+                        MaterialInfoDialogFragment(
+                            R.string.dialog_recorded_title,
+                            R.string.dialog_recorded_message,
+                            null
+                        ).show(
+                            parentFragmentManager,
+                            RECORDED_DIALOG_TAG
+                        )
+                    }
+                    Rehearsal.NORMALIZED -> {
+                        val intent = Intent(context, ProcessActivity::class.java)
+                        intent.putExtra("fileName", holder.fileName)
+                        intent.putExtra("rehearsalId", holder.id)
+                        startActivity(intent)
+                    }
+                    Rehearsal.PROCESSING -> {
+                        MaterialInfoDialogFragment(
+                            R.string.dialog_processing_title,
+                            R.string.dialog_processing_message,
+                            null
+                        ).show(
+                            parentFragmentManager,
+                            PROCESSING_DIALOG_TAG
+                        )
+                    }
+                    Rehearsal.PROCESSED -> {
+                        // todo rehearsal activity
+                    }
+                    else -> {
+                        MaterialInfoDialogFragment(
+                            R.string.dialog_error_state_title,
+                            R.string.dialog_error_state_message,
+                            null
+                        ).show(
+                            parentFragmentManager,
+                            ERROR_STATE_DIALOG_TAG
+                        )
+                    }
+                }
+            }
+        }.start()
     }
 
     override fun onClick(v: View?) {

@@ -14,6 +14,6 @@ interface SongDao {
     fun getAllSorted(): List<Song>
 
     @Insert
-    fun insert(vararg rehearsals: Rehearsal)
+    fun insert(songs: Song): Long
 
 }

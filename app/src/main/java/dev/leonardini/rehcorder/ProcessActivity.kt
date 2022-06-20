@@ -14,6 +14,9 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import dev.leonardini.rehcorder.databinding.ActivityProcessBinding
+import dev.leonardini.rehcorder.db.AppDatabase
+import dev.leonardini.rehcorder.db.Database
+import dev.leonardini.rehcorder.ui.SongPickerDialogFragment
 import kotlin.math.min
 
 class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeListener,
@@ -27,6 +30,8 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         private const val SONG_STARTS = "songStarts"
         private const val SONG_ENDS = "songEnds"
     }
+
+    private lateinit var database: AppDatabase
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityProcessBinding
@@ -81,6 +86,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         binding.content.seekBack.setOnClickListener(this)
         binding.content.seekForward.setOnClickListener(this)
         binding.content.toggleSong.setOnClickListener(this)
+        binding.content.save.setOnClickListener(this)
 
         if (savedInstanceState != null) {
             if (savedInstanceState.getInt(SEEK, -1) > 0) {
@@ -120,6 +126,8 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
 
         runOnUiThread(this)
         binding.content.seekBar.setOnSeekBarChangeListener(this)
+
+        database = Database.getInstance(applicationContext)
     }
 
     override fun run() {
@@ -171,13 +179,22 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
                 binding.content.toggleSong.text = "End song"
                 songStarts.add(mediaPlayer.currentPosition)
             } else {
-                if (mediaPlayer.currentPosition < songStarts.last()) {
+                if (mediaPlayer.currentPosition <= songStarts.last()) {
                     return
                 }
                 binding.content.toggleSong.text = "Begin song"
                 songEnds.add(mediaPlayer.currentPosition)
                 binding.content.seekBar.highlightRegion(songStarts.last(), songEnds.last())
+                Thread {
+                    val songs = database.songDao().getAllSorted()
+                    runOnUiThread {
+                        SongPickerDialogFragment(songs) { id ->
+                            songIds.add(id)
+                        }.show(supportFragmentManager, "SongPickerDialog")
+                    }
+                }.start()
             }
+        } else if (v == binding.content.save) {
         }
     }
 

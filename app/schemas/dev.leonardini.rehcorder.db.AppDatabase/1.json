@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "4726acf6ba5b3e11a8f39b1472d2a674",
+    "identityHash": "39058bb21e6680722f913db08e5fc70e",
     "entities": [
       {
         "tableName": "rehearsal",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`date` INTEGER NOT NULL, `file_name` TEXT NOT NULL, `external_storage` INTEGER NOT NULL, `_ID` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `songs_count` INTEGER NOT NULL DEFAULT 0, `status` INTEGER NOT NULL DEFAULT 1)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`date` INTEGER NOT NULL, `file_name` TEXT NOT NULL, `external_storage` INTEGER NOT NULL, `uid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `songs_count` INTEGER NOT NULL DEFAULT 0, `status` INTEGER NOT NULL DEFAULT 1)",
         "fields": [
           {
             "fieldPath": "date",
@@ -27,8 +27,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "_ID",
-            "columnName": "_ID",
+            "fieldPath": "uid",
+            "columnName": "uid",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -55,7 +55,7 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "_ID"
+            "uid"
           ],
           "autoGenerate": true
         },
@@ -64,11 +64,11 @@
       },
       {
         "tableName": "song",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_ID` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL)",
         "fields": [
           {
-            "fieldPath": "_ID",
-            "columnName": "_ID",
+            "fieldPath": "uid",
+            "columnName": "uid",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -81,7 +81,7 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "_ID"
+            "uid"
           ],
           "autoGenerate": true
         },
@@ -90,11 +90,11 @@
       },
       {
         "tableName": "song_recording",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_ID` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `song_id` INTEGER NOT NULL, `recording_id` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `song_id` INTEGER NOT NULL, `recording_id` INTEGER NOT NULL)",
         "fields": [
           {
-            "fieldPath": "_ID",
-            "columnName": "_ID",
+            "fieldPath": "uid",
+            "columnName": "uid",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -113,7 +113,7 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "_ID"
+            "uid"
           ],
           "autoGenerate": true
         },
@@ -124,7 +124,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4726acf6ba5b3e11a8f39b1472d2a674')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '39058bb21e6680722f913db08e5fc70e')"
     ]
   }
 }

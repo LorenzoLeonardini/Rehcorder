@@ -6,6 +6,12 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "song")
 data class Song(
-    @PrimaryKey(autoGenerate = true) val uid: Int,
-    @ColumnInfo(name = "name") var name: String,
-)
+    @ColumnInfo(name = "name") var name: String
+) {
+    @PrimaryKey(autoGenerate = true)
+    var uid: Long = 0
+
+    override fun toString(): String {
+        return name
+    }
+}
