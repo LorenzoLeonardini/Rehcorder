@@ -1,4 +1,4 @@
-package dev.leonardini.rehcorder
+package dev.leonardini.rehcorder.services
 
 import android.app.*
 import android.content.Context
@@ -10,6 +10,8 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
+import dev.leonardini.rehcorder.MainActivity
+import dev.leonardini.rehcorder.R
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
 import java.io.File

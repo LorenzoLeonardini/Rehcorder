@@ -9,10 +9,10 @@ import androidx.room.Update
 @Dao
 interface RehearsalDao {
 
-    @Query("SELECT * FROM rehearsal")
+    @Query("SELECT * FROM rehearsal ORDER BY date DESC")
     fun getAll(): List<Rehearsal>
 
-    @Query("SELECT * FROM rehearsal")
+    @Query("SELECT * FROM rehearsal ORDER BY date DESC")
     fun getAllCursor(): Cursor
 
     @Query("SELECT * FROM rehearsal WHERE status = ${Rehearsal.NORMALIZED} LIMIT 1")

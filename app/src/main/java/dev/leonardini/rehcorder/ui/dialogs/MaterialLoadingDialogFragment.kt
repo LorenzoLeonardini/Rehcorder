@@ -1,4 +1,4 @@
-package dev.leonardini.rehcorder.utils
+package dev.leonardini.rehcorder.ui.dialogs
 
 import android.app.Dialog
 import android.os.Bundle

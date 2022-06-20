@@ -2,9 +2,11 @@ package dev.leonardini.rehcorder.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.leonardini.rehcorder.ProcessActivity
@@ -12,7 +14,8 @@ import dev.leonardini.rehcorder.R
 import dev.leonardini.rehcorder.adapters.RehearsalsAdapter
 import dev.leonardini.rehcorder.databinding.FragmentRehearsalsBinding
 import dev.leonardini.rehcorder.db.*
-import dev.leonardini.rehcorder.utils.MaterialInfoDialogFragment
+import dev.leonardini.rehcorder.ui.dialogs.RenameDialogFragment
+import dev.leonardini.rehcorder.ui.dialogs.MaterialInfoDialogFragment
 
 class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickListener,
     RehearsalsAdapter.OnHeaderBoundListener, RehearsalsAdapter.OnItemClickListener,
@@ -22,6 +25,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
         private const val RECORDED_DIALOG_TAG = "RecordedDialog"
         private const val PROCESSING_DIALOG_TAG = "ProcessingDialog"
         private const val ERROR_STATE_DIALOG_TAG = "ErrorStateDialog"
+        private const val RENAME_DIALOG_TAG = "RenameDialog"
     }
 
     private var _binding: FragmentRehearsalsBinding? = null
@@ -36,15 +40,31 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
     private var inNeedOfProcessingId: Long = -1
     private var inNeedOfProcessingFileName: String = ""
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         _binding = FragmentRehearsalsBinding.inflate(inflater, container, false)
 
-        return binding.root
+        activity!!.supportFragmentManager.setFragmentResultListener(RECORDED_DIALOG_TAG, viewLifecycleOwner) { _, _ -> }
+        activity!!.supportFragmentManager.setFragmentResultListener(PROCESSING_DIALOG_TAG, viewLifecycleOwner) { _, _ -> }
+        activity!!.supportFragmentManager.setFragmentResultListener(ERROR_STATE_DIALOG_TAG, viewLifecycleOwner) { _, _ -> }
+        activity!!.supportFragmentManager.setFragmentResultListener(RENAME_DIALOG_TAG, viewLifecycleOwner) { _, bundle ->
+            Log.i("Test", "Received rename dialog tag")
+            val name = bundle.getString("name")
+            val id = bundle.getLong("id")
+            Thread {
+                database.rehearsalDao().updateName(id, name!!.ifBlank { null })
+                updateDbData()
+            }.start()
 
+        }
+
+        return binding.root
     }
 
     private fun updateDbData() {
@@ -101,14 +121,12 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
 
     override fun onEdit(id: Long, currentName: String?) {
         (activity!! as AppCompatActivity).let { activity ->
-            RenameDialogFragment(currentName, R.string.r_rename) { name ->
-                Thread {
-                    database.rehearsalDao().updateName(id, name.ifBlank { null })
-                    updateDbData()
-                }.start()
-            }.show(activity.supportFragmentManager, "RenameDialog")
+            RenameDialogFragment(
+                id,
+                currentName,
+                R.string.r_rename
+            ).show(activity.supportFragmentManager, RENAME_DIALOG_TAG)
         }
-
     }
 
     override fun onBound(holder: RehearsalsAdapter.HeaderViewHolder) {
@@ -132,7 +150,6 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
                         MaterialInfoDialogFragment(
                             R.string.dialog_recorded_title,
                             R.string.dialog_recorded_message,
-                            null
                         ).show(
                             parentFragmentManager,
                             RECORDED_DIALOG_TAG
@@ -148,7 +165,6 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
                         MaterialInfoDialogFragment(
                             R.string.dialog_processing_title,
                             R.string.dialog_processing_message,
-                            null
                         ).show(
                             parentFragmentManager,
                             PROCESSING_DIALOG_TAG
@@ -161,7 +177,6 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
                         MaterialInfoDialogFragment(
                             R.string.dialog_error_state_title,
                             R.string.dialog_error_state_message,
-                            null
                         ).show(
                             parentFragmentManager,
                             ERROR_STATE_DIALOG_TAG

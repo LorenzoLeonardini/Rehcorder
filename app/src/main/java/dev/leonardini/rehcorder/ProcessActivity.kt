@@ -1,6 +1,7 @@
 package dev.leonardini.rehcorder
 
 import android.content.Context
+import android.content.Intent
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
@@ -16,8 +17,9 @@ import androidx.navigation.ui.navigateUp
 import dev.leonardini.rehcorder.databinding.ActivityProcessBinding
 import dev.leonardini.rehcorder.db.AppDatabase
 import dev.leonardini.rehcorder.db.Database
-import dev.leonardini.rehcorder.ui.SongPickerDialogFragment
-import kotlin.math.min
+import dev.leonardini.rehcorder.services.SplitterService
+import dev.leonardini.rehcorder.ui.dialogs.SongPickerDialogFragment
+import kotlin.math.floor
 
 class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeListener,
     View.OnClickListener, MediaPlayer.OnCompletionListener {
@@ -25,10 +27,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
     companion object {
         private const val PLAYING = "playing"
         private const val SEEK = "seek"
-        private const val SONG_COUNT = "songCount"
-        private const val SONG_IDS = "songIds"
-        private const val SONG_STARTS = "songStarts"
-        private const val SONG_ENDS = "songEnds"
+        private const val SONG_REGIONS = "songRegions"
     }
 
     private lateinit var database: AppDatabase
@@ -36,15 +35,15 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityProcessBinding
 
-    private var rehearsalId: Long = -1
+    private var rehearsalId: Long = -1L
     private lateinit var fileName: String
     private lateinit var audioManager: AudioManager
     private lateinit var mediaPlayer: MediaPlayer
     private var stopped: Boolean = false
+    private var savedCurrentPlayingStatus :Boolean = false
 
-    private var songIds = ArrayList<Long>()
-    private lateinit var songStarts: ArrayList<Int>
-    private lateinit var songEnds: ArrayList<Int>
+    // triplets of ints indicating start,end,songId
+    private lateinit var songRegions :ArrayList<Long>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -60,7 +59,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
             return
         }
 
-        rehearsalId = intent.getLongExtra("rehearsalId", -1)
+        rehearsalId = intent.getLongExtra("rehearsalId", -1L)
         fileName = intent.getStringExtra("fileName")!!
 
         audioManager = applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -96,38 +95,35 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
                 mediaPlayer.start()
                 binding.content.playPause.setIconResource(R.drawable.ic_pause)
             }
-            if (savedInstanceState.getInt(SONG_COUNT, 0) > 0) {
-                val arr = savedInstanceState.getLongArray(SONG_IDS)
-                if (arr != null) {
-                    for (id in arr) {
-                        songIds.add(id)
-                    }
-                }
-            }
-            val startArr = savedInstanceState.getIntegerArrayList(SONG_STARTS)
-            songStarts = startArr ?: ArrayList()
-            val endArr = savedInstanceState.getIntegerArrayList(SONG_ENDS)
-            songEnds = endArr ?: ArrayList()
+            val arr = savedInstanceState.getLongArray(SONG_REGIONS)?.toCollection(ArrayList())
+            songRegions = arr ?: ArrayList()
         }
-        if (!::songStarts.isInitialized) {
-            songStarts = ArrayList()
-        }
-        if (!::songEnds.isInitialized) {
-            songEnds = ArrayList()
+        if (!::songRegions.isInitialized) {
+            songRegions = ArrayList()
         }
 
-        if (songStarts.size != songEnds.size) {
+        if (songRegions.size % 3 == 1) {
             binding.content.toggleSong.text = "End song"
+        } else if(songRegions.size % 3 == 2) {
+            runSongSelector()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
         }
 
-        for (i in 0 until (min(songStarts.size, songEnds.size))) {
-            binding.content.seekBar.highlightRegion(songStarts[i], songEnds[i])
+        for (i in 0 until floor(songRegions.size / 3.0).toInt()) {
+            binding.content.seekBar.highlightRegion(songRegions[i * 3].toInt(), songRegions[i * 3 + 1].toInt())
         }
 
         runOnUiThread(this)
         binding.content.seekBar.setOnSeekBarChangeListener(this)
 
         database = Database.getInstance(applicationContext)
+
+        supportFragmentManager.setFragmentResultListener("SongPickerDialog", this) { _, bundle ->
+            val id = bundle.getLong("id")!!
+            songRegions.add(id)
+            if(savedCurrentPlayingStatus) {
+                mediaPlayer.start()
+            }
+        }
     }
 
     override fun run() {
@@ -147,7 +143,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
 
     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
         if (fromUser) {
-            mediaPlayer.seekTo(progress)
+            mediaPlayer.seekTo(progress.coerceAtMost(mediaPlayer.duration - 10))
 
             val minutes = progress / 60000
             val seconds = (progress / 1000) % 60
@@ -174,28 +170,45 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
             binding.content.seekBar.progress = position
             mediaPlayer.seekTo(position)
         } else if (v == binding.content.toggleSong) {
-            if (songStarts.size == songEnds.size) {
+            if (songRegions.size % 3 == 0) {
                 // New song
                 binding.content.toggleSong.text = "End song"
-                songStarts.add(mediaPlayer.currentPosition)
+                songRegions.add(mediaPlayer.currentPosition.toLong())
             } else {
-                if (mediaPlayer.currentPosition <= songStarts.last()) {
+                if (mediaPlayer.currentPosition <= songRegions.last()) {
                     return
                 }
                 binding.content.toggleSong.text = "Begin song"
-                songEnds.add(mediaPlayer.currentPosition)
-                binding.content.seekBar.highlightRegion(songStarts.last(), songEnds.last())
-                Thread {
-                    val songs = database.songDao().getAllSorted()
-                    runOnUiThread {
-                        SongPickerDialogFragment(songs) { id ->
-                            songIds.add(id)
-                        }.show(supportFragmentManager, "SongPickerDialog")
-                    }
-                }.start()
+                binding.content.seekBar.highlightRegion(songRegions.last().toInt(), mediaPlayer.currentPosition)
+                songRegions.add(mediaPlayer.currentPosition.toLong())
+                runSongSelector()
             }
         } else if (v == binding.content.save) {
+            if(songRegions.size == 0 || songRegions.size % 3 != 0) {
+                // TODO: error alert
+            } else {
+                val intent = Intent(this, SplitterService::class.java)
+                intent.putExtra("id", rehearsalId)
+                intent.putExtra("file", "${filesDir.absolutePath}/recordings/$fileName")
+                intent.putExtra("regions", songRegions)
+                startForegroundService(intent)
+
+                finish()
+            }
         }
+    }
+
+    private fun runSongSelector() {
+        savedCurrentPlayingStatus = mediaPlayer.isPlaying
+        if(savedCurrentPlayingStatus) {
+            mediaPlayer.pause()
+        }
+        Thread {
+            val songs = database.songDao().getAllSorted()
+            runOnUiThread {
+                SongPickerDialogFragment(ArrayList(songs)).show(supportFragmentManager, "SongPickerDialog")
+            }
+        }.start()
     }
 
     override fun onStartTrackingTouch(seekBar: SeekBar?) {}
@@ -226,10 +239,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         outState.putBoolean(PLAYING, mediaPlayer.isPlaying)
         outState.putInt(SEEK, mediaPlayer.currentPosition)
 
-        outState.putInt(SONG_COUNT, songIds.size)
-        outState.putLongArray(SONG_IDS, songIds.toLongArray())
-        outState.putIntegerArrayList(SONG_STARTS, songStarts)
-        outState.putIntegerArrayList(SONG_ENDS, songEnds)
+        outState.putLongArray(SONG_REGIONS, songRegions.toLongArray())
 
         super.onSaveInstanceState(outState)
     }

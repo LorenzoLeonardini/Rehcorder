@@ -1,4 +1,4 @@
-package dev.leonardini.rehcorder
+package dev.leonardini.rehcorder.services
 
 import android.app.*
 import android.content.Context
@@ -8,21 +8,24 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.arthenica.ffmpegkit.*
+import dev.leonardini.rehcorder.R
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
 import java.io.File
 import java.util.*
+import kotlin.collections.ArrayList
 
-class NormalizerService : Service(), FFmpegSessionCompleteCallback, LogCallback,
+class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
     StatisticsCallback {
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
 
-    private var queue: Queue<Pair<Long, String>> = LinkedList()
+    private var queue: Queue<Triple<Long, String, ArrayList<Long>>> = LinkedList()
     private var running: Boolean = false
     private var currentId: Long = -1L
     private var currentFile: String = ""
+    private var currentRegions: Queue<Triple<Long, Long, Long>> = LinkedList()
 
     private fun requestForeground() {
         val nm: NotificationManager =
@@ -37,26 +40,35 @@ class NormalizerService : Service(), FFmpegSessionCompleteCallback, LogCallback,
         }
 
         val notification = NotificationCompat.Builder(this, "dev.leonardini.rehcorder")
-            .setContentTitle("Normalizing audio...")
+            .setContentTitle("Splitting audio...")
             .setSmallIcon(R.drawable.ic_mic)
-            .setContentText("Audio is being normalized in the background")
+            .setContentText("Audio is being split into tracks in the background")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
             .build()
 
-        startForeground(31337, notification)
+        startForeground(42, notification)
     }
 
     private fun start() {
-        val (id, fileName) = queue.poll() ?: return
-        currentId = id
-        currentFile = fileName
+        if (currentRegions.size == 0) {
+            val (id, fileName, regions) = queue.poll() ?: return
+            currentId = id
+            currentFile = fileName
+            for (i in 0 until regions.size / 3) {
+                currentRegions.add(Triple(regions[i * 3], regions[i * 3 + 1], regions[i * 3 + 2]))
+            }
+        }
+        val (start, end, id) = currentRegions.poll() ?: return
+        val startSeek = start / 1000f
+        val endSeek = (end - start) / 1000f
 
         running = true
-        Log.i("Normalizer", "Normalizing $fileName")
+        Log.i("Splitter", "Splitting $currentFile for song id $id")
+        Log.i("Splitter", "Splitting into ${filesDir.absolutePath}/songs/$id.aac")
         FFmpegKit.executeAsync(
-            "-y -i $fileName -af loudnorm ${filesDir.absolutePath}/tmp.aac",
+            "-y -ss $startSeek -to $endSeek -i $currentFile ${filesDir.absolutePath}/songs/$id.aac",
             this,
             this,
             this
@@ -75,7 +87,12 @@ class NormalizerService : Service(), FFmpegSessionCompleteCallback, LogCallback,
             throw IllegalArgumentException("Missing id in start service intent")
         }
         val file = intent.getStringExtra("file")!!
-        queue.add(Pair(id, file))
+        val regions = intent.getSerializableExtra("regions") as ArrayList<Long>
+        Thread {
+            Database.getInstance(applicationContext).rehearsalDao()
+                .updateStatus(id, Rehearsal.PROCESSING)
+        }.start()
+        queue.add(Triple(id, file, regions))
         if (!running) {
             start()
         }
@@ -86,12 +103,13 @@ class NormalizerService : Service(), FFmpegSessionCompleteCallback, LogCallback,
     // End callback
     override fun apply(session: FFmpegSession?) {
         // TODO: should probably check exit code, but we've seen it's not really relevant
-        val file = File("${filesDir.absolutePath}/tmp.aac")
-        file.renameTo(File(currentFile))
-        Database.getInstance(applicationContext).rehearsalDao()
-            .updateStatus(currentId, Rehearsal.NORMALIZED)
-
-        if (queue.size == 0) {
+        if (currentRegions.size == 0) {
+            Thread {
+                Database.getInstance(applicationContext).rehearsalDao()
+                    .updateStatus(currentId, Rehearsal.PROCESSED)
+            }.start()
+        }
+        if (queue.size == 0 && currentRegions.size == 0) {
             stopSelf()
         } else {
             start()

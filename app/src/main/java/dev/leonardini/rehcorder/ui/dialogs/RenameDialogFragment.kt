@@ -1,0 +1,66 @@
+package dev.leonardini.rehcorder.ui.dialogs
+
+import android.app.Dialog
+import android.content.DialogInterface
+import android.os.Bundle
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import androidx.appcompat.app.AppCompatDialogFragment
+import androidx.fragment.app.setFragmentResult
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
+import dev.leonardini.rehcorder.R
+
+class RenameDialogFragment(
+    private val rehearsalId: Long,
+    private val currentName: String?,
+    private val hintString: Int
+) : AppCompatDialogFragment(), DialogInterface.OnClickListener {
+
+    private lateinit var v: View
+    private var _rehearsalId: Long = -1
+    private var _currentName: String? = null
+    private var _hintString: Int = -1
+
+    constructor() : this(-1, null, -1)
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        _rehearsalId = savedInstanceState?.getLong("rehearsalId") ?: rehearsalId
+        _currentName = savedInstanceState?.getString("currentName") ?: currentName
+        _hintString = savedInstanceState?.getInt("hintString") ?: hintString
+
+        v = LayoutInflater.from(activity).inflate(R.layout.dialog_rename, null)
+        v.findViewById<TextInputEditText>(R.id.text_field_input).setText(_currentName ?: "")
+        v.findViewById<TextInputLayout>(R.id.text_field).setHint(_hintString)
+
+        return MaterialAlertDialogBuilder(requireContext(), theme)
+            .setTitle(R.string.rename)
+            .setPositiveButton(R.string.save, this)
+            .setNegativeButton(R.string.cancel, null)
+            .setView(v)
+            .create()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putLong("rehearsalId", _rehearsalId)
+        outState.putString(
+            "currentName",
+            v.findViewById<TextInputEditText>(R.id.text_field_input).text.toString().trim()
+        )
+        outState.putInt("hintString", _hintString)
+    }
+
+    override fun onClick(dialog: DialogInterface?, which: Int) {
+        val bundle = Bundle()
+        bundle.putLong("id", _rehearsalId)
+        bundle.putString(
+            "name",
+            v.findViewById<TextInputEditText>(R.id.text_field_input).text.toString().trim()
+        )
+        Log.i("Test", tag ?: this::class.simpleName!!)
+        activity!!.supportFragmentManager.setFragmentResult(tag ?: this::class.simpleName!!, bundle)
+    }
+}

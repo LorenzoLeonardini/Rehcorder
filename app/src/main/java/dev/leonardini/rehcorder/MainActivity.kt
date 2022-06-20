@@ -12,6 +12,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.get
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -21,7 +22,8 @@ import dev.leonardini.rehcorder.databinding.ActivityMainBinding
 import dev.leonardini.rehcorder.db.AppDatabase
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
-import dev.leonardini.rehcorder.utils.MaterialInfoDialogFragment
+import dev.leonardini.rehcorder.services.RecorderService
+import dev.leonardini.rehcorder.ui.dialogs.MaterialInfoDialogFragment
 import java.io.File
 import java.time.Instant
 
@@ -108,12 +110,9 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
             MaterialInfoDialogFragment(
                 R.string.permission_required_title,
                 R.string.permission_required
-            ) { _, _ ->
-                run {
-                    binding.fab.setImageResource(R.drawable.ic_record)
-                    recording = false
-                }
-            }.show(supportFragmentManager, PERMISSION_DIALOG_TAG)
+            ).show(supportFragmentManager, PERMISSION_DIALOG_TAG)
+            binding.fab.setImageResource(R.drawable.ic_record)
+            recording = false
         } else {
             startRecording()
         }
