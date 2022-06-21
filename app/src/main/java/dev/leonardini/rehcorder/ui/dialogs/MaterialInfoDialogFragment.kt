@@ -17,9 +17,12 @@ class MaterialInfoDialogFragment(
     private var _message: Int = -1
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        _title = savedInstanceState?.getInt("title") ?: title
+        _message = savedInstanceState?.getInt("message") ?: message
+
         return MaterialAlertDialogBuilder(requireContext(), theme)
-            .setTitle(title)
-            .setMessage(message)
+            .setTitle(_title)
+            .setMessage(_message)
             .setPositiveButton(android.R.string.ok, this)
             .setCancelable(false)
             .create()
