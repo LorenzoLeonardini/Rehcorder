@@ -4,6 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
@@ -36,6 +38,8 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
     private lateinit var database: AppDatabase
     private lateinit var adapter: RehearsalsAdapter
 
+    private lateinit var activityLauncher :ActivityResultLauncher<Intent>
+
     private var showCard: Boolean = false
     private var inNeedOfProcessingId: Long = -1
     private var inNeedOfProcessingFileName: String = ""
@@ -50,10 +54,22 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
     ): View {
         _binding = FragmentRehearsalsBinding.inflate(inflater, container, false)
 
-        activity!!.supportFragmentManager.setFragmentResultListener(RECORDED_DIALOG_TAG, viewLifecycleOwner) { _, _ -> }
-        activity!!.supportFragmentManager.setFragmentResultListener(PROCESSING_DIALOG_TAG, viewLifecycleOwner) { _, _ -> }
-        activity!!.supportFragmentManager.setFragmentResultListener(ERROR_STATE_DIALOG_TAG, viewLifecycleOwner) { _, _ -> }
-        activity!!.supportFragmentManager.setFragmentResultListener(RENAME_DIALOG_TAG, viewLifecycleOwner) { _, bundle ->
+        activity!!.supportFragmentManager.setFragmentResultListener(
+            RECORDED_DIALOG_TAG,
+            viewLifecycleOwner
+        ) { _, _ -> }
+        activity!!.supportFragmentManager.setFragmentResultListener(
+            PROCESSING_DIALOG_TAG,
+            viewLifecycleOwner
+        ) { _, _ -> }
+        activity!!.supportFragmentManager.setFragmentResultListener(
+            ERROR_STATE_DIALOG_TAG,
+            viewLifecycleOwner
+        ) { _, _ -> }
+        activity!!.supportFragmentManager.setFragmentResultListener(
+            RENAME_DIALOG_TAG,
+            viewLifecycleOwner
+        ) { _, bundle ->
             Log.i("Test", "Received rename dialog tag")
             val name = bundle.getString("name")
             val id = bundle.getLong("id")
@@ -62,6 +78,12 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
                 updateDbData()
             }.start()
 
+        }
+
+        activityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            Thread {
+                updateDbData()
+            }.start()
         }
 
         return binding.root
@@ -159,7 +181,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
                         val intent = Intent(context, ProcessActivity::class.java)
                         intent.putExtra("fileName", holder.fileName)
                         intent.putExtra("rehearsalId", holder.id)
-                        startActivity(intent)
+                        activityLauncher.launch(intent)
                     }
                     Rehearsal.PROCESSING -> {
                         MaterialInfoDialogFragment(
@@ -191,6 +213,6 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
         val intent = Intent(context, ProcessActivity::class.java)
         intent.putExtra("fileName", inNeedOfProcessingFileName)
         intent.putExtra("rehearsalId", inNeedOfProcessingId)
-        startActivity(intent)
+        activityLauncher.launch(intent)
     }
 }

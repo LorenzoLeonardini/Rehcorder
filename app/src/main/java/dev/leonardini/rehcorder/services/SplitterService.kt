@@ -92,10 +92,6 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
         }
         val file = intent.getStringExtra("file")!!
         val regions = intent.getSerializableExtra("regions") as ArrayList<Long>
-        Thread {
-            Database.getInstance(applicationContext).rehearsalDao()
-                .updateStatus(id, Rehearsal.PROCESSING)
-        }.start()
         queue.add(Triple(id, file, regions))
         if (!running) {
             start()

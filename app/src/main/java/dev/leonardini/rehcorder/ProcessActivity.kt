@@ -17,6 +17,7 @@ import androidx.navigation.ui.navigateUp
 import dev.leonardini.rehcorder.databinding.ActivityProcessBinding
 import dev.leonardini.rehcorder.db.AppDatabase
 import dev.leonardini.rehcorder.db.Database
+import dev.leonardini.rehcorder.db.Rehearsal
 import dev.leonardini.rehcorder.services.SplitterService
 import dev.leonardini.rehcorder.ui.dialogs.SongPickerDialogFragment
 import kotlin.math.floor
@@ -40,10 +41,10 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
     private lateinit var audioManager: AudioManager
     private lateinit var mediaPlayer: MediaPlayer
     private var stopped: Boolean = false
-    private var savedCurrentPlayingStatus :Boolean = false
+    private var savedCurrentPlayingStatus: Boolean = false
 
     // triplets of ints indicating start,end,songId
-    private lateinit var songRegions :ArrayList<Long>
+    private lateinit var songRegions: ArrayList<Long>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -104,12 +105,15 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
 
         if (songRegions.size % 3 == 1) {
             binding.content.toggleSong.text = "End song"
-        } else if(songRegions.size % 3 == 2) {
-            runSongSelector()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+        } else if (songRegions.size % 3 == 2) {
+            runSongSelector()
         }
 
         for (i in 0 until floor(songRegions.size / 3.0).toInt()) {
-            binding.content.seekBar.highlightRegion(songRegions[i * 3].toInt(), songRegions[i * 3 + 1].toInt())
+            binding.content.seekBar.highlightRegion(
+                songRegions[i * 3].toInt(),
+                songRegions[i * 3 + 1].toInt()
+            )
         }
 
         runOnUiThread(this)
@@ -120,7 +124,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         supportFragmentManager.setFragmentResultListener("SongPickerDialog", this) { _, bundle ->
             val id = bundle.getLong("id")!!
             songRegions.add(id)
-            if(savedCurrentPlayingStatus) {
+            if (savedCurrentPlayingStatus) {
                 mediaPlayer.start()
             }
         }
@@ -179,34 +183,46 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
                     return
                 }
                 binding.content.toggleSong.text = "Begin song"
-                binding.content.seekBar.highlightRegion(songRegions.last().toInt(), mediaPlayer.currentPosition)
+                binding.content.seekBar.highlightRegion(
+                    songRegions.last().toInt(),
+                    mediaPlayer.currentPosition
+                )
                 songRegions.add(mediaPlayer.currentPosition.toLong())
                 runSongSelector()
             }
         } else if (v == binding.content.save) {
-            if(songRegions.size == 0 || songRegions.size % 3 != 0) {
+            if (songRegions.size == 0 || songRegions.size % 3 != 0) {
                 // TODO: error alert
             } else {
                 val intent = Intent(this, SplitterService::class.java)
                 intent.putExtra("id", rehearsalId)
                 intent.putExtra("file", "${filesDir.absolutePath}/recordings/$fileName")
                 intent.putExtra("regions", songRegions)
-                startForegroundService(intent)
 
-                finish()
+                Thread {
+                    Database.getInstance(applicationContext).rehearsalDao()
+                        .updateStatus(rehearsalId, Rehearsal.PROCESSING)
+                    runOnUiThread {
+                        startForegroundService(intent)
+                        finish()
+                    }
+                }.start()
             }
         }
     }
 
     private fun runSongSelector() {
         savedCurrentPlayingStatus = mediaPlayer.isPlaying
-        if(savedCurrentPlayingStatus) {
+        if (savedCurrentPlayingStatus) {
             mediaPlayer.pause()
         }
         Thread {
             val songs = database.songDao().getAllSorted()
             runOnUiThread {
-                SongPickerDialogFragment(ArrayList(songs)).show(supportFragmentManager, "SongPickerDialog")
+                SongPickerDialogFragment(ArrayList(songs)).show(
+                    supportFragmentManager,
+                    "SongPickerDialog"
+                )
             }
         }.start()
     }
