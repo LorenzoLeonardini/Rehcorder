@@ -59,6 +59,9 @@ class SongNameDialogFragment : AppCompatDialogFragment(), DialogInterface.OnClic
             "name",
             v.findViewById<TextInputEditText>(R.id.text_field_input).text.toString().trim()
         )
-        activity!!.supportFragmentManager.setFragmentResult(tag ?: this::class.simpleName!!, bundle)
+        requireActivity().supportFragmentManager.setFragmentResult(
+            tag ?: this::class.simpleName!!,
+            bundle
+        )
     }
 }

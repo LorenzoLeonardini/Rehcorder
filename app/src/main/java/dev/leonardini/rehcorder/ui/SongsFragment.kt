@@ -62,7 +62,7 @@ class SongsFragment : Fragment(), SongsAdapter.OnSongEditClickListener,
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
         adapter = SongsAdapter(this, this, this, null)
         Thread {
-            database = Database.getInstance(context!!)
+            database = Database.getInstance(requireContext())
             updateDbData()
         }.start()
         binding.recyclerView.adapter = adapter
@@ -91,11 +91,14 @@ class SongsFragment : Fragment(), SongsAdapter.OnSongEditClickListener,
 
     override fun onItemClicked(holder: SongsAdapter.SongViewHolder) {
         // SHARING
-        Log.i("Share", "Sharing \"${context!!.filesDir.absolutePath}/songs/${holder.id}.aac\"")
+        Log.i(
+            "Share",
+            "Sharing \"${requireContext().filesDir.absolutePath}/songs/${holder.id}.aac\""
+        )
         val uri = FileProvider.getUriForFile(
-            context!!,
-            "${context!!.applicationContext.packageName}.provider",
-            File("${context!!.filesDir.absolutePath}/songs/${holder.id}.aac")
+            requireContext(),
+            "${requireContext().applicationContext.packageName}.provider",
+            File("${requireContext().filesDir.absolutePath}/songs/${holder.id}.aac")
         )
         val builder = ShareCompat.IntentBuilder(activity as AppCompatActivity)
         builder.addStream(uri)
@@ -103,7 +106,7 @@ class SongsFragment : Fragment(), SongsAdapter.OnSongEditClickListener,
         builder.startChooser()
 //        Thread {
 //            val status = database.rehearsalDao().getRehearsal(holder.id)?.status
-//            activity!!.runOnUiThread {
+//            requireActivity().runOnUiThread {
 //                when (status) {
 //                    Rehearsal.RECORDED -> {
 //                        MaterialInfoDialogFragment(

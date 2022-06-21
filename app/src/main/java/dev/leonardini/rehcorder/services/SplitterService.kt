@@ -45,14 +45,17 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
             nm.createNotificationChannel(channel)
         }
 
-        val notification = NotificationCompat.Builder(this, "dev.leonardini.rehcorder")
+        var notificationBuilder = NotificationCompat.Builder(this, "dev.leonardini.rehcorder")
             .setContentTitle("Splitting audio...")
             .setSmallIcon(R.drawable.ic_mic)
             .setContentText("Audio is being split into tracks in the background")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
-            .setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
-            .build()
+        if (Build.VERSION.SDK_INT >= 31) {
+            notificationBuilder =
+                notificationBuilder.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
+        }
+        val notification = notificationBuilder.build()
 
         startForeground(42, notification)
     }

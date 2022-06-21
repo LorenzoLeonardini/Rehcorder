@@ -21,10 +21,10 @@ class SongPickerDialogFragment(
     private lateinit var _adapter: ArrayAdapter<Song>
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        songs.add(0, Song(context!!.getString(R.string.s_picker_new_song)))
+        songs.add(0, Song(requireContext().getString(R.string.s_picker_new_song)))
         _songs = savedInstanceState?.getParcelableArrayList<Song>("songs") ?: songs
         _adapter = ArrayAdapter(
-            context!!,
+            requireContext(),
             R.layout.autocomplete_list_item,
             _songs
         )
@@ -52,7 +52,7 @@ class SongPickerDialogFragment(
         } else {
             val bundle = Bundle()
             bundle.putLong("id", _adapter.getItem(which)!!.uid)
-            activity!!.supportFragmentManager.setFragmentResult(
+            requireActivity().supportFragmentManager.setFragmentResult(
                 tag ?: this::class.simpleName!!,
                 bundle
             )

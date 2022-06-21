@@ -3,15 +3,18 @@ package dev.leonardini.rehcorder
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.get
+import androidx.core.view.marginBottom
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -23,7 +26,6 @@ import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
 import dev.leonardini.rehcorder.services.RecorderService
 import dev.leonardini.rehcorder.ui.dialogs.MaterialInfoDialogFragment
-import java.time.Instant
 
 class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedListener,
     NavigationBarView.OnItemSelectedListener, View.OnClickListener {
@@ -63,6 +65,13 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
         bottomNavigation.setOnItemSelectedListener(this)
 
         binding.fab.setOnClickListener(this)
+        val fabMargin = binding.fab.marginBottom
+        binding.fab.setOnApplyWindowInsetsListener { v, insets ->
+            (v.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin =
+                fabMargin + insets.systemWindowInsetBottom
+            v.requestLayout()
+            insets
+        }
 
         database = Database.getInstance(applicationContext)
 
@@ -127,7 +136,7 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
 
         recording = true
 
-        val timestamp = Instant.now().epochSecond
+        val timestamp = System.currentTimeMillis() / 1000
         val fileName = "$timestamp.aac"
         Thread {
             val id = database.rehearsalDao().insert(
@@ -142,14 +151,22 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
             intent.action = "RECORD"
             intent.putExtra("id", id)
             intent.putExtra("file", "${filesDir.absolutePath}/recordings/$fileName")
-            startForegroundService(intent)
+            if (Build.VERSION.SDK_INT >= 26) {
+                startForegroundService(intent)
+            } else {
+                startService(intent)
+            }
         }.start()
     }
 
     private fun stopRecording() {
         val intent = Intent(this, RecorderService::class.java)
         intent.action = "STOP"
-        startForegroundService(intent)
+        if (Build.VERSION.SDK_INT >= 26) {
+            startForegroundService(intent)
+        } else {
+            startService(intent)
+        }
 
         binding.fab.setImageResource(R.drawable.ic_record)
         recording = false

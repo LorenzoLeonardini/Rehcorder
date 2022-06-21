@@ -38,7 +38,10 @@ class MaterialDialogFragment(
     override fun onClick(dialog: DialogInterface?, which: Int) {
         val bundle = Bundle()
         bundle.putInt("which", which)
-        activity!!.supportFragmentManager.setFragmentResult(tag ?: this::class.simpleName!!, bundle)
+        requireActivity().supportFragmentManager.setFragmentResult(
+            tag ?: this::class.simpleName!!,
+            bundle
+        )
     }
 
 }

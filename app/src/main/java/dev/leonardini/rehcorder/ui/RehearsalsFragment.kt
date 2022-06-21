@@ -57,19 +57,19 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
     ): View {
         _binding = FragmentRehearsalsBinding.inflate(inflater, container, false)
 
-        activity!!.supportFragmentManager.setFragmentResultListener(
+        requireActivity().supportFragmentManager.setFragmentResultListener(
             RECORDED_DIALOG_TAG,
             viewLifecycleOwner
         ) { _, _ -> }
-        activity!!.supportFragmentManager.setFragmentResultListener(
+        requireActivity().supportFragmentManager.setFragmentResultListener(
             PROCESSING_DIALOG_TAG,
             viewLifecycleOwner
         ) { _, _ -> }
-        activity!!.supportFragmentManager.setFragmentResultListener(
+        requireActivity().supportFragmentManager.setFragmentResultListener(
             ERROR_STATE_DIALOG_TAG,
             viewLifecycleOwner
         ) { _, _ -> }
-        activity!!.supportFragmentManager.setFragmentResultListener(
+        requireActivity().supportFragmentManager.setFragmentResultListener(
             RENAME_DIALOG_TAG,
             viewLifecycleOwner
         ) { _, bundle ->
@@ -129,7 +129,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
         adapter = RehearsalsAdapter(this, this, this, null)
         Thread {
-            database = Database.getInstance(context!!)
+            database = Database.getInstance(requireContext())
             updateDbData()
         }.start()
         binding.recyclerView.adapter = adapter
@@ -151,7 +151,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
     }
 
     override fun onEdit(id: Long, currentName: String?) {
-        (activity!! as AppCompatActivity).let { activity ->
+        (requireActivity() as AppCompatActivity).let { activity ->
             RenameDialogFragment(
                 id,
                 currentName,
@@ -167,7 +167,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
 
     override fun onItemClicked(holder: RehearsalsAdapter.RehearsalViewHolder) {
         // SHARING
-//        val uri = FileProvider.getUriForFile(context!!, "${context!!.applicationContext.packageName}.provider", File("${context!!.filesDir.absolutePath}/recordings/${holder.fileName}"))
+//        val uri = FileProvider.getUriForFile(requireContext(), "${requireContext().applicationContext.packageName}.provider", File("${requireContext().filesDir.absolutePath}/recordings/${holder.fileName}"))
 //        val builder = ShareCompat.IntentBuilder(activity as AppCompatActivity)
 //        builder.addStream(uri)
 //        builder.setType("audio/*")
@@ -175,7 +175,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
 
         Thread {
             val status = database.rehearsalDao().getRehearsal(holder.id)?.status
-            activity!!.runOnUiThread {
+            requireActivity().runOnUiThread {
                 when (status) {
                     Rehearsal.RECORDED -> {
                         MaterialInfoDialogFragment(

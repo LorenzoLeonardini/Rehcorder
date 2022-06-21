@@ -17,8 +17,6 @@ import dev.leonardini.rehcorder.R
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
 import java.io.File
-import java.nio.file.Files
-import java.nio.file.StandardCopyOption
 import java.util.*
 
 class NormalizerService : Service(), FFmpegSessionCompleteCallback, LogCallback,
@@ -44,14 +42,17 @@ class NormalizerService : Service(), FFmpegSessionCompleteCallback, LogCallback,
             nm.createNotificationChannel(channel)
         }
 
-        val notification = NotificationCompat.Builder(this, "dev.leonardini.rehcorder")
+        var notificationBuilder = NotificationCompat.Builder(this, "dev.leonardini.rehcorder")
             .setContentTitle("Normalizing audio...")
             .setSmallIcon(R.drawable.ic_mic)
             .setContentText("Audio is being normalized in the background")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
-            .setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
-            .build()
+        if (Build.VERSION.SDK_INT >= 31) {
+            notificationBuilder =
+                notificationBuilder.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
+        }
+        val notification = notificationBuilder.build()
 
         startForeground(31337, notification)
     }
@@ -96,7 +97,8 @@ class NormalizerService : Service(), FFmpegSessionCompleteCallback, LogCallback,
         // TODO: should probably check exit code, but we've seen it's not really relevant
         val file = File("${filesDir.absolutePath}/tmp.aac")
         val destinationFile = File(currentFile)
-        Files.move(file.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
+        val result = file.renameTo(destinationFile)
+        Log.i("Normalizer", "Renaming result : $result")
 
         Database.getInstance(applicationContext).rehearsalDao()
             .updateStatus(currentId, Rehearsal.NORMALIZED)

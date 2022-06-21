@@ -60,6 +60,9 @@ class RenameDialogFragment(
             v.findViewById<TextInputEditText>(R.id.text_field_input).text.toString().trim()
         )
         Log.i("Test", tag ?: this::class.simpleName!!)
-        activity!!.supportFragmentManager.setFragmentResult(tag ?: this::class.simpleName!!, bundle)
+        requireActivity().supportFragmentManager.setFragmentResult(
+            tag ?: this::class.simpleName!!,
+            bundle
+        )
     }
 }

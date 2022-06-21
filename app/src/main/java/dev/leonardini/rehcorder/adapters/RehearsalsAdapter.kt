@@ -1,5 +1,6 @@
 package dev.leonardini.rehcorder.adapters
 
+import android.annotation.SuppressLint
 import android.database.Cursor
 import android.view.LayoutInflater
 import android.view.View
@@ -34,6 +35,7 @@ class RehearsalsAdapter(
         }
     }
 
+    @SuppressLint("Range")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, cursor: Cursor, position: Int) {
         val id: Long = cursor.getLong(cursor.getColumnIndex("uid"))
         val name: String? = cursor.getStringOrNull(cursor.getColumnIndex("name"))

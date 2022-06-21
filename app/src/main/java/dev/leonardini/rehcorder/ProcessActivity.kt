@@ -5,6 +5,7 @@ import android.content.Intent
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
+import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.View
@@ -68,7 +69,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         fileName = intent.getStringExtra("fileName")!!
 
         audioManager = applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        audioManager.mode = AudioManager.STREAM_MUSIC
+        audioManager.mode = AudioManager.MODE_NORMAL
 
         mediaPlayer = MediaPlayer()
         mediaPlayer.setDataSource("${filesDir.absolutePath}/recordings/$fileName")
@@ -217,7 +218,11 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
                     Database.getInstance(applicationContext).rehearsalDao()
                         .updateStatus(rehearsalId, Rehearsal.PROCESSING)
                     runOnUiThread {
-                        startForegroundService(intent)
+                        if (Build.VERSION.SDK_INT >= 26) {
+                            startForegroundService(intent)
+                        } else {
+                            startService(intent)
+                        }
                         finish()
                     }
                 }.start()
@@ -250,7 +255,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         stopped = true
         mediaPlayer.stop()
         mediaPlayer.release()
-        audioManager.mode = AudioManager.USE_DEFAULT_STREAM_TYPE
+        audioManager.mode = AudioManager.MODE_NORMAL
         super.onDestroy()
     }
 

@@ -3,6 +3,7 @@ package dev.leonardini.rehcorder.ui
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.os.Build
 import android.util.AttributeSet
 import android.util.TypedValue
 import androidx.appcompat.widget.AppCompatSeekBar
@@ -52,14 +53,18 @@ class HighlightedSeekBar : AppCompatSeekBar {
         super.onDraw(canvas)
         val width = measuredWidth - paddingLeft - paddingRight
         val height = measuredHeight - paddingTop - paddingBottom
-        val top = (height - currentDrawable!!.intrinsicHeight) / 2f
+
+        // This will look horrible
+        val barHeight =
+            if (Build.VERSION.SDK_INT >= 29) currentDrawable!!.intrinsicHeight else (height / 4)
+        val top = (height - barHeight) / 2f
 
         for (region in regions) {
             canvas?.drawRect(
                 paddingLeft + region.first * width,
                 top,
                 paddingLeft + region.second * width,
-                top + currentDrawable!!.intrinsicHeight.toFloat(),
+                top + barHeight.toFloat(),
                 paint
             )
         }

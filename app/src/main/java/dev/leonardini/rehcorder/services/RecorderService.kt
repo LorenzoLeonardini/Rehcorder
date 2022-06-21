@@ -36,7 +36,7 @@ class RecorderService : Service() {
         }
 
         val audioManager: AudioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        return if (audioManager.getProperty(AudioManager.PROPERTY_SUPPORT_AUDIO_SOURCE_UNPROCESSED) != null) {
+        return if (Build.VERSION.SDK_INT >= 24 && audioManager.getProperty(AudioManager.PROPERTY_SUPPORT_AUDIO_SOURCE_UNPROCESSED) != null) {
             Log.i("Recorder", "Using unprocessed mic")
             MediaRecorder.AudioSource.UNPROCESSED
         } else {
@@ -59,17 +59,25 @@ class RecorderService : Service() {
 
         val int = Intent(this, MainActivity::class.java)
         int.putExtra("Recording", true)
-        val pendingIntent = PendingIntent.getActivity(this, 0, int, PendingIntent.FLAG_IMMUTABLE)
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            int,
+            if (Build.VERSION.SDK_INT >= 23) PendingIntent.FLAG_IMMUTABLE else 0
+        )
 
-        val notification = NotificationCompat.Builder(this, "dev.leonardini.rehcorder")
+        var notificationBuilder = NotificationCompat.Builder(this, "dev.leonardini.rehcorder")
             .setContentTitle("Rehearsal is being recorded")
             .setSmallIcon(R.drawable.ic_mic)
             .setContentText("Tap to return to the application")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setContentIntent(pendingIntent)
-            .setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
-            .build()
+        if (Build.VERSION.SDK_INT >= 31) {
+            notificationBuilder =
+                notificationBuilder.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
+        }
+        val notification = notificationBuilder.build()
 
         startForeground(1337, notification)
     }
@@ -79,22 +87,26 @@ class RecorderService : Service() {
         if (!folder.exists())
             folder.mkdirs()
 
-        recorder = MediaRecorder(applicationContext).apply {
-            setAudioSource(getBestAudioSource())
-            setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS)
-            setOutputFile(fileName)
-            setAudioSamplingRate(44100)
-            setAudioEncodingBitRate(192000)
-            setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+        recorder =
+            (if (Build.VERSION.SDK_INT >= 31)
+                MediaRecorder(applicationContext)
+            else
+                MediaRecorder()).apply {
+                setAudioSource(getBestAudioSource())
+                setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS)
+                setOutputFile(fileName)
+                setAudioSamplingRate(44100)
+                setAudioEncodingBitRate(192000)
+                setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
 
-            try {
-                prepare()
-            } catch (e: IOException) {
-                Log.e("Recorder", "prepare() failed")
+                try {
+                    prepare()
+                } catch (e: IOException) {
+                    Log.e("Recorder", "prepare() failed")
+                }
+
+                start()
             }
-
-            start()
-        }
     }
 
     private fun stopRecording() {
@@ -113,7 +125,11 @@ class RecorderService : Service() {
         val intent = Intent(this, NormalizerService::class.java)
         intent.putExtra("id", id)
         intent.putExtra("file", fileName)
-        startForegroundService(intent)
+        if (Build.VERSION.SDK_INT >= 26) {
+            startForegroundService(intent)
+        } else {
+            startService(intent)
+        }
 
         stopSelf()
     }
