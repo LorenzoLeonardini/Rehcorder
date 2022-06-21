@@ -18,6 +18,7 @@ import dev.leonardini.rehcorder.databinding.ActivityProcessBinding
 import dev.leonardini.rehcorder.db.AppDatabase
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
+import dev.leonardini.rehcorder.db.Song
 import dev.leonardini.rehcorder.services.SplitterService
 import dev.leonardini.rehcorder.ui.dialogs.SongPickerDialogFragment
 import kotlin.math.floor
@@ -127,6 +128,16 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
             if (savedCurrentPlayingStatus) {
                 mediaPlayer.start()
             }
+        }
+        supportFragmentManager.setFragmentResultListener("NewSongNameDialog", this) { _, bundle ->
+            val name = bundle.getString("name")
+            Thread {
+                val song = Song(name!!)
+                song.uid = database.songDao().insert(song)
+                runOnUiThread {
+                    songRegions.add(song.uid)
+                }
+            }.start()
         }
     }
 

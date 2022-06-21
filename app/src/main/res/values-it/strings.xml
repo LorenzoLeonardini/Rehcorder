@@ -46,9 +46,7 @@
     <string name="dialog_error_state_message">La registrazione si trova in uno stato non definito.</string>
 
     <string name="s_picker_title">Seleziona brano</string>
-    <string name="s_picker_song_name">Brano</string>
-    <string name="s_picker_no_song">Nessun brano disponibile</string>
-    <string name="s_picker_new_song">Nuovo brano</string>
+    <string name="s_picker_new_song">+ Nuovo brano</string>
     <string name="s_new_title">Nuovo brano</string>
     <string name="s_new_song_name">Nome brano</string>
     <string name="s_new_add">Aggiungi</string>

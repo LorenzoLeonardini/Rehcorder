@@ -46,12 +46,9 @@
     <string name="dialog_error_state_message">The recording is currently in an inconsistent state.</string>
 
     <string name="s_picker_title">Pick song</string>
-    <string name="s_picker_song_name">Song</string>
-    <string name="s_picker_no_song">No song yet</string>
-    <string name="s_picker_new_song">New song</string>
+    <string name="s_picker_new_song">+ New song</string>
     <string name="s_new_title">New song</string>
     <string name="s_new_song_name">Song name</string>
     <string name="s_new_add">Add</string>
-    <string name="title_activity_test">TestActivity</string>
 
 </resources>
