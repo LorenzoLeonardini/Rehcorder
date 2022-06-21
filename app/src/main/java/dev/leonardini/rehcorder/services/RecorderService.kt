@@ -104,21 +104,17 @@ class RecorderService : Service() {
         }
         recorder = null
 
-        if (!unprocessedMicrophone) {
-            Thread {
-                Database.getInstance(applicationContext).rehearsalDao()
-                    .updateStatus(id, Rehearsal.NORMALIZED)
-            }.start()
-        } else {
-            Thread {
-                Database.getInstance(applicationContext).rehearsalDao()
-                    .updateStatus(id, Rehearsal.RECORDED)
-            }.start()
-            val intent = Intent(this, NormalizerService::class.java)
-            intent.putExtra("id", id)
-            intent.putExtra("file", "${filesDir.absolutePath}/recordings/$fileName")
-            startForegroundService(intent)
-        }
+        // Normalizing everything, even processed microphone in order to improve
+        // and compress audio (ffmpeg chooses the best sample rate)
+        Thread {
+            Database.getInstance(applicationContext).rehearsalDao()
+                .updateStatus(id, Rehearsal.RECORDED)
+        }.start()
+        val intent = Intent(this, NormalizerService::class.java)
+        intent.putExtra("id", id)
+        intent.putExtra("file", fileName)
+        startForegroundService(intent)
+
         stopSelf()
     }
 

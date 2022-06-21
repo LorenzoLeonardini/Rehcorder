@@ -15,6 +15,8 @@ import dev.leonardini.rehcorder.R
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import java.util.*
 
 class NormalizerService : Service(), FFmpegSessionCompleteCallback, LogCallback,
@@ -60,7 +62,7 @@ class NormalizerService : Service(), FFmpegSessionCompleteCallback, LogCallback,
         running = true
         Log.i("Normalizer", "Normalizing $fileName")
         FFmpegKit.executeAsync(
-            "-y -i $fileName -af loudnorm ${filesDir.absolutePath}/tmp.aac",
+            "-y -i $fileName -af loudnorm -ar 44100 ${filesDir.absolutePath}/tmp.aac",
             this,
             this,
             this
@@ -91,7 +93,9 @@ class NormalizerService : Service(), FFmpegSessionCompleteCallback, LogCallback,
     override fun apply(session: FFmpegSession?) {
         // TODO: should probably check exit code, but we've seen it's not really relevant
         val file = File("${filesDir.absolutePath}/tmp.aac")
-        file.renameTo(File(currentFile))
+        val destinationFile = File(currentFile)
+        Files.move(file.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
+
         Database.getInstance(applicationContext).rehearsalDao()
             .updateStatus(currentId, Rehearsal.NORMALIZED)
 
