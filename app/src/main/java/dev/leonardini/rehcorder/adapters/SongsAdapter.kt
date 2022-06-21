@@ -34,12 +34,13 @@ class SongsAdapter(
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, cursor: Cursor, position: Int) {
         val id: Long = cursor.getLong(cursor.getColumnIndex("uid"))
         val name: String = cursor.getString(cursor.getColumnIndex("name"))
+        val versionsCount: Int = cursor.getInt(cursor.getColumnIndex("versions_count"))
 
         (holder as SongViewHolder).let { holder ->
             holder.id = id
             holder.name = name
             holder.binding.songTitle.text = name
-            holder.binding.songVersions.text = "0 Versions"
+            holder.binding.songVersions.text = versionsCount.toString() + " Versions"
             holder.binding.divider.visibility =
                 if (position != itemCount - 2) View.VISIBLE else View.INVISIBLE
         }

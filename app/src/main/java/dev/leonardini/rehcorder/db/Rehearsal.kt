@@ -24,9 +24,6 @@ data class Rehearsal(
     @ColumnInfo(name = "name")
     var name: String? = null
 
-    @ColumnInfo(name = "songs_count", defaultValue = "0")
-    var songsCount: Int = 0
-
     @ColumnInfo(name = "status", defaultValue = CREATED.toString())
     var status: Int = CREATED
 }

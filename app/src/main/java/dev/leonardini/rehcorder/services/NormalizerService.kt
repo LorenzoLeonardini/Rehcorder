@@ -7,7 +7,9 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.arthenica.ffmpegkit.*
@@ -99,10 +101,12 @@ class NormalizerService : Service(), FFmpegSessionCompleteCallback, LogCallback,
         Database.getInstance(applicationContext).rehearsalDao()
             .updateStatus(currentId, Rehearsal.NORMALIZED)
 
-        if (queue.size == 0) {
-            stopSelf()
-        } else {
-            start()
+        Handler(Looper.getMainLooper()).post {
+            if (queue.size == 0) {
+                stopSelf()
+            } else {
+                start()
+            }
         }
     }
 

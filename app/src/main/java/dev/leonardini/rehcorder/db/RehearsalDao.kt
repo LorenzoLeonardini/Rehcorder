@@ -12,7 +12,10 @@ interface RehearsalDao {
     @Query("SELECT * FROM rehearsal ORDER BY date DESC")
     fun getAll(): List<Rehearsal>
 
-    @Query("SELECT * FROM rehearsal ORDER BY date DESC")
+    @Query("SELECT rehearsal.*, COUNT(song_recording.uid) AS songs_count FROM rehearsal " +
+            "LEFT JOIN song_recording ON rehearsal.uid=song_recording.recording_id " +
+            "GROUP BY rehearsal.uid, name, status, date, rehearsal.file_name, external_storage " +
+            "ORDER BY date DESC")
     fun getAllCursor(): Cursor
 
     @Query("SELECT * FROM rehearsal WHERE status = ${Rehearsal.NORMALIZED} LIMIT 1")
@@ -32,5 +35,4 @@ interface RehearsalDao {
 
     @Query("UPDATE rehearsal SET status=:status WHERE uid=:id")
     fun updateStatus(id: Long, status: Int)
-
 }

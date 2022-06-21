@@ -7,13 +7,16 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.arthenica.ffmpegkit.*
 import dev.leonardini.rehcorder.R
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
+import dev.leonardini.rehcorder.db.SongRecording
 import java.io.File
 import java.util.*
 
@@ -26,8 +29,9 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
     private var queue: Queue<Triple<Long, String, ArrayList<Long>>> = LinkedList()
     private var running: Boolean = false
     private var currentId: Long = -1L
-    private var currentFile: String = ""
+    private var currentRehearsalFile: String = ""
     private var currentRegions: Queue<Triple<Long, Long, Long>> = LinkedList()
+    private var currentSongFile :String = ""
 
     private fun requestForeground() {
         val nm: NotificationManager =
@@ -61,7 +65,7 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
         if (currentRegions.size == 0) {
             val (id, fileName, regions) = queue.poll() ?: return
             currentId = id
-            currentFile = fileName
+            currentRehearsalFile = fileName
             for (i in 0 until regions.size / 3) {
                 currentRegions.add(Triple(regions[i * 3], regions[i * 3 + 1], regions[i * 3 + 2]))
             }
@@ -71,14 +75,25 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
         val endSeek = end / 1000f
 
         running = true
-        Log.i("Splitter", "Splitting $currentFile for song id $id")
-        Log.i("Splitter", "Splitting into ${filesDir.absolutePath}/songs/$id.aac")
-        FFmpegKit.executeAsync(
-            "-y -ss $startSeek -to $endSeek -i $currentFile ${filesDir.absolutePath}/songs/$id.aac",
-            this,
-            this,
-            this
-        )
+
+        Thread {
+            Log.i("Splitter", "Splitting $currentRehearsalFile for song id $id")
+
+            val song = Database.getInstance(applicationContext).songDao().getSong(id)!!
+
+            val songRecording = SongRecording(id, currentId, song.name.replace(" ", "_"))
+            songRecording.uid = Database.getInstance(applicationContext).songRecordingDao().insert(songRecording)
+
+            currentSongFile = "${songRecording.fileName}_${songRecording.uid}.aac"
+            Log.i("Splitter", "Splitting into ${filesDir.absolutePath}/songs/$currentSongFile")
+
+            FFmpegKit.executeAsync(
+                "-y -ss $startSeek -to $endSeek -i $currentRehearsalFile ${filesDir.absolutePath}/songs/$currentSongFile",
+                this,
+                this,
+                this
+            )
+        }.start()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -106,15 +121,16 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
     override fun apply(session: FFmpegSession?) {
         // TODO: should probably check exit code, but we've seen it's not really relevant
         if (currentRegions.size == 0) {
-            Thread {
-                Database.getInstance(applicationContext).rehearsalDao()
-                    .updateStatus(currentId, Rehearsal.PROCESSED)
-            }.start()
+            Database.getInstance(applicationContext).rehearsalDao()
+                .updateStatus(currentId, Rehearsal.PROCESSED)
         }
-        if (queue.size == 0 && currentRegions.size == 0) {
-            stopSelf()
-        } else {
-            start()
+
+        Handler(Looper.getMainLooper()).post {
+            if (queue.size == 0 && currentRegions.size == 0) {
+                stopSelf()
+            } else {
+                start()
+            }
         }
     }
 
