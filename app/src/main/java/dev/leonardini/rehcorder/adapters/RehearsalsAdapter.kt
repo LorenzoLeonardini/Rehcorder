@@ -47,6 +47,7 @@ class RehearsalsAdapter(
         (holder as RehearsalViewHolder).let { holder ->
             holder.id = id
             holder.name = name
+            holder.formattedDate = formattedDate
             holder.fileName = fileName
             holder.binding.rehearsalTitle.text = name ?: formattedDate
             holder.binding.rehearsalDate.text = formattedDate
@@ -70,6 +71,7 @@ class RehearsalsAdapter(
         val binding: RehearsalLayoutBinding = RehearsalLayoutBinding.bind(itemView)
         var id: Long = -1
         var name: String? = null
+        var formattedDate: String? = null
         var fileName: String? = null
 
         init {

@@ -61,6 +61,9 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
             return
         }
 
+        binding.toolbar.title =
+            intent.getStringExtra("rehearsalName") ?: intent.getStringExtra("fileName")!!
+
         rehearsalId = intent.getLongExtra("rehearsalId", -1L)
         fileName = intent.getStringExtra("fileName")!!
 

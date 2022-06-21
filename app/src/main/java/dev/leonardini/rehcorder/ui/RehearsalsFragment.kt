@@ -22,6 +22,8 @@ import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
 import dev.leonardini.rehcorder.ui.dialogs.MaterialInfoDialogFragment
 import dev.leonardini.rehcorder.ui.dialogs.RenameDialogFragment
+import java.text.DateFormat
+import java.util.*
 
 class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickListener,
     RehearsalsAdapter.OnHeaderBoundListener, RehearsalsAdapter.OnItemClickListener,
@@ -47,6 +49,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
     private var showCard: Boolean = false
     private var inNeedOfProcessingId: Long = -1
     private var inNeedOfProcessingFileName: String = ""
+    private var inNeedOfProcessingName: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -95,8 +98,13 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
         var newShowCard = false
         if (needProcessing != null) {
             newShowCard = true
+            val formattedDate = "${
+                DateFormat.getDateInstance().format(Date(needProcessing.date * 1000))
+            } - ${DateFormat.getTimeInstance().format(Date(needProcessing.date * 1000))}"
+
             inNeedOfProcessingId = needProcessing.uid
             inNeedOfProcessingFileName = needProcessing.fileName
+            inNeedOfProcessingName = needProcessing.name ?: formattedDate
         }
 
         val cursor = database.rehearsalDao().getAllCursor()
@@ -182,6 +190,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
                         val intent = Intent(context, ProcessActivity::class.java)
                         intent.putExtra("fileName", holder.fileName)
                         intent.putExtra("rehearsalId", holder.id)
+                        intent.putExtra("rehearsalName", holder.name ?: holder.formattedDate)
                         activityLauncher.launch(intent)
                     }
                     Rehearsal.PROCESSING -> {
@@ -214,6 +223,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
         val intent = Intent(context, ProcessActivity::class.java)
         intent.putExtra("fileName", inNeedOfProcessingFileName)
         intent.putExtra("rehearsalId", inNeedOfProcessingId)
+        intent.putExtra("rehearsalName", inNeedOfProcessingName)
         activityLauncher.launch(intent)
     }
 }
