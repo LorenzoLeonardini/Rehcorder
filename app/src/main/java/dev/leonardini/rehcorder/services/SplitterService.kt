@@ -52,6 +52,10 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
     }
 
     private fun start() {
+        val folder = File("${filesDir.absolutePath}/songs/")
+        if (!folder.exists())
+            folder.mkdirs()
+
         if (currentRegions.size == 0) {
             val (id, fileName, regions) = queue.poll() ?: return
             currentId = id
@@ -62,7 +66,7 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
         }
         val (start, end, id) = currentRegions.poll() ?: return
         val startSeek = start / 1000f
-        val endSeek = (end - start) / 1000f
+        val endSeek = end / 1000f
 
         running = true
         Log.i("Splitter", "Splitting $currentFile for song id $id")
@@ -79,7 +83,7 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
         if (intent == null) {
             return START_NOT_STICKY
         }
-        Log.i("Normalizer", "Started service")
+        Log.i("Splitter", "Started service")
 
         requestForeground()
         val id = intent.getLongExtra("id", -1L)

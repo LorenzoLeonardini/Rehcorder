@@ -140,10 +140,6 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
                 )
             )
 
-            val folder = File("${filesDir.absolutePath}/recordings/")
-            if (!folder.exists())
-                folder.mkdirs()
-
             val intent = Intent(this, RecorderService::class.java)
             intent.action = "RECORD"
             intent.putExtra("id", id)
