@@ -13,4 +13,14 @@
         android:key="delete_recording"
         android:summary="@string/s_storage_summary"
         android:title="@string/s_storage_title" />
+
+    <androidx.preference.Preference
+        android:icon="@drawable/ic_info"
+        android:key="about"
+        android:summary="https://leonardini.dev"
+        android:title="@string/s_about">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="https://leonardini.dev" />
+    </androidx.preference.Preference>
 </androidx.preference.PreferenceScreen>

@@ -19,6 +19,7 @@
     <string name="s_mic_summary">Usa, se disponibile, l\'input di microfono senza post processing</string>
     <string name="s_storage_title">Elimina registrazioni processate</string>
     <string name="s_storage_summary">Elimina le registrazioni complete dopo averle processate per risparmiare spazio sul dispositivo</string>
+    <string name="s_about">About</string>
 
     <!-- Recording -->
     <string name="permission_required_title">Permessi necessari</string>
