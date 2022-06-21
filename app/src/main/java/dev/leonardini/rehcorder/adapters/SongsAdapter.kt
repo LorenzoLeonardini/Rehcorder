@@ -4,13 +4,10 @@ import android.database.Cursor
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.database.getStringOrNull
 import androidx.recyclerview.widget.RecyclerView
 import dev.leonardini.rehcorder.R
-import dev.leonardini.rehcorder.databinding.SongLayoutBinding
 import dev.leonardini.rehcorder.databinding.SongHeaderBinding
-import java.text.DateFormat
-import java.util.*
+import dev.leonardini.rehcorder.databinding.SongLayoutBinding
 
 class SongsAdapter(
     private val editElementListener: OnSongEditClickListener,

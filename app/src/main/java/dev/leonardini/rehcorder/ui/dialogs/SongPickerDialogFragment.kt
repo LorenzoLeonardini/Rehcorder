@@ -4,22 +4,11 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
-import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatDialogFragment
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.textfield.MaterialAutoCompleteTextView
-import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
 import dev.leonardini.rehcorder.R
-import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Song
-import dev.leonardini.rehcorder.ui.RehearsalsFragment
 
 class SongPickerDialogFragment(
     private val songs: ArrayList<Song>,

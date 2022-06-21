@@ -3,21 +3,25 @@ package dev.leonardini.rehcorder.ui
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.*
+import android.view.LayoutInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.setFragmentResultListener
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.leonardini.rehcorder.ProcessActivity
 import dev.leonardini.rehcorder.R
 import dev.leonardini.rehcorder.adapters.RehearsalsAdapter
 import dev.leonardini.rehcorder.databinding.FragmentRehearsalsBinding
-import dev.leonardini.rehcorder.db.*
-import dev.leonardini.rehcorder.ui.dialogs.RenameDialogFragment
+import dev.leonardini.rehcorder.db.AppDatabase
+import dev.leonardini.rehcorder.db.Database
+import dev.leonardini.rehcorder.db.Rehearsal
 import dev.leonardini.rehcorder.ui.dialogs.MaterialInfoDialogFragment
+import dev.leonardini.rehcorder.ui.dialogs.RenameDialogFragment
 
 class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickListener,
     RehearsalsAdapter.OnHeaderBoundListener, RehearsalsAdapter.OnItemClickListener,
@@ -38,15 +42,11 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
     private lateinit var database: AppDatabase
     private lateinit var adapter: RehearsalsAdapter
 
-    private lateinit var activityLauncher :ActivityResultLauncher<Intent>
+    private lateinit var activityLauncher: ActivityResultLauncher<Intent>
 
     private var showCard: Boolean = false
     private var inNeedOfProcessingId: Long = -1
     private var inNeedOfProcessingFileName: String = ""
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -80,11 +80,12 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
 
         }
 
-        activityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            Thread {
-                updateDbData()
-            }.start()
-        }
+        activityLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                Thread {
+                    updateDbData()
+                }.start()
+            }
 
         return binding.root
     }

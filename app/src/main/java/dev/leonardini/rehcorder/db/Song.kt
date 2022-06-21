@@ -10,7 +10,7 @@ import kotlinx.android.parcel.Parcelize
 @Entity(tableName = "song")
 data class Song(
     @ColumnInfo(name = "name") var name: String
-) :Parcelable {
+) : Parcelable {
     @PrimaryKey(autoGenerate = true)
     var uid: Long = 0
 

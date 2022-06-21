@@ -123,7 +123,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         database = Database.getInstance(applicationContext)
 
         supportFragmentManager.setFragmentResultListener("SongPickerDialog", this) { _, bundle ->
-            val id = bundle.getLong("id")!!
+            val id = bundle.getLong("id")
             songRegions.add(id)
             if (savedCurrentPlayingStatus) {
                 mediaPlayer.start()

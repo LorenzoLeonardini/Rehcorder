@@ -4,7 +4,6 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import androidx.appcompat.app.AppCompatDialogFragment
@@ -14,7 +13,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import dev.leonardini.rehcorder.R
 
-class SongNameDialogFragment() : AppCompatDialogFragment(), DialogInterface.OnClickListener {
+class SongNameDialogFragment : AppCompatDialogFragment(), DialogInterface.OnClickListener {
 
     private lateinit var v: View
     private var _currentName: String? = null
