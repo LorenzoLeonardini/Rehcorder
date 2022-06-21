@@ -6,13 +6,13 @@ import androidx.room.Insert
 @Dao
 interface SongRecordingDao {
 
-//    @Query("SELECT * FROM song")
+    //    @Query("SELECT * FROM song")
 //    fun getAll(): List<Song>
 //
 //    @Query("SELECT * FROM song ORDER BY name")
 //    fun getAllSorted(): List<Song>
 //
     @Insert
-    fun insert(songRecording: SongRecording) :Long
+    fun insert(songRecording: SongRecording): Long
 
 }

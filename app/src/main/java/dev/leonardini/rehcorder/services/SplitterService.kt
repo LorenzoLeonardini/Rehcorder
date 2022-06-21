@@ -31,7 +31,7 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
     private var currentId: Long = -1L
     private var currentRehearsalFile: String = ""
     private var currentRegions: Queue<Triple<Long, Long, Long>> = LinkedList()
-    private var currentSongFile :String = ""
+    private var currentSongFile: String = ""
 
     private fun requestForeground() {
         val nm: NotificationManager =
@@ -82,7 +82,8 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
             val song = Database.getInstance(applicationContext).songDao().getSong(id)!!
 
             val songRecording = SongRecording(id, currentId, song.name.replace(" ", "_"))
-            songRecording.uid = Database.getInstance(applicationContext).songRecordingDao().insert(songRecording)
+            songRecording.uid =
+                Database.getInstance(applicationContext).songRecordingDao().insert(songRecording)
 
             currentSongFile = "${songRecording.fileName}_${songRecording.uid}.aac"
             Log.i("Splitter", "Splitting into ${filesDir.absolutePath}/songs/$currentSongFile")
