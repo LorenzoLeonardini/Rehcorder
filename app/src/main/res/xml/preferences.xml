@@ -4,21 +4,31 @@
         android:defaultValue="true"
         android:icon="@drawable/ic_mic"
         android:key="unprocessed_microphone"
-        android:summary="@string/s_mic_summary"
-        android:title="@string/s_mic_title" />
+        android:summary="@string/settings_mic_summary"
+        android:title="@string/settings_mic_title" />
 
     <androidx.preference.SwitchPreferenceCompat
         android:defaultValue="true"
         android:icon="@drawable/ic_sd_storage"
         android:key="delete_recording"
-        android:summary="@string/s_storage_summary"
-        android:title="@string/s_storage_title" />
+        android:summary="@string/settings_storage_summary"
+        android:title="@string/settings_storage_title" />
+
+    <androidx.preference.Preference
+        android:icon="@drawable/ic_code"
+        android:key="source_code"
+        android:summary="https://github.com"
+        android:title="@string/settings_source_code">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="https://github.com/LorenzoLeonardini/Rehcorder" />
+    </androidx.preference.Preference>
 
     <androidx.preference.Preference
         android:icon="@drawable/ic_info"
         android:key="about"
         android:summary="https://leonardini.dev"
-        android:title="@string/s_about">
+        android:title="@string/settings_about">
         <intent
             android:action="android.intent.action.VIEW"
             android:data="https://leonardini.dev" />

@@ -15,11 +15,12 @@
     <string name="menu_rehearsals">Rehearsals</string>
 
     <!-- Settings -->
-    <string name="s_mic_title">Unprocessed microphone</string>
-    <string name="s_mic_summary">Use, if available, the cleanest microphone input</string>
-    <string name="s_storage_title">Delete processed recordings</string>
-    <string name="s_storage_summary">Delete full recording after processing to save space</string>
-    <string name="s_about">About</string>
+    <string name="settings_mic_title">Unprocessed microphone</string>
+    <string name="settings_mic_summary">Use, if available, the cleanest microphone input</string>
+    <string name="settings_storage_title">Delete processed recordings</string>
+    <string name="settings_storage_summary">Delete full recording after processing to save space</string>
+    <string name="settings_source_code">Source code</string>
+    <string name="settings_about">About</string>
 
     <!-- Recording -->
     <string name="permission_required_title">Permission required</string>

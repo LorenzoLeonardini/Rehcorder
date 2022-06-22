@@ -20,8 +20,8 @@
             android:layout_column="1"
             android:layout_columnWeight="1"
             android:layout_gravity="center_vertical"
-            android:layout_marginLeft="48dp"
-            android:layout_marginRight="24dp">
+            android:layout_marginStart="48dp"
+            android:layout_marginEnd="24dp">
 
             <GridLayout
                 android:layout_width="match_parent"
@@ -82,8 +82,8 @@
             android:layout_column="2"
             android:layout_columnWeight="1"
             android:layout_gravity="center_vertical"
-            android:layout_marginLeft="24dp"
-            android:layout_marginRight="48dp">
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="48dp">
 
             <GridLayout
                 android:layout_width="wrap_content"
