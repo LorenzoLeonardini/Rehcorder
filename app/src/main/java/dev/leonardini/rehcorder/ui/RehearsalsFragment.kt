@@ -15,6 +15,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.leonardini.rehcorder.ProcessActivity
 import dev.leonardini.rehcorder.R
+import dev.leonardini.rehcorder.RehearsalActivity
 import dev.leonardini.rehcorder.adapters.RehearsalsAdapter
 import dev.leonardini.rehcorder.databinding.FragmentRehearsalsBinding
 import dev.leonardini.rehcorder.db.AppDatabase
@@ -166,13 +167,6 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
     }
 
     override fun onItemClicked(holder: RehearsalsAdapter.RehearsalViewHolder) {
-        // SHARING
-//        val uri = FileProvider.getUriForFile(requireContext(), "${requireContext().applicationContext.packageName}.provider", File("${requireContext().filesDir.absolutePath}/recordings/${holder.fileName}"))
-//        val builder = ShareCompat.IntentBuilder(activity as AppCompatActivity)
-//        builder.addStream(uri)
-//        builder.setType("audio/*")
-//        builder.startChooser()
-
         Thread {
             val status = database.rehearsalDao().getRehearsal(holder.id)?.status
             requireActivity().runOnUiThread {
@@ -203,7 +197,9 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
                         )
                     }
                     Rehearsal.PROCESSED -> {
-                        // todo rehearsal activity
+                        val intent = Intent(requireContext(), RehearsalActivity::class.java)
+                        intent.putExtra("rehearsalId", holder.id)
+                        startActivity(intent)
                     }
                     else -> {
                         MaterialInfoDialogFragment(

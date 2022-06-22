@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "ba2ad9687debdb123066cebaa7c0b9a4",
+    "identityHash": "0cacae748c81ab205a6560957a80eff1",
     "entities": [
       {
         "tableName": "rehearsal",
@@ -83,7 +83,7 @@
       },
       {
         "tableName": "song_recording",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`song_id` INTEGER NOT NULL, `recording_id` INTEGER NOT NULL, `file_name` TEXT NOT NULL, `uid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`song_id` INTEGER NOT NULL, `recording_id` INTEGER NOT NULL, `file_name` TEXT NOT NULL, `uid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `version` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "songId",
@@ -108,6 +108,12 @@
             "columnName": "uid",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "version",
+            "columnName": "version",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -123,7 +129,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ba2ad9687debdb123066cebaa7c0b9a4')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0cacae748c81ab205a6560957a80eff1')"
     ]
   }
 }

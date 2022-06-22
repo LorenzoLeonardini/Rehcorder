@@ -1,23 +1,20 @@
 package dev.leonardini.rehcorder.ui
 
+import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ShareCompat
-import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.leonardini.rehcorder.R
+import dev.leonardini.rehcorder.SongActivity
 import dev.leonardini.rehcorder.adapters.SongsAdapter
 import dev.leonardini.rehcorder.databinding.FragmentSongsBinding
 import dev.leonardini.rehcorder.db.AppDatabase
 import dev.leonardini.rehcorder.db.Database
-import java.io.File
 
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
@@ -90,20 +87,9 @@ class SongsFragment : Fragment(), SongsAdapter.OnSongEditClickListener,
     }
 
     override fun onItemClicked(holder: SongsAdapter.SongViewHolder) {
-        // SHARING
-        Log.i(
-            "Share",
-            "Sharing \"${requireContext().filesDir.absolutePath}/songs/${holder.id}.aac\""
-        )
-        val uri = FileProvider.getUriForFile(
-            requireContext(),
-            "${requireContext().applicationContext.packageName}.provider",
-            File("${requireContext().filesDir.absolutePath}/songs/${holder.id}.aac")
-        )
-        val builder = ShareCompat.IntentBuilder(activity as AppCompatActivity)
-        builder.addStream(uri)
-        builder.setType("audio/*")
-        builder.startChooser()
+        val intent = Intent(requireContext(), SongActivity::class.java)
+        intent.putExtra("songId", holder.id)
+        startActivity(intent)
 //        Thread {
 //            val status = database.rehearsalDao().getRehearsal(holder.id)?.status
 //            requireActivity().runOnUiThread {

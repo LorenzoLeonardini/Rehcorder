@@ -12,4 +12,7 @@ data class SongRecording(
 ) {
     @PrimaryKey(autoGenerate = true)
     var uid: Long = 0
+
+    @ColumnInfo
+    var version: Int = 0
 }

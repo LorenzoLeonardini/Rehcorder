@@ -16,7 +16,6 @@ import com.arthenica.ffmpegkit.*
 import dev.leonardini.rehcorder.R
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
-import dev.leonardini.rehcorder.db.SongRecording
 import java.io.File
 import java.util.*
 
@@ -82,13 +81,15 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
         Thread {
             Log.i("Splitter", "Splitting $currentRehearsalFile for song id $id")
 
-            val song = Database.getInstance(applicationContext).songDao().getSong(id)!!
+            val database = Database.getInstance(applicationContext)
 
-            val songRecording = SongRecording(id, currentId, song.name.replace(" ", "_"))
-            songRecording.uid =
-                Database.getInstance(applicationContext).songRecordingDao().insert(songRecording)
+            val song = database.songDao().getSong(id)!!
 
-            currentSongFile = "${songRecording.fileName}_${songRecording.uid}.aac"
+            val songRecordingUid =
+                database.songRecordingDao().insert(id, currentId, song.name.replace(" ", "_"))
+            val songRecording = database.songRecordingDao().get(songRecordingUid)!!
+
+            currentSongFile = "${songRecording.fileName}_${songRecording.version}.aac"
             Log.i("Splitter", "Splitting into ${filesDir.absolutePath}/songs/$currentSongFile")
 
             FFmpegKit.executeAsync(
