@@ -28,11 +28,11 @@ interface SongRecordingDao {
 
     @Query(
         "INSERT INTO song_recording " +
-                "(song_id, recording_id, file_name, version) VALUES " +
-                "(:songId, :recordingId, :fileName, (" +
+                "(song_id, recording_id, file_name, external_storage, version) VALUES " +
+                "(:songId, :recordingId, :fileName, :externalStorage, (" +
                 "SELECT IFNULL(MAX(version), 0) + 1 FROM song_recording WHERE song_id=:songId)" +
                 ")"
     )
-    fun insert(songId: Long, recordingId: Long, fileName: String): Long
+    fun insert(songId: Long, recordingId: Long, fileName: String, externalStorage: Boolean): Long
 
 }

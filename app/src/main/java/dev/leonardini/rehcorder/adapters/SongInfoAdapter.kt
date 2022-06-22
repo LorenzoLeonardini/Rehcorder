@@ -42,6 +42,7 @@ class SongInfoAdapter(
         val date: Long = cursor.getLong(cursor.getColumnIndex("date"))
         val version: Int = cursor.getInt(cursor.getColumnIndex("version"))
         val fileName: String = cursor.getString(cursor.getColumnIndex("file_name"))
+        var externalStorage: Boolean = cursor.getInt(cursor.getColumnIndex("external_storage")) == 1
         val formattedDate = "${
             DateFormat.getDateInstance().format(Date(date * 1000))
         } - ${DateFormat.getTimeInstance().format(Date(date * 1000))}"
@@ -51,6 +52,7 @@ class SongInfoAdapter(
             holder.name = name
             holder.version = version
             holder.fileName = fileName
+            holder.externalStorage = externalStorage
             holder.binding.trackTitle.text = name ?: formattedDate
             holder.binding.trackDate.text = formattedDate
             holder.binding.divider.visibility =
@@ -73,6 +75,7 @@ class SongInfoAdapter(
         var name: String? = null
         var version: Int = 0
         var fileName: String? = null
+        var externalStorage: Boolean = false
 
         init {
             binding.root.setOnClickListener(this)
@@ -81,7 +84,7 @@ class SongInfoAdapter(
 
         override fun onClick(v: View?) {
             if (v == binding.trackShareButton) {
-                shareElementListener.onShare(id, fileName!!, version)
+                shareElementListener.onShare(this)
             } else {
                 itemClickListener.onItemClicked(this)
             }
@@ -93,7 +96,7 @@ class SongInfoAdapter(
     }
 
     interface OnTrackShareClickListener {
-        fun onShare(id: Long, fileName: String, version: Int)
+        fun onShare(holder: SongInfoViewHolder)
     }
 
     interface OnHeaderBoundListener {

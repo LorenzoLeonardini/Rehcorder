@@ -42,6 +42,7 @@ class RehearsalsAdapter(
         val date: Long = cursor.getLong(cursor.getColumnIndex("date"))
         val songsCount: Int = cursor.getInt(cursor.getColumnIndex("songs_count"))
         val fileName: String = cursor.getString(cursor.getColumnIndex("file_name"))
+        val externalStorage: Boolean = cursor.getInt(cursor.getColumnIndex("external_storage")) == 1
         val formattedDate = "${
             DateFormat.getDateInstance().format(Date(date * 1000))
         } - ${DateFormat.getTimeInstance().format(Date(date * 1000))}"
@@ -51,6 +52,7 @@ class RehearsalsAdapter(
             holder.name = name
             holder.formattedDate = formattedDate
             holder.fileName = fileName
+            holder.externalStorage = externalStorage
             holder.binding.rehearsalTitle.text = name ?: formattedDate
             holder.binding.rehearsalDate.text = formattedDate
             holder.binding.rehearsalSongs.text =
@@ -75,6 +77,7 @@ class RehearsalsAdapter(
         var name: String? = null
         var formattedDate: String? = null
         var fileName: String? = null
+        var externalStorage: Boolean = false
 
         init {
             binding.root.setOnClickListener(this)

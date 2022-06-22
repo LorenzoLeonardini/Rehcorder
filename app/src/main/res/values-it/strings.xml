@@ -46,6 +46,8 @@
     <string name="dialog_processing_message">La registrazione sta venendo processata e separata in diversi brani, per favore aspetta che il processo finisca prima di continuare.</string>
     <string name="dialog_error_state_title">Errore</string>
     <string name="dialog_error_state_message">La registrazione si trova in uno stato non definito.</string>
+    <string name="dialog_not_found_title">File non trovato</string>
+    <string name="dialog_not_found_message">Impossibile accedere al file. Forse era sulla memoria esterna ed è stata rimossa?</string>
 
     <string name="s_picker_title">Seleziona brano</string>
     <string name="s_picker_new_song">+ Nuovo brano</string>

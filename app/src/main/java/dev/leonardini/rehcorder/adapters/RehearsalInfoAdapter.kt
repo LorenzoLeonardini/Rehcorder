@@ -38,12 +38,14 @@ class RehearsalInfoAdapter(
         val name: String? = cursor.getString(cursor.getColumnIndex("name"))
         val version: Int = cursor.getInt(cursor.getColumnIndex("version"))
         val fileName: String = cursor.getString(cursor.getColumnIndex("file_name"))
+        var externalStorage: Boolean = cursor.getInt(cursor.getColumnIndex("external_storage")) == 1
 
         (holder as RehearsalInfoViewHolder).let { holder ->
             holder.id = id
             holder.name = name
             holder.version = version
             holder.fileName = fileName
+            holder.externalStorage = externalStorage
             holder.binding.trackTitle.text = name
             holder.binding.trackDate.text = "Version " + version
             holder.binding.divider.visibility =
@@ -66,6 +68,7 @@ class RehearsalInfoAdapter(
         var name: String? = null
         var version: Int = 0
         var fileName: String? = null
+        var externalStorage: Boolean = false
 
         init {
             binding.root.setOnClickListener(this)
@@ -74,7 +77,7 @@ class RehearsalInfoAdapter(
 
         override fun onClick(v: View?) {
             if (v == binding.trackShareButton) {
-                shareElementListener.onShare(id, fileName!!, version)
+                shareElementListener.onShare(this)
             } else {
                 itemClickListener.onItemClicked(this)
             }
@@ -86,7 +89,7 @@ class RehearsalInfoAdapter(
     }
 
     interface OnTrackShareClickListener {
-        fun onShare(id: Long, fileName: String, version: Int)
+        fun onShare(holder: RehearsalInfoViewHolder)
     }
 
     interface OnHeaderBoundListener {

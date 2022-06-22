@@ -6,7 +6,6 @@ import com.arthenica.ffmpegkit.FFmpegKit
 import com.arthenica.ffmpegkit.FFmpegSession
 import com.arthenica.ffmpegkit.ReturnCode
 import com.google.android.material.color.DynamicColors
-import java.lang.String
 
 class RehcorderApplication : Application() {
     override fun onCreate() {

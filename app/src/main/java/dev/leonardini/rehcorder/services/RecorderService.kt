@@ -83,7 +83,7 @@ class RecorderService : Service() {
     }
 
     private fun startRecording() {
-        val folder = File("${filesDir.absolutePath}/recordings/")
+        val folder = File(File(fileName!!).parentFile!!.absolutePath)
         if (!folder.exists())
             folder.mkdirs()
 

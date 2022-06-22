@@ -51,6 +51,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
     private var inNeedOfProcessingId: Long = -1
     private var inNeedOfProcessingFileName: String = ""
     private var inNeedOfProcessingName: String = ""
+    private var inNeedOfProcessingExternalStorage: Boolean = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -106,6 +107,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
             inNeedOfProcessingId = needProcessing.uid
             inNeedOfProcessingFileName = needProcessing.fileName
             inNeedOfProcessingName = needProcessing.name ?: formattedDate
+            inNeedOfProcessingExternalStorage = needProcessing.externalStorage
         }
 
         val cursor = database.rehearsalDao().getAllCursor()
@@ -185,6 +187,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
                         intent.putExtra("fileName", holder.fileName)
                         intent.putExtra("rehearsalId", holder.id)
                         intent.putExtra("rehearsalName", holder.name ?: holder.formattedDate)
+                        intent.putExtra("externalStorage", holder.externalStorage)
                         activityLauncher.launch(intent)
                     }
                     Rehearsal.PROCESSING -> {
@@ -220,6 +223,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
         intent.putExtra("fileName", inNeedOfProcessingFileName)
         intent.putExtra("rehearsalId", inNeedOfProcessingId)
         intent.putExtra("rehearsalName", inNeedOfProcessingName)
+        intent.putExtra("externalStorage", inNeedOfProcessingExternalStorage)
         activityLauncher.launch(intent)
     }
 }

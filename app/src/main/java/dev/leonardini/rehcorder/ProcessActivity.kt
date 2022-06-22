@@ -21,7 +21,9 @@ import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
 import dev.leonardini.rehcorder.db.Song
 import dev.leonardini.rehcorder.services.SplitterService
+import dev.leonardini.rehcorder.ui.dialogs.MaterialInfoDialogFragment
 import dev.leonardini.rehcorder.ui.dialogs.SongPickerDialogFragment
+import java.io.File
 import kotlin.math.floor
 
 class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeListener,
@@ -40,6 +42,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
 
     private var rehearsalId: Long = -1L
     private lateinit var fileName: String
+    private var externalStorage: Boolean = false
     private lateinit var audioManager: AudioManager
     private lateinit var mediaPlayer: MediaPlayer
     private var stopped: Boolean = false
@@ -57,7 +60,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
 
         setSupportActionBar(binding.toolbar)
 
-        if (!intent.hasExtra("rehearsalId") || !intent.hasExtra("fileName")) {
+        if (!intent.hasExtra("rehearsalId") || !intent.hasExtra("fileName") || !intent.hasExtra("externalStorage")) {
             finish()
             return
         }
@@ -67,12 +70,22 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
 
         rehearsalId = intent.getLongExtra("rehearsalId", -1L)
         fileName = intent.getStringExtra("fileName")!!
+        externalStorage = intent.getBooleanExtra("externalStorage", false)
 
         audioManager = applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         audioManager.mode = AudioManager.MODE_NORMAL
 
+        val baseDir = if (externalStorage) getExternalFilesDir(null) ?: filesDir else filesDir
+        if (!File("${baseDir.absolutePath}/recordings/$fileName").exists()) {
+            MaterialInfoDialogFragment(
+                R.string.dialog_not_found_title,
+                R.string.dialog_not_found_message
+            ).show(supportFragmentManager, "FileNotFound")
+            finish()
+        }
+
         mediaPlayer = MediaPlayer()
-        mediaPlayer.setDataSource("${filesDir.absolutePath}/recordings/$fileName")
+        mediaPlayer.setDataSource("${baseDir.absolutePath}/recordings/$fileName")
         mediaPlayer.setAudioAttributes(
             AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                 .setUsage(AudioAttributes.USAGE_MEDIA).build()
@@ -136,7 +149,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         supportFragmentManager.setFragmentResultListener("NewSongNameDialog", this) { _, bundle ->
             val name = bundle.getString("name")
             Thread {
-                val song = Song(name!!)
+                val song = Song(name = name!!)
                 song.uid = database.songDao().insert(song)
                 runOnUiThread {
                     songRegions.add(song.uid)
@@ -209,9 +222,11 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
             if (songRegions.size == 0 || songRegions.size % 3 != 0) {
                 // TODO: error alert
             } else {
+                val baseDir =
+                    if (externalStorage) getExternalFilesDir(null) ?: filesDir else filesDir
                 val intent = Intent(this, SplitterService::class.java)
                 intent.putExtra("id", rehearsalId)
-                intent.putExtra("file", "${filesDir.absolutePath}/recordings/$fileName")
+                intent.putExtra("file", "${baseDir.absolutePath}/recordings/$fileName")
                 intent.putExtra("regions", songRegions)
 
                 Thread {

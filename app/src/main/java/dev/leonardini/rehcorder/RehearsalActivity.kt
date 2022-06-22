@@ -14,6 +14,7 @@ import dev.leonardini.rehcorder.adapters.RehearsalInfoAdapter
 import dev.leonardini.rehcorder.databinding.ActivityRehearsalBinding
 import dev.leonardini.rehcorder.db.AppDatabase
 import dev.leonardini.rehcorder.db.Database
+import dev.leonardini.rehcorder.ui.dialogs.MaterialInfoDialogFragment
 import java.io.File
 import java.text.DateFormat
 import java.util.*
@@ -83,11 +84,23 @@ class RehearsalActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShare
         }
     }
 
-    override fun onShare(id: Long, fileName: String, version: Int) {
+    override fun onShare(holder: RehearsalInfoAdapter.RehearsalInfoViewHolder) {
+        val baseDir =
+            if (holder.externalStorage) getExternalFilesDir(null) ?: filesDir else filesDir
+
+        val file = File("${baseDir.absolutePath}/songs/${holder.fileName}_${holder.version}.aac")
+        if (!file.exists()) {
+            MaterialInfoDialogFragment(
+                R.string.dialog_not_found_title,
+                R.string.dialog_not_found_message
+            ).show(supportFragmentManager, "FileNotFound")
+            return
+        }
+
         val uri = FileProvider.getUriForFile(
             this,
-            "${this.applicationContext.packageName}.provider",
-            File("${this.filesDir.absolutePath}/songs/${fileName}_$version.aac")
+            "${applicationContext.packageName}.provider",
+            file
         )
         val builder = ShareCompat.IntentBuilder(this)
         builder.addStream(uri)
@@ -98,10 +111,22 @@ class RehearsalActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShare
     override fun onBound(holder: RehearsalInfoAdapter.HeaderViewHolder) {}
 
     override fun onItemClicked(holder: RehearsalInfoAdapter.RehearsalInfoViewHolder) {
+        val baseDir =
+            if (holder.externalStorage) getExternalFilesDir(null) ?: filesDir else filesDir
+
+        val file = File("${baseDir.absolutePath}/songs/${holder.fileName}_${holder.version}.aac")
+        if (!file.exists()) {
+            MaterialInfoDialogFragment(
+                R.string.dialog_not_found_title,
+                R.string.dialog_not_found_message
+            ).show(supportFragmentManager, "FileNotFound")
+            return
+        }
+
         val uri = FileProvider.getUriForFile(
             this,
-            "${this.applicationContext.packageName}.provider",
-            File("${this.filesDir.absolutePath}/songs/${holder.fileName}_${holder.version}.aac")
+            "${applicationContext.packageName}.provider",
+            file
         )
         val intent = Intent()
         intent.action = Intent.ACTION_VIEW

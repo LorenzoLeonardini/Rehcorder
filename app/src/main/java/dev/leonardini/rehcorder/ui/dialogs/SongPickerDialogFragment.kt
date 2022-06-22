@@ -21,7 +21,7 @@ class SongPickerDialogFragment(
     private lateinit var _adapter: ArrayAdapter<Song>
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        songs.add(0, Song(requireContext().getString(R.string.s_picker_new_song)))
+        songs.add(0, Song(name = requireContext().getString(R.string.s_picker_new_song)))
         _songs = savedInstanceState?.getParcelableArrayList<Song>("songs") ?: songs
         _adapter = ArrayAdapter(
             requireContext(),

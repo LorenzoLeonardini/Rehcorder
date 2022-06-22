@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -139,18 +140,24 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
         val timestamp = System.currentTimeMillis() / 1000
         val fileName = "$timestamp.aac"
         Thread {
+            val externalStorage =
+                Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED && getExternalFilesDir(
+                    null
+                ) != null
+            val baseDir = getExternalFilesDir(null) ?: filesDir
+
             val id = database.rehearsalDao().insert(
                 Rehearsal(
                     date = timestamp,
                     fileName = fileName,
-                    externalStorage = false
+                    externalStorage = externalStorage
                 )
             )
 
             val intent = Intent(this, RecorderService::class.java)
             intent.action = "RECORD"
             intent.putExtra("id", id)
-            intent.putExtra("file", "${filesDir.absolutePath}/recordings/$fileName")
+            intent.putExtra("file", "${baseDir.absolutePath}/recordings/$fileName")
             if (Build.VERSION.SDK_INT >= 26) {
                 startForegroundService(intent)
             } else {

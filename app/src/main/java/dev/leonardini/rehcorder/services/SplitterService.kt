@@ -6,10 +6,7 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.os.Build
-import android.os.Handler
-import android.os.IBinder
-import android.os.Looper
+import android.os.*
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.arthenica.ffmpegkit.*
@@ -60,10 +57,6 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
     }
 
     private fun start() {
-        val folder = File("${filesDir.absolutePath}/songs/")
-        if (!folder.exists())
-            folder.mkdirs()
-
         if (currentRegions.size == 0) {
             val (id, fileName, regions) = queue.poll() ?: return
             currentId = id
@@ -81,19 +74,30 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
         Thread {
             Log.i("Splitter", "Splitting $currentRehearsalFile for song id $id")
 
+            val externalStorage =
+                Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED && getExternalFilesDir(
+                    null
+                ) != null
+            val baseDir = getExternalFilesDir(null) ?: filesDir
+
+            val folder = File("${baseDir.absolutePath}/songs/")
+            if (!folder.exists())
+                folder.mkdirs()
+
             val database = Database.getInstance(applicationContext)
 
             val song = database.songDao().getSong(id)!!
 
             val songRecordingUid =
-                database.songRecordingDao().insert(id, currentId, song.name.replace(" ", "_"))
+                database.songRecordingDao()
+                    .insert(id, currentId, song.name.replace(" ", "_"), externalStorage)
             val songRecording = database.songRecordingDao().get(songRecordingUid)!!
 
             currentSongFile = "${songRecording.fileName}_${songRecording.version}.aac"
-            Log.i("Splitter", "Splitting into ${filesDir.absolutePath}/songs/$currentSongFile")
+            Log.i("Splitter", "Splitting into ${baseDir.absolutePath}/songs/$currentSongFile")
 
             FFmpegKit.executeAsync(
-                "-y -ss $startSeek -to $endSeek -i $currentRehearsalFile ${filesDir.absolutePath}/songs/$currentSongFile",
+                "-y -ss $startSeek -to $endSeek -i $currentRehearsalFile ${baseDir.absolutePath}/songs/$currentSongFile",
                 this,
                 this,
                 this

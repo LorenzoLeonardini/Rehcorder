@@ -46,6 +46,8 @@
     <string name="dialog_processing_message">The recording is being processed and split in different tracks, please wait for the process to finish before continuing.</string>
     <string name="dialog_error_state_title">Error</string>
     <string name="dialog_error_state_message">The recording is currently in an inconsistent state.</string>
+    <string name="dialog_not_found_title">File not found</string>
+    <string name="dialog_not_found_message">Cannot access the file. Maybe it was on external storage and it has been deleted?</string>
 
     <string name="s_picker_title">Pick song</string>
     <string name="s_picker_new_song">+ New song</string>

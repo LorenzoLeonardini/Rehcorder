@@ -50,7 +50,7 @@ class SongsFragment : Fragment(), SongsAdapter.OnSongEditClickListener,
             Log.i("Test", "Received rename dialog tag")
             val name = bundle.getString("name")
             val id = bundle.getLong("id")
-            if(name!!.isNotBlank()) {
+            if (name!!.isNotBlank()) {
                 Thread {
                     database.songDao().updateName(id, name)
                     updateDbData()
@@ -120,52 +120,6 @@ class SongsFragment : Fragment(), SongsAdapter.OnSongEditClickListener,
         val intent = Intent(requireContext(), SongActivity::class.java)
         intent.putExtra("songId", holder.id)
         startActivity(intent)
-//        Thread {
-//            val status = database.rehearsalDao().getRehearsal(holder.id)?.status
-//            requireActivity().runOnUiThread {
-//                when (status) {
-//                    Rehearsal.RECORDED -> {
-//                        MaterialInfoDialogFragment(
-//                            R.string.dialog_recorded_title,
-//                            R.string.dialog_recorded_message,
-//                            null
-//                        ).show(
-//                            parentFragmentManager,
-//                            RehearsalsFragment.RECORDED_DIALOG_TAG
-//                        )
-//                    }
-//                    Rehearsal.NORMALIZED -> {
-//                        val intent = Intent(context, ProcessActivity::class.java)
-//                        intent.putExtra("fileName", holder.fileName)
-//                        intent.putExtra("rehearsalId", holder.id)
-//                        startActivity(intent)
-//                    }
-//                    Rehearsal.PROCESSING -> {
-//                        MaterialInfoDialogFragment(
-//                            R.string.dialog_processing_title,
-//                            R.string.dialog_processing_message,
-//                            null
-//                        ).show(
-//                            parentFragmentManager,
-//                            RehearsalsFragment.PROCESSING_DIALOG_TAG
-//                        )
-//                    }
-//                    Rehearsal.PROCESSED -> {
-//                        // todo rehearsal activity
-//                    }
-//                    else -> {
-//                        MaterialInfoDialogFragment(
-//                            R.string.dialog_error_state_title,
-//                            R.string.dialog_error_state_message,
-//                            null
-//                        ).show(
-//                            parentFragmentManager,
-//                            RehearsalsFragment.ERROR_STATE_DIALOG_TAG
-//                        )
-//                    }
-//                }
-//            }
-//        }.start()
     }
 
 }
