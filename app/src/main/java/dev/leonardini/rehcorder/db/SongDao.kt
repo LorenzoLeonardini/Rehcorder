@@ -28,4 +28,7 @@ interface SongDao {
     @Insert
     fun insert(songs: Song): Long
 
+    @Query("UPDATE song SET name=:name WHERE uid=:id")
+    fun updateName(id: Long, name: String?)
+
 }

@@ -2,10 +2,12 @@ package dev.leonardini.rehcorder.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,12 +17,17 @@ import dev.leonardini.rehcorder.adapters.SongsAdapter
 import dev.leonardini.rehcorder.databinding.FragmentSongsBinding
 import dev.leonardini.rehcorder.db.AppDatabase
 import dev.leonardini.rehcorder.db.Database
+import dev.leonardini.rehcorder.ui.dialogs.RenameDialogFragment
 
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
  */
 class SongsFragment : Fragment(), SongsAdapter.OnSongEditClickListener,
     SongsAdapter.OnHeaderBoundListener, SongsAdapter.OnItemClickListener {
+
+    companion object {
+        private const val RENAME_DIALOG_TAG = "RenameDialog"
+    }
 
     private var _binding: FragmentSongsBinding? = null
 
@@ -35,6 +42,22 @@ class SongsFragment : Fragment(), SongsAdapter.OnSongEditClickListener,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSongsBinding.inflate(inflater, container, false)
+
+        requireActivity().supportFragmentManager.setFragmentResultListener(
+            SongsFragment.RENAME_DIALOG_TAG,
+            viewLifecycleOwner
+        ) { _, bundle ->
+            Log.i("Test", "Received rename dialog tag")
+            val name = bundle.getString("name")
+            val id = bundle.getLong("id")
+            if(name!!.isNotBlank()) {
+                Thread {
+                    database.songDao().updateName(id, name)
+                    updateDbData()
+                }.start()
+            }
+        }
+
         return binding.root
     }
 
@@ -81,6 +104,13 @@ class SongsFragment : Fragment(), SongsAdapter.OnSongEditClickListener,
     }
 
     override fun onEdit(id: Long, currentName: String?) {
+        (requireActivity() as AppCompatActivity).let { activity ->
+            RenameDialogFragment(
+                id,
+                currentName,
+                R.string.s_rename
+            ).show(activity.supportFragmentManager, SongsFragment.RENAME_DIALOG_TAG)
+        }
     }
 
     override fun onBound(holder: SongsAdapter.HeaderViewHolder) {

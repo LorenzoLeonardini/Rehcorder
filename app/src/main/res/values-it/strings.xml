@@ -27,6 +27,7 @@
 
     <!-- Songs -->
     <string name="s_title">I tuoi brani</string>
+    <string name="s_rename">Nome brano</string>
 
     <!-- Rehearsals -->
     <string name="r_card_title">Processa La Tua Ultima Registrazione</string>

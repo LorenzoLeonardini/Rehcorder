@@ -27,6 +27,7 @@
 
     <!-- Songs -->
     <string name="s_title">Your songs</string>
+    <string name="s_rename">Song name</string>
 
     <!-- Rehearsals -->
     <string name="r_card_title">Process Your Latest Recording</string>

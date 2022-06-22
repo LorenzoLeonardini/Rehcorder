@@ -9,7 +9,7 @@
         android:id="@+id/page_record"
         android:enabled="true"
         android:icon="@drawable/ic_record"
-        android:title="@string/menu_record" />
+        android:title="" />
     <item
         android:id="@+id/page_rehearsals"
         android:enabled="true"
