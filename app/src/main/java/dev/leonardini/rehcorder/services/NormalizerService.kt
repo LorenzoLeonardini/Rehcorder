@@ -65,7 +65,7 @@ class NormalizerService : Service(), FFmpegSessionCompleteCallback, LogCallback,
         running = true
         Log.i("Normalizer", "Normalizing $fileName")
         FFmpegKit.executeAsync(
-            "-y -i $fileName -af loudnorm -ar 44100 ${filesDir.absolutePath}/tmp.aac",
+            "-y -i $fileName -af loudnorm -ar 44100 ${File(fileName).parentFile!!.parentFile!!.absolutePath}/tmp.aac",
             this,
             this,
             this
@@ -95,7 +95,7 @@ class NormalizerService : Service(), FFmpegSessionCompleteCallback, LogCallback,
     // End callback
     override fun apply(session: FFmpegSession?) {
         // TODO: should probably check exit code, but we've seen it's not really relevant
-        val file = File("${filesDir.absolutePath}/tmp.aac")
+        val file = File("${File(currentFile).parentFile!!.parentFile!!.absolutePath}/tmp.aac")
         val destinationFile = File(currentFile)
         val result = file.renameTo(destinationFile)
         Log.i("Normalizer", "Renaming result : $result")
