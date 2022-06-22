@@ -37,4 +37,7 @@ interface RehearsalDao {
 
     @Query("UPDATE rehearsal SET status=:status WHERE uid=:id")
     fun updateStatus(id: Long, status: Int)
+
+    @Query("DELETE FROM rehearsal WHERE uid=:id")
+    fun delete(id: Long)
 }

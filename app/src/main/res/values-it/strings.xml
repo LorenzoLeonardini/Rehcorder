@@ -48,6 +48,8 @@
     <string name="dialog_error_state_message">La registrazione si trova in uno stato non definito.</string>
     <string name="dialog_not_found_title">File non trovato</string>
     <string name="dialog_not_found_message">Impossibile accedere al file. Forse era sulla memoria esterna ed è stata rimossa?</string>
+    <string name="dialog_delete_rehearsal_title">Vuoi confermare?</string>
+    <string name="dialog_delete_rehearsal_message">Se cancelli una prova cancelli la registrazione e tutti i suoi brani già processati.</string>
 
     <string name="s_picker_title">Seleziona brano</string>
     <string name="s_picker_new_song">+ Nuovo brano</string>

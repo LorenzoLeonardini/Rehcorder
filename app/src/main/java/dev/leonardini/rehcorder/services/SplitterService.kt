@@ -9,6 +9,7 @@ import android.content.Intent
 import android.os.*
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.preference.PreferenceManager
 import com.arthenica.ffmpegkit.*
 import dev.leonardini.rehcorder.R
 import dev.leonardini.rehcorder.db.Database
@@ -132,6 +133,12 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
         if (currentRegions.size == 0) {
             Database.getInstance(applicationContext).rehearsalDao()
                 .updateStatus(currentId, Rehearsal.PROCESSED)
+
+            val preference = PreferenceManager.getDefaultSharedPreferences(this)
+            val deleteRecording = preference.getBoolean("delete_recording", false)
+            if (deleteRecording) {
+                File(currentRehearsalFile).delete()
+            }
         }
 
         Handler(Looper.getMainLooper()).post {

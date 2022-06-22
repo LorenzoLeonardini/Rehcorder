@@ -48,6 +48,8 @@
     <string name="dialog_error_state_message">The recording is currently in an inconsistent state.</string>
     <string name="dialog_not_found_title">File not found</string>
     <string name="dialog_not_found_message">Cannot access the file. Maybe it was on external storage and it has been deleted?</string>
+    <string name="dialog_delete_rehearsal_title">Are you sure?</string>
+    <string name="dialog_delete_rehearsal_message">If you delete a rehearsal you also delete all the recordings and its already processed songs.</string>
 
     <string name="s_picker_title">Pick song</string>
     <string name="s_picker_new_song">+ New song</string>

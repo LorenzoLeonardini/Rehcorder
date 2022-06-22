@@ -4,17 +4,19 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ShareCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.WindowCompat
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.snackbar.Snackbar
 import dev.leonardini.rehcorder.adapters.RehearsalInfoAdapter
 import dev.leonardini.rehcorder.databinding.ActivityRehearsalBinding
 import dev.leonardini.rehcorder.db.AppDatabase
 import dev.leonardini.rehcorder.db.Database
+import dev.leonardini.rehcorder.ui.dialogs.MaterialDialogFragment
 import dev.leonardini.rehcorder.ui.dialogs.MaterialInfoDialogFragment
+import dev.leonardini.rehcorder.ui.dialogs.MaterialLoadingDialogFragment
 import java.io.File
 import java.text.DateFormat
 import java.util.*
@@ -26,6 +28,10 @@ class RehearsalActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShare
 
     private lateinit var binding: ActivityRehearsalBinding
     private lateinit var adapter: RehearsalInfoAdapter
+
+    private var rehearsalId: Long = -1
+    private var externalStorage: Boolean = false
+    private lateinit var fileName: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -49,6 +55,10 @@ class RehearsalActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShare
 
             val rehearsal =
                 database.rehearsalDao().getRehearsal(intent.getLongExtra("rehearsalId", -1))!!
+            rehearsalId = rehearsal.uid
+            externalStorage = rehearsal.externalStorage
+            fileName = rehearsal.fileName
+
             val formattedDate = "${
                 DateFormat.getDateInstance().format(Date(rehearsal.date * 1000))
             } - ${DateFormat.getTimeInstance().format(Date(rehearsal.date * 1000))}"
@@ -63,6 +73,34 @@ class RehearsalActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShare
         }.start()
         binding.recyclerView.adapter = adapter
 
+        supportFragmentManager.setFragmentResultListener("DeleteRehearsal", this) { _, bundle ->
+            val which = bundle.getInt("which")
+            if (which != AlertDialog.BUTTON_NEGATIVE) {
+                val loadingFragment = MaterialLoadingDialogFragment()
+                loadingFragment.show(supportFragmentManager, "Loading")
+                Thread {
+                    val externalStorageBaseDir = getExternalFilesDir(null) ?: filesDir
+                    File("${(if (externalStorage) externalStorageBaseDir else filesDir).absolutePath}/recordings/$fileName").delete()
+
+                    for (i in 1 until adapter.itemCount) {
+                        val cursor = adapter.getItem(i)!!
+                        val version: Int = cursor.getInt(cursor.getColumnIndex("version"))
+                        val fileName: String = cursor.getString(cursor.getColumnIndex("file_name"))
+                        val externalStorage: Boolean =
+                            cursor.getInt(cursor.getColumnIndex("external_storage")) == 1
+
+                        File("${(if (externalStorage) externalStorageBaseDir else filesDir).absolutePath}/songs/${fileName}_$version.aac").delete()
+                    }
+
+                    database.songRecordingDao().deleteRehearsal(rehearsalId)
+                    database.rehearsalDao().delete(rehearsalId)
+                    runOnUiThread {
+                        loadingFragment.dismiss()
+                        finish()
+                    }
+                }.start()
+            }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -77,7 +115,10 @@ class RehearsalActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShare
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
             R.id.action_delete -> {
-                Snackbar.make(binding.root, "ciao", Snackbar.LENGTH_SHORT).show()
+                MaterialDialogFragment(
+                    R.string.dialog_delete_rehearsal_title,
+                    R.string.dialog_delete_rehearsal_message
+                ).show(supportFragmentManager, "DeleteRehearsal")
                 true
             }
             else -> super.onOptionsItemSelected(item)

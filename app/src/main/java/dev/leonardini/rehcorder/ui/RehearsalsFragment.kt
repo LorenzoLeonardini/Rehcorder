@@ -202,7 +202,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
                     Rehearsal.PROCESSED -> {
                         val intent = Intent(requireContext(), RehearsalActivity::class.java)
                         intent.putExtra("rehearsalId", holder.id)
-                        startActivity(intent)
+                        activityLauncher.launch(intent)
                     }
                     else -> {
                         MaterialInfoDialogFragment(

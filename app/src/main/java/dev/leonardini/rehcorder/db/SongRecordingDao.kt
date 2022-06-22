@@ -35,4 +35,6 @@ interface SongRecordingDao {
     )
     fun insert(songId: Long, recordingId: Long, fileName: String, externalStorage: Boolean): Long
 
+    @Query("DELETE FROM song_recording WHERE recording_id=:id")
+    fun deleteRehearsal(id: Long)
 }
