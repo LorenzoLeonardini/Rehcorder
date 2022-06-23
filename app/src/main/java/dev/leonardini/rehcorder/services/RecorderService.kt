@@ -93,7 +93,7 @@ class RecorderService : Service() {
             else
                 MediaRecorder()).apply {
                 setAudioSource(getBestAudioSource())
-                setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS)
+                setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
                 setOutputFile(fileName)
                 setAudioSamplingRate(44100)
                 setAudioEncodingBitRate(192000)

@@ -89,7 +89,7 @@ class RehearsalActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShare
                         val externalStorage: Boolean =
                             cursor.getInt(cursor.getColumnIndexOrThrow("external_storage")) == 1
 
-                        File("${(if (externalStorage) externalStorageBaseDir else filesDir).absolutePath}/songs/${fileName}_$version.aac").delete()
+                        File("${(if (externalStorage) externalStorageBaseDir else filesDir).absolutePath}/songs/${fileName}_$version.m4a").delete()
                     }
 
                     database.songRecordingDao().deleteRehearsal(rehearsalId)
@@ -129,7 +129,7 @@ class RehearsalActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShare
         val baseDir =
             if (holder.externalStorage) getExternalFilesDir(null) ?: filesDir else filesDir
 
-        val file = File("${baseDir.absolutePath}/songs/${holder.fileName}_${holder.version}.aac")
+        val file = File("${baseDir.absolutePath}/songs/${holder.fileName}_${holder.version}.m4a")
         if (!file.exists()) {
             MaterialInfoDialogFragment(
                 R.string.dialog_not_found_title,
@@ -155,7 +155,7 @@ class RehearsalActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShare
         val baseDir =
             if (holder.externalStorage) getExternalFilesDir(null) ?: filesDir else filesDir
 
-        val file = File("${baseDir.absolutePath}/songs/${holder.fileName}_${holder.version}.aac")
+        val file = File("${baseDir.absolutePath}/songs/${holder.fileName}_${holder.version}.m4a")
         if (!file.exists()) {
             MaterialInfoDialogFragment(
                 R.string.dialog_not_found_title,

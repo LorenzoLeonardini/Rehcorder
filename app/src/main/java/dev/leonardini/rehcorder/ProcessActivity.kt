@@ -180,7 +180,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
 
     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
         if (fromUser) {
-            mediaPlayer.seekTo(progress.coerceAtMost(mediaPlayer.duration - 10))
+            mediaPlayer.seekTo(progress.coerceAtMost(mediaPlayer.duration))
 
             val minutes = progress / 60000
             val seconds = (progress / 1000) % 60
@@ -203,7 +203,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
             mediaPlayer.seekTo(position)
         } else if (v == binding.content.seekForward) {
             val position =
-                (mediaPlayer.currentPosition + 10000).coerceAtMost(mediaPlayer.duration - 10)
+                (mediaPlayer.currentPosition + 10000).coerceAtMost(mediaPlayer.duration)
             binding.content.seekBar.progress = position
             mediaPlayer.seekTo(position)
         } else if (v == binding.content.toggleSong) {
