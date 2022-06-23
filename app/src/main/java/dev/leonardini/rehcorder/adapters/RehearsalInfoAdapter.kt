@@ -1,6 +1,5 @@
 package dev.leonardini.rehcorder.adapters
 
-import android.annotation.SuppressLint
 import android.database.Cursor
 import android.view.LayoutInflater
 import android.view.View
@@ -60,7 +59,8 @@ class RehearsalInfoAdapter(
             holder.fileName = fileName
             holder.externalStorage = externalStorage
             holder.binding.trackTitle.text = name
-            holder.binding.trackDate.text = "Version " + version
+            holder.binding.trackDate.text =
+                holder.binding.trackDate.resources.getString(R.string.s_l_version, version)
             holder.binding.divider.visibility =
                 if (position != itemCount - 2) View.VISIBLE else View.INVISIBLE
         }

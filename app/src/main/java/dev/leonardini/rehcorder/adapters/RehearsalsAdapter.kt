@@ -1,6 +1,5 @@
 package dev.leonardini.rehcorder.adapters
 
-import android.annotation.SuppressLint
 import android.database.Cursor
 import android.view.LayoutInflater
 import android.view.View
@@ -71,7 +70,10 @@ class RehearsalsAdapter(
             holder.binding.rehearsalTitle.text = name ?: formattedDate
             holder.binding.rehearsalDate.text = formattedDate
             holder.binding.rehearsalSongs.text =
-                holder.binding.rehearsalSongs.resources.getString(R.string.r_count, songsCount)
+                holder.binding.rehearsalSongs.resources.getQuantityString(
+                    R.plurals.r_count,
+                    songsCount
+                )
             holder.binding.divider.visibility =
                 if (position != itemCount - 2) View.VISIBLE else View.INVISIBLE
         }

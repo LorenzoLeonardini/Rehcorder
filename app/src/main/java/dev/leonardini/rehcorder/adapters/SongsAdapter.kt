@@ -1,6 +1,5 @@
 package dev.leonardini.rehcorder.adapters
 
-import android.annotation.SuppressLint
 import android.database.Cursor
 import android.view.LayoutInflater
 import android.view.View
@@ -51,7 +50,11 @@ class SongsAdapter(
             holder.id = id
             holder.name = name
             holder.binding.songTitle.text = name
-            holder.binding.songVersions.text = versionsCount.toString() + " Versions"
+            holder.binding.songVersions.text =
+                holder.binding.songVersions.resources.getQuantityText(
+                    R.plurals.s_versions,
+                    versionsCount
+                )
             holder.binding.divider.visibility =
                 if (position != itemCount - 2) View.VISIBLE else View.INVISIBLE
         }

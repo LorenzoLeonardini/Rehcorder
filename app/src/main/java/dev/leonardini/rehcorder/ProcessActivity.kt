@@ -122,7 +122,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         }
 
         if (songRegions.size % 3 == 1) {
-            binding.content.toggleSong.text = "End song"
+            binding.content.toggleSong.setText(R.string.end_song)
         } else if (songRegions.size % 3 == 2) {
             runSongSelector()
         }
@@ -204,13 +204,13 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         } else if (v == binding.content.toggleSong) {
             if (songRegions.size % 3 == 0) {
                 // New song
-                binding.content.toggleSong.text = "End song"
+                binding.content.toggleSong.setText(R.string.end_song)
                 songRegions.add(mediaPlayer.currentPosition.toLong())
             } else {
                 if (mediaPlayer.currentPosition <= songRegions.last()) {
                     return
                 }
-                binding.content.toggleSong.text = "Begin song"
+                binding.content.toggleSong.setText(R.string.begin_song)
                 binding.content.seekBar.highlightRegion(
                     songRegions.last().toInt(),
                     mediaPlayer.currentPosition
