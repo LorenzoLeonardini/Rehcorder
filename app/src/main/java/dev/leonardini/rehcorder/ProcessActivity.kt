@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.View
 import android.widget.SeekBar
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.navigation.findNavController
@@ -106,6 +107,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         binding.content.seekBack.setOnClickListener(this)
         binding.content.seekForward.setOnClickListener(this)
         binding.content.toggleSong.setOnClickListener(this)
+        binding.content.undo.setOnClickListener(this)
         binding.content.save.setOnClickListener(this)
 
         if (savedInstanceState != null) {
@@ -123,18 +125,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
             songRegions = ArrayList()
         }
 
-        if (songRegions.size % 3 == 1) {
-            binding.content.toggleSong.setText(R.string.end_song)
-        } else if (songRegions.size % 3 == 2) {
-            runSongSelector()
-        }
-
-        for (i in 0 until floor(songRegions.size / 3.0).toInt()) {
-            binding.content.seekBar.highlightRegion(
-                songRegions[i * 3].toInt(),
-                songRegions[i * 3 + 1].toInt()
-            )
-        }
+        restoreSongRegionSelectionState(savedInstanceState == null)
 
         runOnUiThread(this)
         binding.content.seekBar.setOnSeekBarChangeListener(this)
@@ -147,14 +138,34 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
             }
         }
         supportFragmentManager.setFragmentResultListener("NewSongNameDialog", this) { _, bundle ->
-            val name = bundle.getString("name")
-            Thread {
-                val song = Song(name = name!!)
-                song.uid = database.songDao().insert(song)
-                runOnUiThread {
-                    songRegions.add(song.uid)
-                }
-            }.start()
+            val which = bundle.getInt("which")
+            if(which == AlertDialog.BUTTON_POSITIVE) {
+                val name = bundle.getString("name")
+                Thread {
+                    val song = Song(name = name!!)
+                    song.uid = database.songDao().insert(song)
+                    runOnUiThread {
+                        songRegions.add(song.uid)
+                    }
+                }.start()
+            } else {
+                runSongSelector()
+            }
+        }
+    }
+
+    private fun restoreSongRegionSelectionState(doRunSongSelector :Boolean) {
+        when (songRegions.size % 3) {
+            0 -> binding.content.toggleSong.setText(R.string.begin_song)
+            1 -> binding.content.toggleSong.setText(R.string.end_song)
+            2 -> if(doRunSongSelector) runSongSelector()
+        }
+
+        for (i in 0 until floor(songRegions.size / 3.0).toInt()) {
+            binding.content.seekBar.highlightRegion(
+                songRegions[i * 3].toInt(),
+                songRegions[i * 3 + 1].toInt()
+            )
         }
     }
 
@@ -175,7 +186,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
 
     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
         if (fromUser) {
-            mediaPlayer.seekTo(progress.coerceAtMost(mediaPlayer.duration - 10))
+            mediaPlayer.seekTo(progress.coerceAtMost(mediaPlayer.duration))
 
             val minutes = progress / 60000
             val seconds = (progress / 1000) % 60
@@ -198,7 +209,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
             mediaPlayer.seekTo(position)
         } else if (v == binding.content.seekForward) {
             val position =
-                (mediaPlayer.currentPosition + 10000).coerceAtMost(mediaPlayer.duration - 10)
+                (mediaPlayer.currentPosition + 10000).coerceAtMost(mediaPlayer.duration)
             binding.content.seekBar.progress = position
             mediaPlayer.seekTo(position)
         } else if (v == binding.content.toggleSong) {
@@ -217,6 +228,15 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
                 )
                 songRegions.add(mediaPlayer.currentPosition.toLong())
                 runSongSelector()
+            }
+        } else if (v == binding.content.undo) {
+            if (songRegions.size > 0) {
+                songRegions.removeLast()
+                if (songRegions.size % 3 == 2) {
+                    songRegions.removeLast()
+                }
+                binding.content.seekBar.clearRegions()
+                restoreSongRegionSelectionState(true)
             }
         } else if (v == binding.content.save) {
             if (songRegions.size == 0 || songRegions.size % 3 != 0) {

@@ -161,7 +161,7 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
         recording = true
 
         val timestamp = System.currentTimeMillis() / 1000
-        val fileName = "$timestamp.aac"
+        val fileName = "$timestamp.m4a"
         Thread {
             val externalStorage =
                 Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED && getExternalFilesDir(

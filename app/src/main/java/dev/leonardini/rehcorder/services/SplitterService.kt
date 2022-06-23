@@ -94,7 +94,7 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
                     .insert(id, currentId, song.name.replace(" ", "_"), externalStorage)
             val songRecording = database.songRecordingDao().get(songRecordingUid)!!
 
-            currentSongFile = "${songRecording.fileName}_${songRecording.version}.aac"
+            currentSongFile = "${songRecording.fileName}_${songRecording.version}.m4a"
             Log.i("Splitter", "Splitting into ${baseDir.absolutePath}/songs/$currentSongFile")
 
             FFmpegKit.executeAsync(

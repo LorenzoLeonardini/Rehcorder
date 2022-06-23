@@ -91,6 +91,7 @@ class HighlightedSeekBar : AppCompatSeekBar {
 
     fun clearRegions() {
         regions.clear()
+        invalidate()
     }
 
 }

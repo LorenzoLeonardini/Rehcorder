@@ -35,7 +35,7 @@ class SongNameDialogFragment : AppCompatDialogFragment(), DialogInterface.OnClic
         materialDialog = MaterialAlertDialogBuilder(requireContext(), theme)
             .setTitle(R.string.s_new_title)
             .setPositiveButton(R.string.s_new_add, this)
-            .setNegativeButton(R.string.cancel, null)
+            .setNegativeButton(R.string.cancel, this)
             .setView(v)
             .create()
         materialDialog.show()
@@ -55,10 +55,13 @@ class SongNameDialogFragment : AppCompatDialogFragment(), DialogInterface.OnClic
 
     override fun onClick(dialog: DialogInterface?, which: Int) {
         val bundle = Bundle()
-        bundle.putString(
-            "name",
-            v.findViewById<TextInputEditText>(R.id.text_field_input).text.toString().trim()
-        )
+        bundle.putInt("which", which)
+        if (which == androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE) {
+            bundle.putString(
+                "name",
+                v.findViewById<TextInputEditText>(R.id.text_field_input).text.toString().trim()
+            )
+        }
         requireActivity().supportFragmentManager.setFragmentResult(
             tag ?: this::class.simpleName!!,
             bundle
