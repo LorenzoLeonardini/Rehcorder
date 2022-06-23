@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.View
 import android.widget.SeekBar
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.navigation.findNavController
@@ -124,7 +125,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
             songRegions = ArrayList()
         }
 
-        restoreSongRegionSelectionState()
+        restoreSongRegionSelectionState(savedInstanceState == null)
 
         runOnUiThread(this)
         binding.content.seekBar.setOnSeekBarChangeListener(this)
@@ -137,22 +138,27 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
             }
         }
         supportFragmentManager.setFragmentResultListener("NewSongNameDialog", this) { _, bundle ->
-            val name = bundle.getString("name")
-            Thread {
-                val song = Song(name = name!!)
-                song.uid = database.songDao().insert(song)
-                runOnUiThread {
-                    songRegions.add(song.uid)
-                }
-            }.start()
+            val which = bundle.getInt("which")
+            if(which == AlertDialog.BUTTON_POSITIVE) {
+                val name = bundle.getString("name")
+                Thread {
+                    val song = Song(name = name!!)
+                    song.uid = database.songDao().insert(song)
+                    runOnUiThread {
+                        songRegions.add(song.uid)
+                    }
+                }.start()
+            } else {
+                runSongSelector()
+            }
         }
     }
 
-    private fun restoreSongRegionSelectionState() {
+    private fun restoreSongRegionSelectionState(doRunSongSelector :Boolean) {
         when (songRegions.size % 3) {
             0 -> binding.content.toggleSong.setText(R.string.begin_song)
             1 -> binding.content.toggleSong.setText(R.string.end_song)
-            2 -> runSongSelector()
+            2 -> if(doRunSongSelector) runSongSelector()
         }
 
         for (i in 0 until floor(songRegions.size / 3.0).toInt()) {
@@ -230,7 +236,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
                     songRegions.removeLast()
                 }
                 binding.content.seekBar.clearRegions()
-                restoreSongRegionSelectionState()
+                restoreSongRegionSelectionState(true)
             }
         } else if (v == binding.content.save) {
             if (songRegions.size == 0 || songRegions.size % 3 != 0) {
