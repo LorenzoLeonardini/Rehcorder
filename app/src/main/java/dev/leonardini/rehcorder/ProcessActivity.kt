@@ -106,6 +106,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         binding.content.seekBack.setOnClickListener(this)
         binding.content.seekForward.setOnClickListener(this)
         binding.content.toggleSong.setOnClickListener(this)
+        binding.content.undo.setOnClickListener(this)
         binding.content.save.setOnClickListener(this)
 
         if (savedInstanceState != null) {
@@ -123,18 +124,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
             songRegions = ArrayList()
         }
 
-        if (songRegions.size % 3 == 1) {
-            binding.content.toggleSong.setText(R.string.end_song)
-        } else if (songRegions.size % 3 == 2) {
-            runSongSelector()
-        }
-
-        for (i in 0 until floor(songRegions.size / 3.0).toInt()) {
-            binding.content.seekBar.highlightRegion(
-                songRegions[i * 3].toInt(),
-                songRegions[i * 3 + 1].toInt()
-            )
-        }
+        restoreSongRegionSelectionState()
 
         runOnUiThread(this)
         binding.content.seekBar.setOnSeekBarChangeListener(this)
@@ -155,6 +145,21 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
                     songRegions.add(song.uid)
                 }
             }.start()
+        }
+    }
+
+    private fun restoreSongRegionSelectionState() {
+        when (songRegions.size % 3) {
+            0 -> binding.content.toggleSong.setText(R.string.begin_song)
+            1 -> binding.content.toggleSong.setText(R.string.end_song)
+            2 -> runSongSelector()
+        }
+
+        for (i in 0 until floor(songRegions.size / 3.0).toInt()) {
+            binding.content.seekBar.highlightRegion(
+                songRegions[i * 3].toInt(),
+                songRegions[i * 3 + 1].toInt()
+            )
         }
     }
 
@@ -217,6 +222,15 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
                 )
                 songRegions.add(mediaPlayer.currentPosition.toLong())
                 runSongSelector()
+            }
+        } else if (v == binding.content.undo) {
+            if (songRegions.size > 0) {
+                songRegions.removeLast()
+                if (songRegions.size % 3 == 2) {
+                    songRegions.removeLast()
+                }
+                binding.content.seekBar.clearRegions()
+                restoreSongRegionSelectionState()
             }
         } else if (v == binding.content.save) {
             if (songRegions.size == 0 || songRegions.size % 3 != 0) {
