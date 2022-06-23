@@ -37,12 +37,11 @@ class SongsAdapter(
     }
 
     override fun onCursorSwapped(cursor: Cursor) {
-        uidIdx = cursor.getColumnIndex("uid")
-        nameIdx = cursor.getColumnIndex("name")
-        versionsCountIdx = cursor.getColumnIndex("versions_count")
+        uidIdx = cursor.getColumnIndexOrThrow("uid")
+        nameIdx = cursor.getColumnIndexOrThrow("name")
+        versionsCountIdx = cursor.getColumnIndexOrThrow("versions_count")
     }
 
-    @SuppressLint("Range")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, cursor: Cursor, position: Int) {
         val id: Long = cursor.getLong(uidIdx)
         val name: String = cursor.getString(nameIdx)

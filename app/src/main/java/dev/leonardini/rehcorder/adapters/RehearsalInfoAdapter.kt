@@ -39,14 +39,13 @@ class RehearsalInfoAdapter(
     }
 
     override fun onCursorSwapped(cursor: Cursor) {
-        uidIdx = cursor.getColumnIndex("uid")
-        nameIdx = cursor.getColumnIndex("name")
-        versionIdx = cursor.getColumnIndex("version")
-        fileNameIdx = cursor.getColumnIndex("file_name")
-        externalStorageIdx = cursor.getColumnIndex("external_storage")
+        uidIdx = cursor.getColumnIndexOrThrow("uid")
+        nameIdx = cursor.getColumnIndexOrThrow("name")
+        versionIdx = cursor.getColumnIndexOrThrow("version")
+        fileNameIdx = cursor.getColumnIndexOrThrow("file_name")
+        externalStorageIdx = cursor.getColumnIndexOrThrow("external_storage")
     }
 
-    @SuppressLint("Range")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, cursor: Cursor, position: Int) {
         val id: Long = cursor.getLong(uidIdx)
         val name: String? = cursor.getString(nameIdx)
