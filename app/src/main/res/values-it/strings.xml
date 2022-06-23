@@ -61,6 +61,7 @@
     <!-- Process -->
     <string name="begin_song">Inizio brano</string>
     <string name="end_song">Fine brano</string>
+    <string name="undo">Annulla</string>
     <string name="save_exit">Salva ed esci</string>
 
     <string name="s_picker_title">Seleziona brano</string>
