@@ -38,6 +38,9 @@ interface RehearsalDao {
     @Query("UPDATE rehearsal SET status=:status WHERE uid=:id")
     fun updateStatus(id: Long, status: Int)
 
+    @Query("UPDATE rehearsal SET has_location_data=TRUE, latitude=:latitude, longitude=:longitude WHERE uid=:id")
+    fun updateLocation(id: Long, latitude: Double, longitude: Double)
+
     @Query("DELETE FROM rehearsal WHERE uid=:id")
     fun delete(id: Long)
 }

@@ -8,7 +8,10 @@ import androidx.room.PrimaryKey
 data class Rehearsal(
     @ColumnInfo(name = "date") val date: Long,
     @ColumnInfo(name = "file_name") val fileName: String,
-    @ColumnInfo(name = "external_storage") val externalStorage: Boolean
+    @ColumnInfo(name = "external_storage") val externalStorage: Boolean,
+    @ColumnInfo(name = "has_location_data", defaultValue = "FALSE") val hasLocationData: Boolean,
+    @ColumnInfo(name = "latitude") val latitude: Double?,
+    @ColumnInfo(name = "longitude") val longitude: Double?,
 ) {
     companion object {
         const val CREATED = 1
