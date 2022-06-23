@@ -31,6 +31,7 @@ import dev.leonardini.rehcorder.db.AppDatabase
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
 import dev.leonardini.rehcorder.services.RecorderService
+import dev.leonardini.rehcorder.ui.RecordingFragment
 import dev.leonardini.rehcorder.ui.dialogs.MaterialInfoDialogFragment
 
 class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedListener,
@@ -43,7 +44,7 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
-    private var recording: Boolean = false
+    var recording: Boolean = false
 
     private lateinit var database: AppDatabase
 
@@ -156,11 +157,17 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
         binding.bottomNavigation.selectedItemId = R.id.page_record
         binding.bottomNavigation.menu[0].isEnabled = false
         binding.bottomNavigation.menu[2].isEnabled = false
-        findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.to_recording_fragment)
-
-        recording = true
 
         val timestamp = System.currentTimeMillis() / 1000
+        val args = Bundle()
+        args.putLong("timestamp", timestamp)
+
+        findNavController(R.id.nav_host_fragment_content_main).navigate(
+            R.id.to_recording_fragment,
+            args
+        )
+        recording = true
+
         val fileName = "$timestamp.m4a"
         Thread {
             val externalStorage =
@@ -257,6 +264,13 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
         } else {
             startService(intent)
         }
+
+        supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main)
+            ?.let { navFragment ->
+                if (navFragment.childFragmentManager.primaryNavigationFragment is RecordingFragment) {
+                    (navFragment.childFragmentManager.primaryNavigationFragment as RecordingFragment).stopRecording()
+                }
+            }
 
         binding.fab.setImageResource(R.drawable.ic_record)
         recording = false

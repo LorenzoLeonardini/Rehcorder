@@ -21,6 +21,7 @@
     <string name="settings_about">About</string>
 
     <!-- Recording -->
+    <string name="press_to_record">Premi per registrare</string>
     <string name="permission_required_title">Permessi necessari</string>
     <string name="permission_required">Questa app ha bisogno di accedere al microfono per registrare</string>
 
@@ -55,10 +56,13 @@
     <string name="dialog_not_found_message">Impossibile accedere al file. Forse era sulla memoria esterna ed è stata rimossa?</string>
     <string name="dialog_delete_rehearsal_title">Vuoi confermare?</string>
     <string name="dialog_delete_rehearsal_message">Se cancelli una prova cancelli la registrazione e tutti i suoi brani già processati.</string>
+    <string name="dialog_save_error_title">Errore</string>
+    <string name="dialog_save_error_message">Devi selezionare almeno un brano, e per ogni brano devi specificare un punto di inizio e un punto di fine.</string>
 
     <!-- Process -->
     <string name="begin_song">Inizio brano</string>
     <string name="end_song">Fine brano</string>
+    <string name="undo">Annulla</string>
     <string name="save_exit">Salva ed esci</string>
 
     <string name="s_picker_title">Seleziona brano</string>
@@ -71,5 +75,13 @@
     <string name="s_l_version">Versione %1$d</string>
     <string name="s_l_title">Lista versioni</string>
     <string name="r_l_title">Lista brani</string>
+
+    <!-- Notifications -->
+    <string name="notification_recorder_title">Registrazione delle prove in corso</string>
+    <string name="notification_recorder_text">Premi per tornare all\'applicazione</string>
+    <string name="notification_normalizer_title">Normalizzando l\'audio…</string>
+    <string name="notification_normalizer_text">Normalizzazione audio in background</string>
+    <string name="notification_splitter_title">Separando l\'audio…</string>
+    <string name="notification_splitter_text">Separazione delle varie tracce in corso</string>
 
 </resources>

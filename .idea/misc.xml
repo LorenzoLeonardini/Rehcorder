@@ -24,6 +24,7 @@
         <entry key="app/src/main/res/drawable/ic_sd_storage.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_settings.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_stop.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/recording_animation.xml" value="0.194" />
         <entry key="app/src/main/res/layout-land/activity_process.xml" value="0.1" />
         <entry key="app/src/main/res/layout-land/content_process.xml" value="0.1" />
         <entry key="app/src/main/res/layout-large-land/content_process.xml" value="0.11981258366800536" />

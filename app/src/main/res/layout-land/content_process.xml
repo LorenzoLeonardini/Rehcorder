@@ -155,7 +155,7 @@
                         android:layout_height="match_parent"
                         android:layout_marginEnd="4dp"
                         android:layout_weight="1"
-                        android:text="Undo"
+                        android:text="@string/undo"
                         app:icon="@drawable/ic_undo"
                         app:iconGravity="textStart"
                         app:iconPadding="8dp" />

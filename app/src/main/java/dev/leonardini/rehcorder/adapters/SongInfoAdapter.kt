@@ -1,6 +1,5 @@
 package dev.leonardini.rehcorder.adapters
 
-import android.annotation.SuppressLint
 import android.database.Cursor
 import android.view.LayoutInflater
 import android.view.View
@@ -57,7 +56,7 @@ class SongInfoAdapter(
         val date: Long = cursor.getLong(dateIdx)
         val version: Int = cursor.getInt(versionIdx)
         val fileName: String = cursor.getString(fileNameIdx)
-        var externalStorage: Boolean = cursor.getInt(externalStorageIdx) == 1
+        val externalStorage: Boolean = cursor.getInt(externalStorageIdx) == 1
         val formattedDate = "${
             DateFormat.getDateInstance().format(Date(date * 1000))
         } - ${DateFormat.getTimeInstance().format(Date(date * 1000))}"

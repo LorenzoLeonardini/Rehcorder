@@ -1,7 +1,6 @@
 package dev.leonardini.rehcorder.services
 
 import android.app.Notification
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
@@ -29,25 +28,23 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
     private var currentRehearsalFile: String = ""
     private var currentRegions: Queue<Triple<Long, Long, Long>> = LinkedList()
     private var currentSongFile: String = ""
+    private var currentMaxProgress: Int = 0
 
-    private fun requestForeground() {
-        val nm: NotificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                "dev.leonardini.rehcorder",
-                "Rehcorder",
-                NotificationManager.IMPORTANCE_HIGH
-            )
-            nm.createNotificationChannel(channel)
-        }
+    private fun createNotificationBuilder(notificationManager: NotificationManager? = null): NotificationCompat.Builder {
+        var nm = notificationManager
+            ?: getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        Utils.createServiceNotificationChannelIfNotExists(nm)
 
-        var notificationBuilder = NotificationCompat.Builder(this, "dev.leonardini.rehcorder")
-            .setContentTitle("Splitting audio...")
+        return NotificationCompat.Builder(this, "dev.leonardini.rehcorder")
+            .setContentTitle(resources.getString(R.string.notification_splitter_title))
             .setSmallIcon(R.drawable.ic_mic)
-            .setContentText("Audio is being split into tracks in the background")
+            .setContentText(resources.getString(R.string.notification_splitter_title))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
+    }
+
+    private fun requestForeground() {
+        var notificationBuilder = createNotificationBuilder()
         if (Build.VERSION.SDK_INT >= 31) {
             notificationBuilder =
                 notificationBuilder.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
@@ -55,6 +52,17 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
         val notification = notificationBuilder.build()
 
         startForeground(42, notification)
+    }
+
+    private fun updateProgress() {
+        val nm: NotificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        var notification = createNotificationBuilder(nm)
+            .setProgress(currentMaxProgress, currentMaxProgress - currentRegions.size, false)
+            .build()
+
+        nm.notify(42, notification)
     }
 
     private fun start() {
@@ -65,6 +73,9 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
             for (i in 0 until regions.size / 3) {
                 currentRegions.add(Triple(regions[i * 3], regions[i * 3 + 1], regions[i * 3 + 2]))
             }
+
+            currentMaxProgress = currentRegions.size
+            updateProgress()
         }
         val (start, end, id) = currentRegions.poll() ?: return
         val startSeek = start / 1000f
@@ -142,6 +153,7 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
         }
 
         Handler(Looper.getMainLooper()).post {
+            updateProgress()
             if (queue.size == 0 && currentRegions.size == 0) {
                 stopSelf()
             } else {

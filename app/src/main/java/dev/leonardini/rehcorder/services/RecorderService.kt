@@ -48,14 +48,7 @@ class RecorderService : Service() {
     private fun requestForeground() {
         val nm: NotificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                "dev.leonardini.rehcorder",
-                "Rehcorder",
-                NotificationManager.IMPORTANCE_HIGH
-            )
-            nm.createNotificationChannel(channel)
-        }
+        Utils.createServiceNotificationChannelIfNotExists(nm)
 
         val int = Intent(this, MainActivity::class.java)
         int.putExtra("Recording", true)
@@ -67,9 +60,9 @@ class RecorderService : Service() {
         )
 
         var notificationBuilder = NotificationCompat.Builder(this, "dev.leonardini.rehcorder")
-            .setContentTitle("Rehearsal is being recorded")
+            .setContentTitle(resources.getString(R.string.notification_recorder_title))
             .setSmallIcon(R.drawable.ic_mic)
-            .setContentText("Tap to return to the application")
+            .setContentText(resources.getString(R.string.notification_recorder_text))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setContentIntent(pendingIntent)

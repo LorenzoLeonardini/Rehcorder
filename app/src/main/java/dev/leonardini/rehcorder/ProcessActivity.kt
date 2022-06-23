@@ -34,6 +34,13 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         private const val PLAYING = "playing"
         private const val SEEK = "seek"
         private const val SONG_REGIONS = "songRegions"
+
+        fun secondsToTimeString(time: Long): String {
+            val hours = time / 3600
+            val minutes = (time / 60) % 60
+            val seconds = time % 60
+            return String.format("%02d:%02d:%02d", hours, minutes, seconds)
+        }
     }
 
     private lateinit var database: AppDatabase
@@ -98,9 +105,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
 
         binding.content.waveform.setAudioSession(mediaPlayer.audioSessionId)
 
-        val minutes = mediaPlayer.duration / 60000
-        val seconds = (mediaPlayer.duration / 1000) % 60
-        binding.content.audioLength.text = String.format("%02d:%02d", minutes, seconds)
+        binding.content.audioLength.text = secondsToTimeString(mediaPlayer.duration / 1000L)
         binding.content.seekBar.max = mediaPlayer.duration
 
         binding.content.playPause.setOnClickListener(this)
@@ -124,6 +129,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         if (!::songRegions.isInitialized) {
             songRegions = ArrayList()
         }
+        binding.content.undo.isEnabled = songRegions.size > 0
 
         restoreSongRegionSelectionState(savedInstanceState == null)
 
@@ -139,7 +145,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         }
         supportFragmentManager.setFragmentResultListener("NewSongNameDialog", this) { _, bundle ->
             val which = bundle.getInt("which")
-            if(which == AlertDialog.BUTTON_POSITIVE) {
+            if (which == AlertDialog.BUTTON_POSITIVE) {
                 val name = bundle.getString("name")
                 Thread {
                     val song = Song(name = name!!)
@@ -154,11 +160,11 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         }
     }
 
-    private fun restoreSongRegionSelectionState(doRunSongSelector :Boolean) {
+    private fun restoreSongRegionSelectionState(doRunSongSelector: Boolean) {
         when (songRegions.size % 3) {
             0 -> binding.content.toggleSong.setText(R.string.begin_song)
             1 -> binding.content.toggleSong.setText(R.string.end_song)
-            2 -> if(doRunSongSelector) runSongSelector()
+            2 -> if (doRunSongSelector) runSongSelector()
         }
 
         for (i in 0 until floor(songRegions.size / 3.0).toInt()) {
@@ -172,9 +178,8 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
     override fun run() {
         if (!stopped) {
             binding.content.seekBar.progress = mediaPlayer.currentPosition
-            val minutes = mediaPlayer.currentPosition / 60000
-            val seconds = (mediaPlayer.currentPosition / 1000) % 60
-            binding.content.currentTime.text = String.format("%02d:%02d", minutes, seconds)
+            binding.content.currentTime.text =
+                secondsToTimeString(mediaPlayer.currentPosition / 1000L)
 
             binding.content.seekBar.postDelayed(this, 1000)
         }
@@ -187,10 +192,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
         if (fromUser) {
             mediaPlayer.seekTo(progress.coerceAtMost(mediaPlayer.duration))
-
-            val minutes = progress / 60000
-            val seconds = (progress / 1000) % 60
-            binding.content.currentTime.text = String.format("%02d:%02d", minutes, seconds)
+            binding.content.currentTime.text = secondsToTimeString(progress / 1000L)
         }
     }
 
@@ -229,18 +231,25 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
                 songRegions.add(mediaPlayer.currentPosition.toLong())
                 runSongSelector()
             }
+            binding.content.undo.isEnabled = true
         } else if (v == binding.content.undo) {
             if (songRegions.size > 0) {
                 songRegions.removeLast()
                 if (songRegions.size % 3 == 2) {
                     songRegions.removeLast()
                 }
+                if (songRegions.size == 0) {
+                    binding.content.undo.isEnabled = false
+                }
                 binding.content.seekBar.clearRegions()
                 restoreSongRegionSelectionState(true)
             }
         } else if (v == binding.content.save) {
             if (songRegions.size == 0 || songRegions.size % 3 != 0) {
-                // TODO: error alert
+                MaterialInfoDialogFragment(
+                    R.string.dialog_save_error_title,
+                    R.string.dialog_save_error_message
+                ).show(supportFragmentManager, "IncompleteProcess")
             } else {
                 val baseDir =
                     if (externalStorage) getExternalFilesDir(null) ?: filesDir else filesDir

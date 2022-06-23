@@ -21,6 +21,7 @@
     <string name="settings_about">About</string>
 
     <!-- Recording -->
+    <string name="press_to_record">Press to record</string>
     <string name="permission_required_title">Permission required</string>
     <string name="permission_required">This app needs to access your microphone to record rehearsals</string>
 
@@ -55,10 +56,13 @@
     <string name="dialog_not_found_message">Cannot access the file. Maybe it was on external storage and it has been deleted?</string>
     <string name="dialog_delete_rehearsal_title">Are you sure?</string>
     <string name="dialog_delete_rehearsal_message">If you delete a rehearsal you also delete all the recordings and its already processed songs.</string>
+    <string name="dialog_save_error_title">Error</string>
+    <string name="dialog_save_error_message">You must select at least a song, and you have to specify a starting point and an ending point for each of the songs.</string>
 
     <!-- Process -->
     <string name="begin_song">Begin song</string>
     <string name="end_song">End song</string>
+    <string name="undo">Undo</string>
     <string name="save_exit">Save and exit</string>
 
     <string name="s_picker_title">Pick song</string>
@@ -71,5 +75,13 @@
     <string name="s_l_version">Version %1$d</string>
     <string name="s_l_title">Versions list</string>
     <string name="r_l_title">Songs list</string>
+
+    <!-- Notifications -->
+    <string name="notification_recorder_title">Rehearsal is being recorded</string>
+    <string name="notification_recorder_text">Tap to return to the application</string>
+    <string name="notification_normalizer_title">Normalizing audio…</string>
+    <string name="notification_normalizer_text">Audio is being normalized in the background</string>
+    <string name="notification_splitter_title">Splitting audio…</string>
+    <string name="notification_splitter_text">Audio is being split into tracks in the background</string>
 
 </resources>
