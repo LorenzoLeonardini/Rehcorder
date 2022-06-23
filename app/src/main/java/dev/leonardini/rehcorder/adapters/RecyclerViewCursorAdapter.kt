@@ -13,6 +13,7 @@ abstract class RecyclerViewCursorAdapter<V : RecyclerView.ViewHolder>(c: Cursor?
 
     abstract fun onBindViewHolder(holder: V, cursor: Cursor, position: Int)
     abstract fun onBindHeaderViewHolder(holder: V)
+    abstract fun onCursorSwapped(cursor: Cursor)
 
     companion object ViewTypes {
         const val HEADER_VIEW = 0
@@ -76,6 +77,7 @@ abstract class RecyclerViewCursorAdapter<V : RecyclerView.ViewHolder>(c: Cursor?
             cursor = newCursor
             dataValid = true
             rowIDColumn = cursor!!.getColumnIndex("uid")
+            onCursorSwapped(cursor!!)
             notifyDataSetChanged()
         } else {
             notifyItemRangeRemoved(0, itemCount)

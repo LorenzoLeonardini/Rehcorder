@@ -18,6 +18,12 @@ class RehearsalInfoAdapter(
 ) :
     RecyclerViewCursorAdapter<RecyclerView.ViewHolder>(cursor) {
 
+    private var uidIdx: Int = -1
+    private var nameIdx: Int = -1
+    private var versionIdx: Int = -1
+    private var fileNameIdx: Int = -1
+    private var externalStorageIdx: Int = -1
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType == HEADER_VIEW) {
             val v =
@@ -32,13 +38,21 @@ class RehearsalInfoAdapter(
         }
     }
 
+    override fun onCursorSwapped(cursor: Cursor) {
+        uidIdx = cursor.getColumnIndex("uid")
+        nameIdx = cursor.getColumnIndex("name")
+        versionIdx = cursor.getColumnIndex("version")
+        fileNameIdx = cursor.getColumnIndex("file_name")
+        externalStorageIdx = cursor.getColumnIndex("external_storage")
+    }
+
     @SuppressLint("Range")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, cursor: Cursor, position: Int) {
-        val id: Long = cursor.getLong(cursor.getColumnIndex("uid"))
-        val name: String? = cursor.getString(cursor.getColumnIndex("name"))
-        val version: Int = cursor.getInt(cursor.getColumnIndex("version"))
-        val fileName: String = cursor.getString(cursor.getColumnIndex("file_name"))
-        var externalStorage: Boolean = cursor.getInt(cursor.getColumnIndex("external_storage")) == 1
+        val id: Long = cursor.getLong(uidIdx)
+        val name: String? = cursor.getString(nameIdx)
+        val version: Int = cursor.getInt(versionIdx)
+        val fileName: String = cursor.getString(fileNameIdx)
+        var externalStorage: Boolean = cursor.getInt(externalStorageIdx) == 1
 
         (holder as RehearsalInfoViewHolder).let { holder ->
             holder.id = id

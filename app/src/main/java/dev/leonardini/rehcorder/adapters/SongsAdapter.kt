@@ -18,6 +18,10 @@ class SongsAdapter(
 ) :
     RecyclerViewCursorAdapter<RecyclerView.ViewHolder>(cursor) {
 
+    private var uidIdx: Int = -1
+    private var nameIdx: Int = -1
+    private var versionsCountIdx: Int = -1
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType == HEADER_VIEW) {
             val v =
@@ -32,11 +36,17 @@ class SongsAdapter(
         }
     }
 
+    override fun onCursorSwapped(cursor: Cursor) {
+        uidIdx = cursor.getColumnIndex("uid")
+        nameIdx = cursor.getColumnIndex("name")
+        versionsCountIdx = cursor.getColumnIndex("versions_count")
+    }
+
     @SuppressLint("Range")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, cursor: Cursor, position: Int) {
-        val id: Long = cursor.getLong(cursor.getColumnIndex("uid"))
-        val name: String = cursor.getString(cursor.getColumnIndex("name"))
-        val versionsCount: Int = cursor.getInt(cursor.getColumnIndex("versions_count"))
+        val id: Long = cursor.getLong(uidIdx)
+        val name: String = cursor.getString(nameIdx)
+        val versionsCount: Int = cursor.getInt(versionsCountIdx)
 
         (holder as SongViewHolder).let { holder ->
             holder.id = id
