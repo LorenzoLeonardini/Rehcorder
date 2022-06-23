@@ -124,6 +124,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         if (!::songRegions.isInitialized) {
             songRegions = ArrayList()
         }
+        binding.content.undo.isEnabled = songRegions.size > 0
 
         restoreSongRegionSelectionState(savedInstanceState == null)
 
@@ -229,11 +230,15 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
                 songRegions.add(mediaPlayer.currentPosition.toLong())
                 runSongSelector()
             }
+            binding.content.undo.isEnabled = true
         } else if (v == binding.content.undo) {
             if (songRegions.size > 0) {
                 songRegions.removeLast()
                 if (songRegions.size % 3 == 2) {
                     songRegions.removeLast()
+                }
+                if(songRegions.size == 0) {
+                    binding.content.undo.isEnabled = false
                 }
                 binding.content.seekBar.clearRegions()
                 restoreSongRegionSelectionState(true)
