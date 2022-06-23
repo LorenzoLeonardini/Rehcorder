@@ -140,7 +140,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         }
         supportFragmentManager.setFragmentResultListener("NewSongNameDialog", this) { _, bundle ->
             val which = bundle.getInt("which")
-            if(which == AlertDialog.BUTTON_POSITIVE) {
+            if (which == AlertDialog.BUTTON_POSITIVE) {
                 val name = bundle.getString("name")
                 Thread {
                     val song = Song(name = name!!)
@@ -155,11 +155,11 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         }
     }
 
-    private fun restoreSongRegionSelectionState(doRunSongSelector :Boolean) {
+    private fun restoreSongRegionSelectionState(doRunSongSelector: Boolean) {
         when (songRegions.size % 3) {
             0 -> binding.content.toggleSong.setText(R.string.begin_song)
             1 -> binding.content.toggleSong.setText(R.string.end_song)
-            2 -> if(doRunSongSelector) runSongSelector()
+            2 -> if (doRunSongSelector) runSongSelector()
         }
 
         for (i in 0 until floor(songRegions.size / 3.0).toInt()) {
@@ -237,7 +237,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
                 if (songRegions.size % 3 == 2) {
                     songRegions.removeLast()
                 }
-                if(songRegions.size == 0) {
+                if (songRegions.size == 0) {
                     binding.content.undo.isEnabled = false
                 }
                 binding.content.seekBar.clearRegions()
@@ -245,7 +245,10 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
             }
         } else if (v == binding.content.save) {
             if (songRegions.size == 0 || songRegions.size % 3 != 0) {
-                // TODO: error alert
+                MaterialInfoDialogFragment(
+                    R.string.dialog_save_error_title,
+                    R.string.dialog_save_error_message
+                ).show(supportFragmentManager, "IncompleteProcess")
             } else {
                 val baseDir =
                     if (externalStorage) getExternalFilesDir(null) ?: filesDir else filesDir

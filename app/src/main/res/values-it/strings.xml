@@ -55,6 +55,8 @@
     <string name="dialog_not_found_message">Impossibile accedere al file. Forse era sulla memoria esterna ed è stata rimossa?</string>
     <string name="dialog_delete_rehearsal_title">Vuoi confermare?</string>
     <string name="dialog_delete_rehearsal_message">Se cancelli una prova cancelli la registrazione e tutti i suoi brani già processati.</string>
+    <string name="dialog_save_error_title">Errore</string>
+    <string name="dialog_save_error_message">Devi selezionare almeno un brano, e per ogni brano devi specificare un punto di inizio e un punto di fine.</string>
 
     <!-- Process -->
     <string name="begin_song">Inizio brano</string>
