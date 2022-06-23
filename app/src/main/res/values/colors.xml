@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-<!--    <color name="black">#FF000000</color>-->
-<!--    <color name="white">#FFFFFFFF</color>-->
-<!--    <color name="light_blue_400">#FF29B6F6</color>-->
-<!--    <color name="light_blue_600">#FF039BE5</color>-->
-<!--    <color name="gray_400">#FFBDBDBD</color>-->
-<!--    <color name="gray_600">#FF757575</color>-->
+    <!--    <color name="black">#FF000000</color>-->
+    <!--    <color name="white">#FFFFFFFF</color>-->
+    <!--    <color name="light_blue_400">#FF29B6F6</color>-->
+    <!--    <color name="light_blue_600">#FF039BE5</color>-->
+    <!--    <color name="gray_400">#FFBDBDBD</color>-->
+    <!--    <color name="gray_600">#FF757575</color>-->
 
     <color name="appRed">#ee675c</color>
     <color name="appColorOnRed">#601410</color>
+
+    <color name="recordingAnimationColor">#FF9F97</color>
 
     <color name="md_theme_light_primary">#006B57</color>
     <color name="md_theme_light_onPrimary">#FFFFFF</color>
@@ -36,7 +38,7 @@
     <color name="md_theme_light_inverseOnSurface">#EFF1EE</color>
     <color name="md_theme_light_inverseSurface">#2E312F</color>
     <color name="md_theme_light_inversePrimary">#5EDBBB</color>
-<!--    <color name="md_theme_light_shadow">#000000</color>-->
+    <!--    <color name="md_theme_light_shadow">#000000</color>-->
     <color name="md_theme_light_surfaceTint">#006B57</color>
     <color name="md_theme_light_surfaceTintColor">#006B57</color>
 
@@ -66,10 +68,10 @@
     <color name="md_theme_dark_inverseOnSurface">#191C1B</color>
     <color name="md_theme_dark_inverseSurface">#E1E3E0</color>
     <color name="md_theme_dark_inversePrimary">#006B57</color>
-<!--    <color name="md_theme_dark_shadow">#000000</color>-->
+    <!--    <color name="md_theme_dark_shadow">#000000</color>-->
     <color name="md_theme_dark_surfaceTint">#5EDBBB</color>
     <color name="md_theme_dark_surfaceTintColor">#5EDBBB</color>
 
-<!--    <color name="seed">#006b57</color>-->
+    <!--    <color name="seed">#006b57</color>-->
 
 </resources>

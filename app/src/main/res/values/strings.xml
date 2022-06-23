@@ -21,6 +21,7 @@
     <string name="settings_about">About</string>
 
     <!-- Recording -->
+    <string name="press_to_record">Press to record</string>
     <string name="permission_required_title">Permission required</string>
     <string name="permission_required">This app needs to access your microphone to record rehearsals</string>
 
