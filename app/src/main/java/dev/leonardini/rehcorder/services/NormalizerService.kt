@@ -1,7 +1,6 @@
 package dev.leonardini.rehcorder.services
 
 import android.app.Notification
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
@@ -33,19 +32,12 @@ class NormalizerService : Service(), FFmpegSessionCompleteCallback, LogCallback,
     private fun requestForeground() {
         val nm: NotificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                "dev.leonardini.rehcorder",
-                "Rehcorder",
-                NotificationManager.IMPORTANCE_HIGH
-            )
-            nm.createNotificationChannel(channel)
-        }
+        Utils.createServiceNotificationChannelIfNotExists(nm)
 
         var notificationBuilder = NotificationCompat.Builder(this, "dev.leonardini.rehcorder")
-            .setContentTitle("Normalizing audio...")
+            .setContentTitle(resources.getString(R.string.notification_normalizer_title))
             .setSmallIcon(R.drawable.ic_mic)
-            .setContentText("Audio is being normalized in the background")
+            .setContentText(resources.getString(R.string.notification_normalizer_text))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
         if (Build.VERSION.SDK_INT >= 31) {

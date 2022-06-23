@@ -76,4 +76,12 @@
     <string name="s_l_title">Versions list</string>
     <string name="r_l_title">Songs list</string>
 
+    <!-- Notifications -->
+    <string name="notification_recorder_title">Rehearsal is being recorded</string>
+    <string name="notification_recorder_text">Tap to return to the application</string>
+    <string name="notification_normalizer_title">Normalizing audio…</string>
+    <string name="notification_normalizer_text">Audio is being normalized in the background</string>
+    <string name="notification_splitter_title">Splitting audio…</string>
+    <string name="notification_splitter_text">Audio is being split into tracks in the background</string>
+
 </resources>

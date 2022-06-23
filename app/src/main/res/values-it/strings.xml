@@ -76,4 +76,12 @@
     <string name="s_l_title">Lista versioni</string>
     <string name="r_l_title">Lista brani</string>
 
+    <!-- Notifications -->
+    <string name="notification_recorder_title">Registrazione delle prove in corso</string>
+    <string name="notification_recorder_text">Premi per tornare all\'applicazione</string>
+    <string name="notification_normalizer_title">Normalizzando l\'audio…</string>
+    <string name="notification_normalizer_text">Normalizzazione audio in background</string>
+    <string name="notification_splitter_title">Separando l\'audio…</string>
+    <string name="notification_splitter_text">Separazione delle varie tracce in corso</string>
+
 </resources>
