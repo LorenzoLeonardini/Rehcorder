@@ -1,6 +1,5 @@
 package dev.leonardini.rehcorder.adapters
 
-import android.annotation.SuppressLint
 import android.database.Cursor
 import android.view.LayoutInflater
 import android.view.View
@@ -21,6 +20,13 @@ class RehearsalsAdapter(
 ) :
     RecyclerViewCursorAdapter<RecyclerView.ViewHolder>(cursor) {
 
+    private var uidIdx: Int = -1
+    private var nameIdx: Int = -1
+    private var dateIdx: Int = -1
+    private var songsCountIdx: Int = -1
+    private var fileNameIdx: Int = -1
+    private var externalStorageIdx: Int = -1
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType == HEADER_VIEW) {
             val v =
@@ -35,14 +41,22 @@ class RehearsalsAdapter(
         }
     }
 
-    @SuppressLint("Range")
+    override fun onCursorSwapped(cursor: Cursor) {
+        uidIdx = cursor.getColumnIndexOrThrow("uid")
+        nameIdx = cursor.getColumnIndexOrThrow("name")
+        dateIdx = cursor.getColumnIndexOrThrow("date")
+        songsCountIdx = cursor.getColumnIndexOrThrow("songs_count")
+        fileNameIdx = cursor.getColumnIndexOrThrow("file_name")
+        externalStorageIdx = cursor.getColumnIndexOrThrow("external_storage")
+    }
+
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, cursor: Cursor, position: Int) {
-        val id: Long = cursor.getLong(cursor.getColumnIndex("uid"))
-        val name: String? = cursor.getStringOrNull(cursor.getColumnIndex("name"))
-        val date: Long = cursor.getLong(cursor.getColumnIndex("date"))
-        val songsCount: Int = cursor.getInt(cursor.getColumnIndex("songs_count"))
-        val fileName: String = cursor.getString(cursor.getColumnIndex("file_name"))
-        val externalStorage: Boolean = cursor.getInt(cursor.getColumnIndex("external_storage")) == 1
+        val id: Long = cursor.getLong(uidIdx)
+        val name: String? = cursor.getStringOrNull(nameIdx)
+        val date: Long = cursor.getLong(dateIdx)
+        val songsCount: Int = cursor.getInt(songsCountIdx)
+        val fileName: String = cursor.getString(fileNameIdx)
+        val externalStorage: Boolean = cursor.getInt(externalStorageIdx) == 1
         val formattedDate = "${
             DateFormat.getDateInstance().format(Date(date * 1000))
         } - ${DateFormat.getTimeInstance().format(Date(date * 1000))}"
@@ -56,7 +70,11 @@ class RehearsalsAdapter(
             holder.binding.rehearsalTitle.text = name ?: formattedDate
             holder.binding.rehearsalDate.text = formattedDate
             holder.binding.rehearsalSongs.text =
-                holder.binding.rehearsalSongs.resources.getString(R.string.r_count, songsCount)
+                holder.binding.rehearsalSongs.resources.getQuantityString(
+                    R.plurals.r_count,
+                    songsCount,
+                    songsCount
+                )
             holder.binding.divider.visibility =
                 if (position != itemCount - 2) View.VISIBLE else View.INVISIBLE
         }

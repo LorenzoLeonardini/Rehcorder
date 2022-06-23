@@ -84,10 +84,10 @@ class RehearsalActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShare
 
                     for (i in 1 until adapter.itemCount) {
                         val cursor = adapter.getItem(i)!!
-                        val version: Int = cursor.getInt(cursor.getColumnIndex("version"))
-                        val fileName: String = cursor.getString(cursor.getColumnIndex("file_name"))
+                        val version: Int = cursor.getInt(cursor.getColumnIndexOrThrow("version"))
+                        val fileName: String = cursor.getString(cursor.getColumnIndexOrThrow("file_name"))
                         val externalStorage: Boolean =
-                            cursor.getInt(cursor.getColumnIndex("external_storage")) == 1
+                            cursor.getInt(cursor.getColumnIndexOrThrow("external_storage")) == 1
 
                         File("${(if (externalStorage) externalStorageBaseDir else filesDir).absolutePath}/songs/${fileName}_$version.aac").delete()
                     }

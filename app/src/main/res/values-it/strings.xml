@@ -2,8 +2,7 @@
 <resources>
     <!-- Generic -->
     <string name="action_settings">Impostazioni</string>
-    <string name="next">Avanti</string>
-    <string name="previous">Indietro</string>
+    <string name="action_delete">Elimina</string>
     <string name="record">Registra</string>
     <string name="rename">Rinomina</string>
     <string name="save">Salva</string>
@@ -11,7 +10,6 @@
 
     <!-- Menu -->
     <string name="menu_songs">Brani</string>
-    <string name="menu_record">Registra</string>
     <string name="menu_rehearsals">Prove</string>
 
     <!-- Settings -->
@@ -29,6 +27,10 @@
     <!-- Songs -->
     <string name="s_title">I tuoi brani</string>
     <string name="s_rename">Nome brano</string>
+    <plurals name="s_versions">
+        <item quantity="one">%1$d Versione</item>
+        <item quantity="other">%1$d Versioni</item>
+    </plurals>
 
     <!-- Rehearsals -->
     <string name="r_card_title">Processa La Tua Ultima Registrazione</string>
@@ -36,7 +38,10 @@
     <string name="r_card_action">Processa Ora</string>
     <string name="r_rename">Nome registrazione</string>
     <string name="r_title">Le tue prove</string>
-    <string name="r_count">%1$d Brani</string>
+    <plurals name="r_count">
+        <item quantity="one">%1$d Brano</item>
+        <item quantity="other">%1$d Brani</item>
+    </plurals>
     <string name="r_no_recordings">Ancora nessuna registrazione, premi il pulsante per iniziare!</string>
 
     <!-- Dialogs -->
@@ -51,10 +56,20 @@
     <string name="dialog_delete_rehearsal_title">Vuoi confermare?</string>
     <string name="dialog_delete_rehearsal_message">Se cancelli una prova cancelli la registrazione e tutti i suoi brani già processati.</string>
 
+    <!-- Process -->
+    <string name="begin_song">Inizio brano</string>
+    <string name="end_song">Fine brano</string>
+    <string name="save_exit">Salva ed esci</string>
+
     <string name="s_picker_title">Seleziona brano</string>
     <string name="s_picker_new_song">+ Nuovo brano</string>
     <string name="s_new_title">Nuovo brano</string>
     <string name="s_new_song_name">Nome brano</string>
     <string name="s_new_add">Aggiungi</string>
+
+    <!-- Rehearsal and Song list -->
+    <string name="s_l_version">Versione %1$d</string>
+    <string name="s_l_title">Lista versioni</string>
+    <string name="r_l_title">Lista brani</string>
 
 </resources>

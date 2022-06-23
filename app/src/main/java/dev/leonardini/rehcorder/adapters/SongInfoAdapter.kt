@@ -21,6 +21,13 @@ class SongInfoAdapter(
 ) :
     RecyclerViewCursorAdapter<RecyclerView.ViewHolder>(cursor) {
 
+    private var uidIdx: Int = -1
+    private var nameIdx: Int = -1
+    private var dateIdx: Int = -1
+    private var versionIdx: Int = -1
+    private var fileNameIdx: Int = -1
+    private var externalStorageIdx: Int = -1
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType == HEADER_VIEW) {
             val v =
@@ -35,14 +42,22 @@ class SongInfoAdapter(
         }
     }
 
-    @SuppressLint("Range")
+    override fun onCursorSwapped(cursor: Cursor) {
+        uidIdx = cursor.getColumnIndexOrThrow("uid")
+        nameIdx = cursor.getColumnIndexOrThrow("name")
+        dateIdx = cursor.getColumnIndexOrThrow("date")
+        versionIdx = cursor.getColumnIndexOrThrow("version")
+        fileNameIdx = cursor.getColumnIndexOrThrow("file_name")
+        externalStorageIdx = cursor.getColumnIndexOrThrow("external_storage")
+    }
+
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, cursor: Cursor, position: Int) {
-        val id: Long = cursor.getLong(cursor.getColumnIndex("uid"))
-        val name: String? = cursor.getStringOrNull(cursor.getColumnIndex("name"))
-        val date: Long = cursor.getLong(cursor.getColumnIndex("date"))
-        val version: Int = cursor.getInt(cursor.getColumnIndex("version"))
-        val fileName: String = cursor.getString(cursor.getColumnIndex("file_name"))
-        var externalStorage: Boolean = cursor.getInt(cursor.getColumnIndex("external_storage")) == 1
+        val id: Long = cursor.getLong(uidIdx)
+        val name: String? = cursor.getStringOrNull(nameIdx)
+        val date: Long = cursor.getLong(dateIdx)
+        val version: Int = cursor.getInt(versionIdx)
+        val fileName: String = cursor.getString(fileNameIdx)
+        var externalStorage: Boolean = cursor.getInt(externalStorageIdx) == 1
         val formattedDate = "${
             DateFormat.getDateInstance().format(Date(date * 1000))
         } - ${DateFormat.getTimeInstance().format(Date(date * 1000))}"

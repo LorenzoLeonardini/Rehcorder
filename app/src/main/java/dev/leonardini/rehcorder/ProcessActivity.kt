@@ -68,6 +68,8 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         binding.toolbar.title =
             intent.getStringExtra("rehearsalName") ?: intent.getStringExtra("fileName")!!
 
+        database = Database.getInstance(applicationContext)
+
         rehearsalId = intent.getLongExtra("rehearsalId", -1L)
         fileName = intent.getStringExtra("fileName")!!
         externalStorage = intent.getBooleanExtra("externalStorage", false)
@@ -122,7 +124,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         }
 
         if (songRegions.size % 3 == 1) {
-            binding.content.toggleSong.text = "End song"
+            binding.content.toggleSong.setText(R.string.end_song)
         } else if (songRegions.size % 3 == 2) {
             runSongSelector()
         }
@@ -136,8 +138,6 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
 
         runOnUiThread(this)
         binding.content.seekBar.setOnSeekBarChangeListener(this)
-
-        database = Database.getInstance(applicationContext)
 
         supportFragmentManager.setFragmentResultListener("SongPickerDialog", this) { _, bundle ->
             val id = bundle.getLong("id")
@@ -204,13 +204,13 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         } else if (v == binding.content.toggleSong) {
             if (songRegions.size % 3 == 0) {
                 // New song
-                binding.content.toggleSong.text = "End song"
+                binding.content.toggleSong.setText(R.string.end_song)
                 songRegions.add(mediaPlayer.currentPosition.toLong())
             } else {
                 if (mediaPlayer.currentPosition <= songRegions.last()) {
                     return
                 }
-                binding.content.toggleSong.text = "Begin song"
+                binding.content.toggleSong.setText(R.string.begin_song)
                 binding.content.seekBar.highlightRegion(
                     songRegions.last().toInt(),
                     mediaPlayer.currentPosition

@@ -1,6 +1,5 @@
 package dev.leonardini.rehcorder.adapters
 
-import android.annotation.SuppressLint
 import android.database.Cursor
 import android.view.LayoutInflater
 import android.view.View
@@ -18,6 +17,10 @@ class SongsAdapter(
 ) :
     RecyclerViewCursorAdapter<RecyclerView.ViewHolder>(cursor) {
 
+    private var uidIdx: Int = -1
+    private var nameIdx: Int = -1
+    private var versionsCountIdx: Int = -1
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType == HEADER_VIEW) {
             val v =
@@ -32,17 +35,27 @@ class SongsAdapter(
         }
     }
 
-    @SuppressLint("Range")
+    override fun onCursorSwapped(cursor: Cursor) {
+        uidIdx = cursor.getColumnIndexOrThrow("uid")
+        nameIdx = cursor.getColumnIndexOrThrow("name")
+        versionsCountIdx = cursor.getColumnIndexOrThrow("versions_count")
+    }
+
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, cursor: Cursor, position: Int) {
-        val id: Long = cursor.getLong(cursor.getColumnIndex("uid"))
-        val name: String = cursor.getString(cursor.getColumnIndex("name"))
-        val versionsCount: Int = cursor.getInt(cursor.getColumnIndex("versions_count"))
+        val id: Long = cursor.getLong(uidIdx)
+        val name: String = cursor.getString(nameIdx)
+        val versionsCount: Int = cursor.getInt(versionsCountIdx)
 
         (holder as SongViewHolder).let { holder ->
             holder.id = id
             holder.name = name
             holder.binding.songTitle.text = name
-            holder.binding.songVersions.text = versionsCount.toString() + " Versions"
+            holder.binding.songVersions.text =
+                holder.binding.songVersions.resources.getQuantityString(
+                    R.plurals.s_versions,
+                    versionsCount,
+                    versionsCount
+                )
             holder.binding.divider.visibility =
                 if (position != itemCount - 2) View.VISIBLE else View.INVISIBLE
         }
