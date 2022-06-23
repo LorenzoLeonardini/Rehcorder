@@ -51,8 +51,9 @@ class SongsAdapter(
             holder.name = name
             holder.binding.songTitle.text = name
             holder.binding.songVersions.text =
-                holder.binding.songVersions.resources.getQuantityText(
+                holder.binding.songVersions.resources.getQuantityString(
                     R.plurals.s_versions,
+                    versionsCount,
                     versionsCount
                 )
             holder.binding.divider.visibility =

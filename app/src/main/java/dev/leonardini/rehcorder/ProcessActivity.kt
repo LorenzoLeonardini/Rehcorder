@@ -68,6 +68,8 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         binding.toolbar.title =
             intent.getStringExtra("rehearsalName") ?: intent.getStringExtra("fileName")!!
 
+        database = Database.getInstance(applicationContext)
+
         rehearsalId = intent.getLongExtra("rehearsalId", -1L)
         fileName = intent.getStringExtra("fileName")!!
         externalStorage = intent.getBooleanExtra("externalStorage", false)
@@ -136,8 +138,6 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
 
         runOnUiThread(this)
         binding.content.seekBar.setOnSeekBarChangeListener(this)
-
-        database = Database.getInstance(applicationContext)
 
         supportFragmentManager.setFragmentResultListener("SongPickerDialog", this) { _, bundle ->
             val id = bundle.getLong("id")

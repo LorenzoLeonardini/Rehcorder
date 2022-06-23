@@ -72,6 +72,7 @@ class RehearsalsAdapter(
             holder.binding.rehearsalSongs.text =
                 holder.binding.rehearsalSongs.resources.getQuantityString(
                     R.plurals.r_count,
+                    songsCount,
                     songsCount
                 )
             holder.binding.divider.visibility =
