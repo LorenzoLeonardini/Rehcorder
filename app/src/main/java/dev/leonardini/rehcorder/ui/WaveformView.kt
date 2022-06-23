@@ -78,16 +78,20 @@ class WaveformView : androidx.appcompat.widget.AppCompatTextView, Visualizer.OnD
             enabled = false
             release()
         }
-        visualizer = Visualizer(audioSessionId)
-        visualizer!!.apply {
-            captureSize = Visualizer.getCaptureSizeRange()[1]
-            setDataCaptureListener(
-                this@WaveformView,
-                Visualizer.getMaxCaptureRate() / 2,
-                true,
-                false
-            )
-            enabled = true
+        try {
+            visualizer = Visualizer(audioSessionId)
+            visualizer!!.apply {
+                captureSize = Visualizer.getCaptureSizeRange()[1]
+                setDataCaptureListener(
+                    this@WaveformView,
+                    Visualizer.getMaxCaptureRate() / 2,
+                    true,
+                    false
+                )
+                enabled = true
+            }
+        } catch (_: Exception) {
+            visualizer = null
         }
     }
 
