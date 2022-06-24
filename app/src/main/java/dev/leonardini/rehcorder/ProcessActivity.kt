@@ -168,6 +168,10 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
     }
 
     override fun onBackPressed() {
+        if(songRegions.size == 0) {
+            finish()
+            return
+        }
         MaterialDialogFragment(
             R.string.dialog_confirm_exit_title,
             R.string.dialog_confirm_exit_message,
