@@ -24,15 +24,24 @@ data class Rehearsal(
 
         fun create(
             applicationContext: Context,
-            hasLocationData: Boolean,
-            latitude: Double,
-            longitude: Double
+            permissionToGetCoarseLocationAccepted: Boolean,
+            permissionToGetFineLocationAccepted: Boolean
         ): Pair<Long, String> {
             val timestamp = System.currentTimeMillis() / 1000
             val fileName = "$timestamp.m4a"
 
             val (externalStorage, baseDir) = Utils.getPreferredStorageLocation(applicationContext)
 
+            // Get location
+            val (info, location) = Utils.getLocation(
+                applicationContext,
+                permissionToGetFineLocationAccepted,
+                permissionToGetCoarseLocationAccepted
+            )
+            val (hasLocationData, willComputeNewLocation) = info
+            val (latitude, longitude, provider) = location
+
+            // Create rehearsal
             val id = Database.getInstance(applicationContext).rehearsalDao().insert(
                 Rehearsal(
                     date = timestamp,
@@ -43,6 +52,18 @@ data class Rehearsal(
                     longitude = longitude
                 )
             )
+
+            // Callback for updated location
+            if (willComputeNewLocation) {
+                Utils.getUpdatedLocation(applicationContext, provider!!) { location ->
+                    if (location != null) {
+                        Thread {
+                            Database.getInstance(applicationContext).rehearsalDao()
+                                .updateLocation(id, location.latitude, location.longitude)
+                        }.start()
+                    }
+                }
+            }
 
             return Pair(id, Utils.getRecordingPath(baseDir, fileName))
         }

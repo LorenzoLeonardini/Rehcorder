@@ -1,11 +1,8 @@
 package dev.leonardini.rehcorder
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.Criteria
-import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -16,7 +13,6 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.location.LocationManagerCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.get
 import androidx.core.view.marginBottom
@@ -26,7 +22,6 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.material.navigation.NavigationBarView
 import dev.leonardini.rehcorder.databinding.ActivityMainBinding
-import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
 import dev.leonardini.rehcorder.services.RecorderService
 import dev.leonardini.rehcorder.ui.RecordingFragment
@@ -102,10 +97,6 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
         Manifest.permission.ACCESS_COARSE_LOCATION
     )
 
-    private fun recordingPermissionsGranted() = permissions.all {
-        ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
-    }
-
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putBoolean("recording", recording)
@@ -118,8 +109,10 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         for (i in permissions.indices) {
-            val granted =
-                requestCode == REQUEST_PERMISSIONS && grantResults[i] == PackageManager.PERMISSION_GRANTED
+            if (requestCode != REQUEST_PERMISSIONS) {
+                continue
+            }
+            val granted = grantResults[i] == PackageManager.PERMISSION_GRANTED
             when (permissions[i]) {
                 Manifest.permission.RECORD_AUDIO -> {
                     permissionToRecordAccepted = granted
@@ -163,73 +156,14 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
         )
         recording = true
 
-        // Location stuff
-        var hasLocationData = false
-        var latitude = -1.0
-        var longitude = -1.0
-        var willComputeNewLocation = false
-        var provider: String? = null
-        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        if (permissionToGetCoarseLocationAccepted || permissionToGetFineLocationAccepted) {
-            val criteria = Criteria()
-            criteria.accuracy =
-                if (permissionToGetFineLocationAccepted) Criteria.ACCURACY_FINE else Criteria.ACCURACY_COARSE
-            criteria.isCostAllowed = false
-            criteria.isAltitudeRequired = false
-            criteria.isSpeedRequired = false
-
-            provider = locationManager.getBestProvider(criteria, true)
-            if (provider != null) {
-                Log.i("Location", "Best provider is $provider")
-                val location = locationManager.getLastKnownLocation(provider)
-                if (location == null || location.time < System.currentTimeMillis() - 30 * 60 * 1000) {
-                    // request new location
-                    willComputeNewLocation = true
-                }
-                if (location != null) {
-                    // meanwhile set this location
-                    hasLocationData = true
-                    latitude = location.latitude
-                    longitude = location.longitude
-                    Log.i(
-                        "Location",
-                        "Location at ${location.time} is ${location.latitude} ${location.longitude}"
-                    )
-                }
-            }
-        }
-
         Thread {
             val (id, file) = Rehearsal.create(
                 applicationContext,
-                hasLocationData,
-                latitude,
-                longitude
+                permissionToGetCoarseLocationAccepted,
+                permissionToGetFineLocationAccepted
             )
 
             runOnUiThread {
-                if (willComputeNewLocation) {
-                    Log.i("Location", "Will get new location with provider $provider")
-                    LocationManagerCompat.getCurrentLocation(
-                        locationManager,
-                        provider!!,
-                        null,
-                        ContextCompat.getMainExecutor(this)
-                    ) { location ->
-                        Log.i("Location", "New location! $location")
-                        if (location != null) {
-                            Thread {
-                                Database.getInstance(applicationContext).rehearsalDao()
-                                    .updateLocation(id, location.latitude, location.longitude)
-                                Log.i(
-                                    "Location",
-                                    "Updated location at ${location.time} is ${location.latitude} ${location.longitude}"
-                                )
-                            }.start()
-                        }
-                    }
-                }
-
                 val intent = Intent(this, RecorderService::class.java)
                 intent.action = "RECORD"
                 intent.putExtra("id", id)

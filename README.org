@@ -2,4 +2,8 @@
 #+AUTHOR:
 #+DATE:
 
-Empty README file
+Rehcorder is an audio recording app specifically designed for musicians to record their rehearsals.
+
+Record your session, split the audio and keep track of you progress and your songs versions! Share your recordings with your band mates!
+
+> Warning: This branch contains extra code for getting the user's location. This feature has only been added to make the app be counted for a University exam, this feature will not be pushed on the main branch and pubicly distributed

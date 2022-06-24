@@ -4,7 +4,6 @@ import android.content.Intent
 import android.location.Geocoder
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -124,8 +123,11 @@ class RehearsalInfoActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackS
             holder.binding.card.visibility =
                 if (rehearsal.hasLocationData) View.VISIBLE else View.GONE
             if (rehearsal.hasLocationData) {
+                // Fallback coordinates in case Geocoder is not present
                 holder.binding.location.text =
-                    "${rehearsal.latitude} ${rehearsal.longitude}"
+                    String.format("%.5f %.5f", rehearsal.latitude, rehearsal.longitude)
+
+                // Geocoding
                 if (Geocoder.isPresent()) {
                     val geocoder = Geocoder(this, resources.configuration.locale)
                     val address =
@@ -136,10 +138,11 @@ class RehearsalInfoActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackS
                         )[0]
                     holder.binding.location.text = address.getAddressLine(0)
                 }
+
+                // Open Maps
                 holder.binding.card.setOnClickListener {
                     val locationUri =
                         Uri.parse("geo:${rehearsal.latitude},${rehearsal.longitude}?q=${rehearsal.latitude},${rehearsal.longitude}")
-                    Log.i("Location", locationUri.toString())
                     startActivity(Intent(Intent.ACTION_VIEW, locationUri))
                 }
             }
