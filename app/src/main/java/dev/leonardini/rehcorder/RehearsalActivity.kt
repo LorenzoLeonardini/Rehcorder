@@ -1,10 +1,14 @@
 package dev.leonardini.rehcorder
 
 import android.content.Intent
+import android.location.Geocoder
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.viewModels
+import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ShareCompat
@@ -14,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import dev.leonardini.rehcorder.adapters.RehearsalInfoAdapter
 import dev.leonardini.rehcorder.databinding.ActivityRehearsalBinding
 import dev.leonardini.rehcorder.db.Database
+import dev.leonardini.rehcorder.db.Rehearsal
 import dev.leonardini.rehcorder.ui.dialogs.MaterialDialogFragment
 import dev.leonardini.rehcorder.ui.dialogs.MaterialInfoDialogFragment
 import dev.leonardini.rehcorder.ui.dialogs.MaterialLoadingDialogFragment
@@ -28,6 +33,7 @@ class RehearsalActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShare
 
     private lateinit var binding: ActivityRehearsalBinding
     private lateinit var adapter: RehearsalInfoAdapter
+    private lateinit var model :RehearsalViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -54,6 +60,7 @@ class RehearsalActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShare
                 intent.getLongExtra("rehearsalId", -1)
             )
         }
+        this.model = model
         model.getRehearsal().observe(this) { rehearsal ->
             val formattedDate = "${
                 DateFormat.getDateInstance().format(Date(rehearsal.date * 1000))
@@ -128,7 +135,24 @@ class RehearsalActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShare
         builder.startChooser()
     }
 
-    override fun onBound(holder: RehearsalInfoAdapter.HeaderViewHolder) {}
+    override fun onBound(holder: RehearsalInfoAdapter.HeaderViewHolder) {
+        holder.binding.card.visibility = if (model.getRehearsal().value.hasLocationData) View.VISIBLE else View.GONE
+        if (model.getRehearsal().value.hasLocationData) {
+            holder.binding.location.text = "${model.getRehearsal().value.latitude} ${model.getRehearsal().value.longitude}"
+            if (Geocoder.isPresent()) {
+                val geocoder = Geocoder(this, resources.configuration.locale)
+                val address =
+                    geocoder.getFromLocation(model.getRehearsal().value.latitude!!, model.getRehearsal().value.longitude!!, 1)[0]
+                holder.binding.location.text = address.getAddressLine(0)
+            }
+            holder.binding.card.setOnClickListener {
+                val locationUri =
+                    Uri.parse("geo:${model.getRehearsal().value.latitude},${model.getRehearsal().value.longitude}?q=${model.getRehearsal().value.latitude},${model.getRehearsal().value.longitude}")
+                Log.i("Location", locationUri.toString())
+                startActivity(Intent(Intent.ACTION_VIEW, locationUri))
+            }
+        }
+    }
 
     override fun onItemClicked(holder: RehearsalInfoAdapter.RehearsalInfoViewHolder) {
         val baseDir =
