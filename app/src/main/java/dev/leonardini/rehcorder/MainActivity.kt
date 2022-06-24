@@ -8,7 +8,6 @@ import android.location.Criteria
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -27,6 +26,7 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.material.navigation.NavigationBarView
 import dev.leonardini.rehcorder.databinding.ActivityMainBinding
+import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
 import dev.leonardini.rehcorder.services.RecorderService
 import dev.leonardini.rehcorder.ui.RecordingFragment
@@ -160,7 +160,7 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
             args
         )
         recording = true
-      
+
         // Location stuff
         var hasLocationData = false
         var latitude = -1.0
@@ -198,37 +198,45 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
         }
 
         Thread {
-            val (id, file) = Rehearsal.create(applicationContext, hasLocationData, latitude, longitude)
-            if (willComputeNewLocation) {
-                Log.i("Location", "Will get new location with provider $provider")
-                LocationManagerCompat.getCurrentLocation(
-                    locationManager,
-                    provider!!,
-                    null,
-                    ContextCompat.getMainExecutor(this)
-                ) { location ->
-                    Log.i("Location", "New location! $location")
-                    if (location != null) {
-                        Thread {
-                            database.rehearsalDao()
-                                .updateLocation(id, location.latitude, location.longitude)
-                            Log.i(
-                                "Location",
-                                "Updated location at ${location.time} is ${location.latitude} ${location.longitude}"
-                            )
-                        }.start()
+            val (id, file) = Rehearsal.create(
+                applicationContext,
+                hasLocationData,
+                latitude,
+                longitude
+            )
+
+            runOnUiThread {
+                if (willComputeNewLocation) {
+                    Log.i("Location", "Will get new location with provider $provider")
+                    LocationManagerCompat.getCurrentLocation(
+                        locationManager,
+                        provider!!,
+                        null,
+                        ContextCompat.getMainExecutor(this)
+                    ) { location ->
+                        Log.i("Location", "New location! $location")
+                        if (location != null) {
+                            Thread {
+                                Database.getInstance(applicationContext).rehearsalDao()
+                                    .updateLocation(id, location.latitude, location.longitude)
+                                Log.i(
+                                    "Location",
+                                    "Updated location at ${location.time} is ${location.latitude} ${location.longitude}"
+                                )
+                            }.start()
+                        }
                     }
                 }
-            }
 
-            val intent = Intent(this, RecorderService::class.java)
-            intent.action = "RECORD"
-            intent.putExtra("id", id)
-            intent.putExtra("file", file)
-            if (Build.VERSION.SDK_INT >= 26) {
-                startForegroundService(intent)
-            } else {
-                startService(intent)
+                val intent = Intent(this, RecorderService::class.java)
+                intent.action = "RECORD"
+                intent.putExtra("id", id)
+                intent.putExtra("file", file)
+                if (Build.VERSION.SDK_INT >= 26) {
+                    startForegroundService(intent)
+                } else {
+                    startService(intent)
+                }
             }
         }.start()
     }

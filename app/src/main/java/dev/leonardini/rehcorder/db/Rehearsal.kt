@@ -22,7 +22,12 @@ data class Rehearsal(
         const val PROCESSING = 4
         const val PROCESSED = 5
 
-        fun create(applicationContext: Context): Pair<Long, String> {
+        fun create(
+            applicationContext: Context,
+            hasLocationData: Boolean,
+            latitude: Double,
+            longitude: Double
+        ): Pair<Long, String> {
             val timestamp = System.currentTimeMillis() / 1000
             val fileName = "$timestamp.m4a"
 
@@ -37,7 +42,10 @@ data class Rehearsal(
                 Rehearsal(
                     date = timestamp,
                     fileName = fileName,
-                    externalStorage = externalStorage
+                    externalStorage = externalStorage,
+                    hasLocationData = hasLocationData,
+                    latitude = latitude,
+                    longitude = longitude
                 )
             )
 
