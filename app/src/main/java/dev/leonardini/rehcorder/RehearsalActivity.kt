@@ -54,7 +54,7 @@ class RehearsalActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShare
             database = Database.getInstance(applicationContext)
 
             val rehearsal =
-                database.rehearsalDao().getRehearsal(intent.getLongExtra("rehearsalId", -1))!!
+                database.rehearsalDao().getRehearsal(intent.getLongExtra("rehearsalId", -1))
             rehearsalId = rehearsal.uid
             externalStorage = rehearsal.externalStorage
             fileName = rehearsal.fileName

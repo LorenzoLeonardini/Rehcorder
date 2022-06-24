@@ -7,7 +7,7 @@ import android.os.Build
 object Utils {
     fun createServiceNotificationChannelIfNotExists(notificationManager: NotificationManager) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if(notificationManager.getNotificationChannel("dev.leonardini.rehcorder") == null) {
+            if (notificationManager.getNotificationChannel("dev.leonardini.rehcorder") == null) {
                 val channel = NotificationChannel(
                     "dev.leonardini.rehcorder",
                     "Rehcorder",

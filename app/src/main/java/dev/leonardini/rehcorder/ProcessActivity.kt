@@ -168,7 +168,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
     }
 
     override fun onBackPressed() {
-        if(songRegions.size == 0) {
+        if (songRegions.size == 0) {
             finish()
             return
         }

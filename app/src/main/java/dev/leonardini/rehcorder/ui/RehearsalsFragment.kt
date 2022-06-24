@@ -11,6 +11,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.leonardini.rehcorder.ProcessActivity
@@ -18,13 +19,12 @@ import dev.leonardini.rehcorder.R
 import dev.leonardini.rehcorder.RehearsalActivity
 import dev.leonardini.rehcorder.adapters.RehearsalsAdapter
 import dev.leonardini.rehcorder.databinding.FragmentRehearsalsBinding
-import dev.leonardini.rehcorder.db.AppDatabase
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
 import dev.leonardini.rehcorder.ui.dialogs.MaterialInfoDialogFragment
 import dev.leonardini.rehcorder.ui.dialogs.RenameDialogFragment
-import java.text.DateFormat
-import java.util.*
+import dev.leonardini.rehcorder.viewmodels.RehearsalsViewModel
+import dev.leonardini.rehcorder.viewmodels.RehearsalsViewModelFactory
 
 class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickListener,
     RehearsalsAdapter.OnHeaderBoundListener, RehearsalsAdapter.OnItemClickListener,
@@ -42,16 +42,33 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
-    private lateinit var database: AppDatabase
+    private lateinit var model: RehearsalsViewModel
     private lateinit var adapter: RehearsalsAdapter
 
     private lateinit var activityLauncher: ActivityResultLauncher<Intent>
 
-    private var showCard: Boolean = false
-    private var inNeedOfProcessingId: Long = -1
-    private var inNeedOfProcessingFileName: String = ""
-    private var inNeedOfProcessingName: String = ""
-    private var inNeedOfProcessingExternalStorage: Boolean = false
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val model: RehearsalsViewModel by viewModels {
+            RehearsalsViewModelFactory(Database.getInstance(requireActivity().applicationContext))
+        }
+        this.model = model
+        model.getRehearsals().observe(this) { cursor ->
+            if (cursor.count > 0 && adapter.itemCount == 0) {
+                binding.recyclerView.visibility = View.VISIBLE
+                binding.emptyView.visibility = View.GONE
+            } else if (cursor.count == 0 && adapter.itemCount > 0) {
+                binding.recyclerView.visibility = View.GONE
+                binding.emptyView.visibility = View.VISIBLE
+            }
+            adapter.swapCursor(cursor)
+        }
+        model.getInNeedOfProcessRehearsal().observe(this) { rehearsal ->
+            Log.i("Header", "UPDATED")
+            adapter.notifyItemChanged(0)
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -75,54 +92,17 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
             RENAME_DIALOG_TAG,
             viewLifecycleOwner
         ) { _, bundle ->
-            Log.i("Test", "Received rename dialog tag")
             val name = bundle.getString("name")
             val id = bundle.getLong("id")
-            Thread {
-                database.rehearsalDao().updateName(id, name!!.ifBlank { null })
-                updateDbData()
-            }.start()
-
+            model.updateRehearsalName(id, name!!.ifBlank { null })
         }
 
         activityLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-                Thread {
-                    updateDbData()
-                }.start()
+                model.update()
             }
 
         return binding.root
-    }
-
-    private fun updateDbData() {
-        val needProcessing = database.rehearsalDao().getUnprocessedRehearsal()
-        var newShowCard = false
-        if (needProcessing != null) {
-            newShowCard = true
-            val formattedDate = "${
-                DateFormat.getDateInstance().format(Date(needProcessing.date * 1000))
-            } - ${DateFormat.getTimeInstance().format(Date(needProcessing.date * 1000))}"
-
-            inNeedOfProcessingId = needProcessing.uid
-            inNeedOfProcessingFileName = needProcessing.fileName
-            inNeedOfProcessingName = needProcessing.name ?: formattedDate
-            inNeedOfProcessingExternalStorage = needProcessing.externalStorage
-        }
-
-        val cursor = database.rehearsalDao().getAllCursor()
-        binding.recyclerView.post {
-            showCard = newShowCard
-
-            if (cursor.count > 0 && adapter.itemCount == 0) {
-                binding.recyclerView.visibility = View.VISIBLE
-                binding.emptyView.visibility = View.GONE
-            } else if (cursor.count == 0 && adapter.itemCount > 0) {
-                binding.recyclerView.visibility = View.GONE
-                binding.emptyView.visibility = View.VISIBLE
-            }
-            adapter.swapCursor(cursor)
-        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -131,10 +111,6 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
 
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
         adapter = RehearsalsAdapter(this, this, this, null)
-        Thread {
-            database = Database.getInstance(requireContext())
-            updateDbData()
-        }.start()
         binding.recyclerView.adapter = adapter
     }
 
@@ -164,13 +140,15 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
     }
 
     override fun onBound(holder: RehearsalsAdapter.HeaderViewHolder) {
-        holder.binding.card.visibility = if (showCard) View.VISIBLE else View.GONE
+        Log.i("Header", "BOUND")
+        holder.binding.card.visibility =
+            if (model.getInNeedOfProcessRehearsal().value != null) View.VISIBLE else View.GONE
         holder.binding.processNow.setOnClickListener(this)
     }
 
     override fun onItemClicked(holder: RehearsalsAdapter.RehearsalViewHolder) {
         Thread {
-            val status = database.rehearsalDao().getRehearsal(holder.id)?.status
+            val status = model.getRehearsalStatus(holder.id)
             requireActivity().runOnUiThread {
                 when (status) {
                     Rehearsal.RECORDED -> {
@@ -219,11 +197,13 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
     }
 
     override fun onClick(v: View?) {
-        val intent = Intent(context, ProcessActivity::class.java)
-        intent.putExtra("fileName", inNeedOfProcessingFileName)
-        intent.putExtra("rehearsalId", inNeedOfProcessingId)
-        intent.putExtra("rehearsalName", inNeedOfProcessingName)
-        intent.putExtra("externalStorage", inNeedOfProcessingExternalStorage)
-        activityLauncher.launch(intent)
+        model.getInNeedOfProcessRehearsal().value?.let {
+            val intent = Intent(context, ProcessActivity::class.java)
+            intent.putExtra("fileName", it.fileName)
+            intent.putExtra("rehearsalId", it.uid)
+            intent.putExtra("rehearsalName", it.name)
+            intent.putExtra("externalStorage", it.externalStorage)
+            activityLauncher.launch(intent)
+        }
     }
 }
