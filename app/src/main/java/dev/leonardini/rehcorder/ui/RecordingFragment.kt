@@ -13,9 +13,6 @@ import dev.leonardini.rehcorder.ProcessActivity
 import dev.leonardini.rehcorder.R
 import dev.leonardini.rehcorder.databinding.FragmentRecordingBinding
 
-/**
- * A simple [Fragment] subclass as the second destination in the navigation.
- */
 class RecordingFragment : Fragment(), Runnable {
 
     private var _binding: FragmentRecordingBinding? = null

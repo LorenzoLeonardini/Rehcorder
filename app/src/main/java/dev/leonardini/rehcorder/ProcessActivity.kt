@@ -22,6 +22,7 @@ import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
 import dev.leonardini.rehcorder.db.Song
 import dev.leonardini.rehcorder.services.SplitterService
+import dev.leonardini.rehcorder.ui.dialogs.MaterialDialogFragment
 import dev.leonardini.rehcorder.ui.dialogs.MaterialInfoDialogFragment
 import dev.leonardini.rehcorder.ui.dialogs.SongPickerDialogFragment
 import java.io.File
@@ -158,6 +159,23 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
                 runSongSelector()
             }
         }
+        supportFragmentManager.setFragmentResultListener("ExitDialog", this) { _, bundle ->
+            val which = bundle.getInt("which")
+            if (which == AlertDialog.BUTTON_POSITIVE) {
+                finish()
+            }
+        }
+    }
+
+    override fun onBackPressed() {
+        if (songRegions.size == 0) {
+            finish()
+            return
+        }
+        MaterialDialogFragment(
+            R.string.dialog_confirm_exit_title,
+            R.string.dialog_confirm_exit_message,
+        ).show(supportFragmentManager, "ExitDialog")
     }
 
     private fun restoreSongRegionSelectionState(doRunSongSelector: Boolean) {

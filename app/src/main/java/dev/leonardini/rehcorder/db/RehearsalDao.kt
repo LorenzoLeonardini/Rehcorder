@@ -21,19 +21,19 @@ interface RehearsalDao {
     fun getAllCursor(): Cursor
 
     @Query("SELECT * FROM rehearsal WHERE status = ${Rehearsal.NORMALIZED} LIMIT 1")
-    fun getUnprocessedRehearsal(): Rehearsal?
+    suspend fun getUnprocessedRehearsal(): Rehearsal?
 
     @Query("SELECT * FROM rehearsal WHERE uid=:id")
-    fun getRehearsal(id: Long): Rehearsal?
+    fun getRehearsal(id: Long): Rehearsal
 
     @Insert
     fun insert(rehearsal: Rehearsal): Long
 
     @Update
-    fun update(rehearsal: Rehearsal)
+    suspend fun update(rehearsal: Rehearsal)
 
     @Query("UPDATE rehearsal SET name=:name WHERE uid=:id")
-    fun updateName(id: Long, name: String?)
+    suspend fun updateName(id: Long, name: String?)
 
     @Query("UPDATE rehearsal SET status=:status WHERE uid=:id")
     fun updateStatus(id: Long, status: Int)

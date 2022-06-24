@@ -47,10 +47,10 @@ class WaveformView : androidx.appcompat.widget.AppCompatTextView, Visualizer.OnD
     }
 
     override fun onDraw(canvas: Canvas) {
-        rawAudioBytes?.let { rawAudioBytes ->
-            val samples = (rawAudioBytes.size / (width / 20f)).toInt()
-            for (i in 0 until (width / 20)) {
-                var value = 0f
+        val samples = ((rawAudioBytes?.size ?: 0) / (width / 20f)).toInt()
+        var value = 16f
+        for (i in 0 until (width / 20)) {
+            rawAudioBytes?.let { rawAudioBytes ->
                 for (j in 0 until samples) {
                     if (i * samples + j < rawAudioBytes.size)
                         value += rawAudioBytes[i * samples + j].toFloat() + 128
@@ -58,16 +58,16 @@ class WaveformView : androidx.appcompat.widget.AppCompatTextView, Visualizer.OnD
                 value /= samples
                 value = (value / 256) * height
                 value = value.coerceAtLeast(16f)
-                canvas.drawRoundRect(
-                    i * 20f,
-                    (height - value) / 2f,
-                    (i * 20f) + 16f,
-                    (height - value) / 2f + value,
-                    8f,
-                    8f,
-                    paint
-                )
             }
+            canvas.drawRoundRect(
+                i * 20f,
+                (height - value) / 2f,
+                (i * 20f) + 16f,
+                (height - value) / 2f + value,
+                8f,
+                8f,
+                paint
+            )
         }
 
         super.onDraw(canvas)
@@ -92,6 +92,7 @@ class WaveformView : androidx.appcompat.widget.AppCompatTextView, Visualizer.OnD
             }
         } catch (_: Exception) {
             visualizer = null
+            rawAudioBytes = null
         }
     }
 

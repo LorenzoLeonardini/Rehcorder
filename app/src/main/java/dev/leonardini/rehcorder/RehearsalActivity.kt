@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import androidx.activity.viewModels
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -16,12 +17,13 @@ import androidx.core.view.WindowCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.leonardini.rehcorder.adapters.RehearsalInfoAdapter
 import dev.leonardini.rehcorder.databinding.ActivityRehearsalBinding
-import dev.leonardini.rehcorder.db.AppDatabase
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
 import dev.leonardini.rehcorder.ui.dialogs.MaterialDialogFragment
 import dev.leonardini.rehcorder.ui.dialogs.MaterialInfoDialogFragment
 import dev.leonardini.rehcorder.ui.dialogs.MaterialLoadingDialogFragment
+import dev.leonardini.rehcorder.viewmodels.RehearsalViewModel
+import dev.leonardini.rehcorder.viewmodels.RehearsalViewModelFactory
 import java.io.File
 import java.text.DateFormat
 import java.util.*
@@ -29,12 +31,9 @@ import java.util.*
 class RehearsalActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShareClickListener,
     RehearsalInfoAdapter.OnHeaderBoundListener, RehearsalInfoAdapter.OnItemClickListener {
 
-    private lateinit var database: AppDatabase
-
     private lateinit var binding: ActivityRehearsalBinding
     private lateinit var adapter: RehearsalInfoAdapter
-
-    private lateinit var rehearsal: Rehearsal
+    private lateinit var model :RehearsalViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -53,25 +52,26 @@ class RehearsalActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShare
 
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = RehearsalInfoAdapter(this, this, this, null)
-        Thread {
-            database = Database.getInstance(applicationContext)
+        binding.recyclerView.adapter = adapter
 
-            rehearsal =
-                database.rehearsalDao().getRehearsal(intent.getLongExtra("rehearsalId", -1))!!
-
+        val model: RehearsalViewModel by viewModels {
+            RehearsalViewModelFactory(
+                Database.getInstance(applicationContext),
+                intent.getLongExtra("rehearsalId", -1)
+            )
+        }
+        this.model = model
+        model.getRehearsal().observe(this) { rehearsal ->
             val formattedDate = "${
                 DateFormat.getDateInstance().format(Date(rehearsal.date * 1000))
             } - ${DateFormat.getTimeInstance().format(Date(rehearsal.date * 1000))}"
 
             binding.toolbar.title = rehearsal.name ?: formattedDate
             binding.toolbar.subtitle = if (rehearsal.name != null) formattedDate else ""
-
-            val cursor = database.songRecordingDao().getRehearsalSortedCursor(rehearsal.uid)
-            binding.recyclerView.post {
-                adapter.swapCursor(cursor)
-            }
-        }.start()
-        binding.recyclerView.adapter = adapter
+        }
+        model.getRehearsalSongs().observe(this) { cursor ->
+            adapter.swapCursor(cursor)
+        }
 
         supportFragmentManager.setFragmentResultListener("DeleteRehearsal", this) { _, bundle ->
             val which = bundle.getInt("which")
@@ -79,22 +79,7 @@ class RehearsalActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShare
                 val loadingFragment = MaterialLoadingDialogFragment()
                 loadingFragment.show(supportFragmentManager, "Loading")
                 Thread {
-                    val externalStorageBaseDir = getExternalFilesDir(null) ?: filesDir
-                    File("${(if (rehearsal.externalStorage) externalStorageBaseDir else filesDir).absolutePath}/recordings/${rehearsal.fileName}").delete()
-
-                    for (i in 1 until adapter.itemCount) {
-                        val cursor = adapter.getItem(i)!!
-                        val version: Int = cursor.getInt(cursor.getColumnIndexOrThrow("version"))
-                        val fileName: String =
-                            cursor.getString(cursor.getColumnIndexOrThrow("file_name"))
-                        val externalStorage: Boolean =
-                            cursor.getInt(cursor.getColumnIndexOrThrow("external_storage")) == 1
-
-                        File("${(if (externalStorage) externalStorageBaseDir else filesDir).absolutePath}/songs/${fileName}_$version.m4a").delete()
-                    }
-
-                    database.songRecordingDao().deleteRehearsal(rehearsal.uid)
-                    database.rehearsalDao().delete(rehearsal.uid)
+                    model.deleteRehearsal(applicationContext)
                     runOnUiThread {
                         loadingFragment.dismiss()
                         finish()
@@ -151,18 +136,18 @@ class RehearsalActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShare
     }
 
     override fun onBound(holder: RehearsalInfoAdapter.HeaderViewHolder) {
-        holder.binding.card.visibility = if (rehearsal.hasLocationData) View.VISIBLE else View.GONE
-        if (rehearsal.hasLocationData) {
-            holder.binding.location.text = "${rehearsal.latitude} ${rehearsal.longitude}"
+        holder.binding.card.visibility = if (model.getRehearsal().value.hasLocationData) View.VISIBLE else View.GONE
+        if (model.getRehearsal().value.hasLocationData) {
+            holder.binding.location.text = "${model.getRehearsal().value.latitude} ${model.getRehearsal().value.longitude}"
             if (Geocoder.isPresent()) {
                 val geocoder = Geocoder(this, resources.configuration.locale)
                 val address =
-                    geocoder.getFromLocation(rehearsal.latitude!!, rehearsal.longitude!!, 1)[0]
+                    geocoder.getFromLocation(model.getRehearsal().value.latitude!!, model.getRehearsal().value.longitude!!, 1)[0]
                 holder.binding.location.text = address.getAddressLine(0)
             }
             holder.binding.card.setOnClickListener {
                 val locationUri =
-                    Uri.parse("geo:${rehearsal.latitude},${rehearsal.longitude}?q=${rehearsal.latitude},${rehearsal.longitude}")
+                    Uri.parse("geo:${model.getRehearsal().value.latitude},${model.getRehearsal().value.longitude}?q=${model.getRehearsal().value.latitude},${model.getRehearsal().value.longitude}")
                 Log.i("Location", locationUri.toString())
                 startActivity(Intent(Intent.ACTION_VIEW, locationUri))
             }
