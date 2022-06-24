@@ -38,7 +38,7 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
         return NotificationCompat.Builder(this, "dev.leonardini.rehcorder")
             .setContentTitle(resources.getString(R.string.notification_splitter_title))
             .setSmallIcon(R.drawable.ic_mic)
-            .setContentText(resources.getString(R.string.notification_splitter_title))
+            .setContentText(resources.getString(R.string.notification_splitter_text))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
     }

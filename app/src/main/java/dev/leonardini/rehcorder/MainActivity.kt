@@ -5,7 +5,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -22,8 +21,6 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.material.navigation.NavigationBarView
 import dev.leonardini.rehcorder.databinding.ActivityMainBinding
-import dev.leonardini.rehcorder.db.AppDatabase
-import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
 import dev.leonardini.rehcorder.services.RecorderService
 import dev.leonardini.rehcorder.ui.RecordingFragment
@@ -40,8 +37,6 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     var recording: Boolean = false
-
-    private lateinit var database: AppDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -74,8 +69,6 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
             v.requestLayout()
             insets
         }
-
-        database = Database.getInstance(applicationContext)
 
         if (savedInstanceState != null) {
             recording = savedInstanceState.getBoolean("recording")
@@ -135,9 +128,8 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
         binding.bottomNavigation.menu[0].isEnabled = false
         binding.bottomNavigation.menu[2].isEnabled = false
 
-        val timestamp = System.currentTimeMillis() / 1000
         val args = Bundle()
-        args.putLong("timestamp", timestamp)
+        args.putLong("timestamp", System.currentTimeMillis() / 1000)
 
         findNavController(R.id.nav_host_fragment_content_main).navigate(
             R.id.to_recording_fragment,
@@ -145,26 +137,12 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
         )
         recording = true
 
-        val fileName = "$timestamp.m4a"
         Thread {
-            val externalStorage =
-                Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED && getExternalFilesDir(
-                    null
-                ) != null
-            val baseDir = getExternalFilesDir(null) ?: filesDir
-
-            val id = database.rehearsalDao().insert(
-                Rehearsal(
-                    date = timestamp,
-                    fileName = fileName,
-                    externalStorage = externalStorage
-                )
-            )
-
+            val (id, file) = Rehearsal.create(applicationContext)
             val intent = Intent(this, RecorderService::class.java)
             intent.action = "RECORD"
             intent.putExtra("id", id)
-            intent.putExtra("file", "${baseDir.absolutePath}/recordings/$fileName")
+            intent.putExtra("file", file)
             if (Build.VERSION.SDK_INT >= 26) {
                 startForegroundService(intent)
             } else {
@@ -197,15 +175,11 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
             else -> super.onOptionsItemSelected(item)
         }
@@ -222,15 +196,16 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        if (recording) {
+            return false
+        }
         return when (item.itemId) {
             R.id.page_songs -> {
-                if (!recording)
-                    findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.to_songs_fragment)
+                findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.to_songs_fragment)
                 true
             }
             R.id.page_rehearsals -> {
-                if (!recording)
-                    findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.to_rehearsals_fragment)
+                findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.to_rehearsals_fragment)
                 true
             }
             else -> {

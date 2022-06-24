@@ -47,14 +47,17 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
 
     private lateinit var activityLauncher: ActivityResultLauncher<Intent>
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentRehearsalsBinding.inflate(inflater, container, false)
 
         val model: RehearsalsViewModel by viewModels {
             RehearsalsViewModelFactory(Database.getInstance(requireActivity().applicationContext))
         }
         this.model = model
-        model.getRehearsals().observe(this) { cursor ->
+        model.getRehearsals().observe(viewLifecycleOwner) { cursor ->
             if (cursor.count > 0 && adapter.itemCount == 0) {
                 binding.recyclerView.visibility = View.VISIBLE
                 binding.emptyView.visibility = View.GONE
@@ -64,17 +67,9 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
             }
             adapter.swapCursor(cursor)
         }
-        model.getInNeedOfProcessRehearsal().observe(this) { rehearsal ->
-            Log.i("Header", "UPDATED")
+        model.getInNeedOfProcessRehearsal().observe(viewLifecycleOwner) { rehearsal ->
             adapter.notifyItemChanged(0)
         }
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentRehearsalsBinding.inflate(inflater, container, false)
 
         requireActivity().supportFragmentManager.setFragmentResultListener(
             RECORDED_DIALOG_TAG,

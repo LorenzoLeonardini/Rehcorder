@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ShareCompat
@@ -12,11 +13,12 @@ import androidx.core.view.WindowCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.leonardini.rehcorder.adapters.RehearsalInfoAdapter
 import dev.leonardini.rehcorder.databinding.ActivityRehearsalBinding
-import dev.leonardini.rehcorder.db.AppDatabase
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.ui.dialogs.MaterialDialogFragment
 import dev.leonardini.rehcorder.ui.dialogs.MaterialInfoDialogFragment
 import dev.leonardini.rehcorder.ui.dialogs.MaterialLoadingDialogFragment
+import dev.leonardini.rehcorder.viewmodels.RehearsalViewModel
+import dev.leonardini.rehcorder.viewmodels.RehearsalViewModelFactory
 import java.io.File
 import java.text.DateFormat
 import java.util.*
@@ -24,14 +26,8 @@ import java.util.*
 class RehearsalActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShareClickListener,
     RehearsalInfoAdapter.OnHeaderBoundListener, RehearsalInfoAdapter.OnItemClickListener {
 
-    private lateinit var database: AppDatabase
-
     private lateinit var binding: ActivityRehearsalBinding
     private lateinit var adapter: RehearsalInfoAdapter
-
-    private var rehearsalId: Long = -1
-    private var externalStorage: Boolean = false
-    private lateinit var fileName: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -50,28 +46,25 @@ class RehearsalActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShare
 
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = RehearsalInfoAdapter(this, this, this, null)
-        Thread {
-            database = Database.getInstance(applicationContext)
+        binding.recyclerView.adapter = adapter
 
-            val rehearsal =
-                database.rehearsalDao().getRehearsal(intent.getLongExtra("rehearsalId", -1))
-            rehearsalId = rehearsal.uid
-            externalStorage = rehearsal.externalStorage
-            fileName = rehearsal.fileName
-
+        val model: RehearsalViewModel by viewModels {
+            RehearsalViewModelFactory(
+                Database.getInstance(applicationContext),
+                intent.getLongExtra("rehearsalId", -1)
+            )
+        }
+        model.getRehearsal().observe(this) { rehearsal ->
             val formattedDate = "${
                 DateFormat.getDateInstance().format(Date(rehearsal.date * 1000))
             } - ${DateFormat.getTimeInstance().format(Date(rehearsal.date * 1000))}"
 
             binding.toolbar.title = rehearsal.name ?: formattedDate
             binding.toolbar.subtitle = if (rehearsal.name != null) formattedDate else ""
-
-            val cursor = database.songRecordingDao().getRehearsalSortedCursor(rehearsal.uid)
-            binding.recyclerView.post {
-                adapter.swapCursor(cursor)
-            }
-        }.start()
-        binding.recyclerView.adapter = adapter
+        }
+        model.getRehearsalSongs().observe(this) { cursor ->
+            adapter.swapCursor(cursor)
+        }
 
         supportFragmentManager.setFragmentResultListener("DeleteRehearsal", this) { _, bundle ->
             val which = bundle.getInt("which")
@@ -79,22 +72,7 @@ class RehearsalActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShare
                 val loadingFragment = MaterialLoadingDialogFragment()
                 loadingFragment.show(supportFragmentManager, "Loading")
                 Thread {
-                    val externalStorageBaseDir = getExternalFilesDir(null) ?: filesDir
-                    File("${(if (externalStorage) externalStorageBaseDir else filesDir).absolutePath}/recordings/$fileName").delete()
-
-                    for (i in 1 until adapter.itemCount) {
-                        val cursor = adapter.getItem(i)!!
-                        val version: Int = cursor.getInt(cursor.getColumnIndexOrThrow("version"))
-                        val fileName: String =
-                            cursor.getString(cursor.getColumnIndexOrThrow("file_name"))
-                        val externalStorage: Boolean =
-                            cursor.getInt(cursor.getColumnIndexOrThrow("external_storage")) == 1
-
-                        File("${(if (externalStorage) externalStorageBaseDir else filesDir).absolutePath}/songs/${fileName}_$version.m4a").delete()
-                    }
-
-                    database.songRecordingDao().deleteRehearsal(rehearsalId)
-                    database.rehearsalDao().delete(rehearsalId)
+                    model.deleteRehearsal(applicationContext)
                     runOnUiThread {
                         loadingFragment.dismiss()
                         finish()

@@ -2,8 +2,7 @@ package dev.leonardini.rehcorder
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ShareCompat
 import androidx.core.content.FileProvider
@@ -11,15 +10,14 @@ import androidx.core.view.WindowCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.leonardini.rehcorder.adapters.SongInfoAdapter
 import dev.leonardini.rehcorder.databinding.ActivitySongBinding
-import dev.leonardini.rehcorder.db.AppDatabase
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.ui.dialogs.MaterialInfoDialogFragment
+import dev.leonardini.rehcorder.viewmodels.SongViewModel
+import dev.leonardini.rehcorder.viewmodels.SongViewModelFactory
 import java.io.File
 
 class SongActivity : AppCompatActivity(), SongInfoAdapter.OnTrackShareClickListener,
     SongInfoAdapter.OnHeaderBoundListener, SongInfoAdapter.OnItemClickListener {
-
-    private lateinit var database: AppDatabase
 
     private lateinit var binding: ActivitySongBinding
     private lateinit var adapter: SongInfoAdapter
@@ -41,38 +39,19 @@ class SongActivity : AppCompatActivity(), SongInfoAdapter.OnTrackShareClickListe
 
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = SongInfoAdapter(this, this, this, null)
-        Thread {
-            database = Database.getInstance(applicationContext)
-
-            val song = database.songDao().getSong(intent.getLongExtra("songId", -1))!!
-
-            binding.toolbar.title = song.name
-
-            val cursor = database.songRecordingDao().getSongSortedCursor(song.uid)
-            binding.recyclerView.post {
-                adapter.swapCursor(cursor)
-            }
-        }.start()
         binding.recyclerView.adapter = adapter
 
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-//        menuInflater.inflate(R.menu.menu_delete, menu)
-        return super.onCreateOptionsMenu(menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return when (item.itemId) {
-//            R.id.action_delete -> {
-//                Snackbar.make(binding.root, "ciao", Snackbar.LENGTH_SHORT).show()
-//                true
-//            }
-            else -> super.onOptionsItemSelected(item)
+        val model: SongViewModel by viewModels {
+            SongViewModelFactory(
+                Database.getInstance(applicationContext),
+                intent.getLongExtra("songId", -1)
+            )
+        }
+        model.getSong().observe(this) { song ->
+            binding.toolbar.title = song.name
+        }
+        model.getSongRehearsals().observe(this) { cursor ->
+            adapter.swapCursor(cursor)
         }
     }
 

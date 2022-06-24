@@ -44,6 +44,7 @@ class RehearsalsViewModel(private val database: AppDatabase) : ViewModel() {
     }
 
     fun update() {
+        fetchRehearsals()
         fetchInNeedOfProcess()
     }
 
