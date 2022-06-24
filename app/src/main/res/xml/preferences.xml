@@ -8,7 +8,7 @@
         android:title="@string/settings_mic_title" />
 
     <androidx.preference.SwitchPreferenceCompat
-        android:defaultValue="true"
+        android:defaultValue="false"
         android:icon="@drawable/ic_sd_storage"
         android:key="delete_recording"
         android:summary="@string/settings_storage_summary"

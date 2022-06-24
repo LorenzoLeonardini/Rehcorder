@@ -12,13 +12,14 @@ import dev.leonardini.rehcorder.databinding.TrackItemBinding
 import java.text.DateFormat
 import java.util.*
 
+/**
+ * RecyclerView Adapter for information about a Rehearsal
+ */
 class SongInfoAdapter(
     private val shareElementListener: OnTrackShareClickListener,
-    private val headerBoundListener: OnHeaderBoundListener,
     private val itemClickListener: OnItemClickListener,
-    cursor: Cursor?
 ) :
-    RecyclerViewCursorAdapter<RecyclerView.ViewHolder>(cursor) {
+    RecyclerViewCursorAdapter<RecyclerView.ViewHolder>(null) {
 
     private var uidIdx: Int = -1
     private var nameIdx: Int = -1
@@ -61,21 +62,20 @@ class SongInfoAdapter(
             DateFormat.getDateInstance().format(Date(date * 1000))
         } - ${DateFormat.getTimeInstance().format(Date(date * 1000))}"
 
-        (holder as SongInfoViewHolder).let { holder ->
-            holder.id = id
-            holder.name = name
-            holder.version = version
-            holder.fileName = fileName
-            holder.externalStorage = externalStorage
-            holder.binding.trackTitle.text = name ?: formattedDate
-            holder.binding.trackDate.text = formattedDate
-            holder.binding.divider.visibility =
+        (holder as SongInfoViewHolder).let { _holder ->
+            _holder.id = id
+            _holder.name = name
+            _holder.version = version
+            _holder.fileName = fileName
+            _holder.externalStorage = externalStorage
+            _holder.binding.trackTitle.text = name ?: formattedDate
+            _holder.binding.trackDate.text = formattedDate
+            _holder.binding.divider.visibility =
                 if (position != itemCount - 2) View.VISIBLE else View.INVISIBLE
         }
     }
 
     override fun onBindHeaderViewHolder(holder: RecyclerView.ViewHolder) {
-        headerBoundListener.onBound(holder as HeaderViewHolder)
     }
 
     class SongInfoViewHolder(
@@ -84,6 +84,7 @@ class SongInfoAdapter(
         private val itemClickListener: OnItemClickListener
     ) :
         RecyclerView.ViewHolder(itemView), View.OnClickListener {
+
         val binding: TrackItemBinding = TrackItemBinding.bind(itemView)
         var id: Long = -1
         var name: String? = null
@@ -111,10 +112,6 @@ class SongInfoAdapter(
 
     interface OnTrackShareClickListener {
         fun onShare(holder: SongInfoViewHolder)
-    }
-
-    interface OnHeaderBoundListener {
-        fun onBound(holder: HeaderViewHolder)
     }
 
     interface OnItemClickListener {

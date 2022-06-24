@@ -11,14 +11,13 @@ class SongsViewModel(private val database: AppDatabase) : ViewModel() {
 
     private var fetchJob: Job? = null
 
-    private val songs: MutableLiveData<Cursor> by lazy {
+    val songs: LiveData<Cursor>
+        get() = _songs
+
+    private val _songs: MutableLiveData<Cursor> by lazy {
         MutableLiveData<Cursor>().also {
             fetchSongs()
         }
-    }
-
-    fun getSongs(): LiveData<Cursor> {
-        return songs
     }
 
     fun updateSongName(id: Long, name: String) {
@@ -31,7 +30,7 @@ class SongsViewModel(private val database: AppDatabase) : ViewModel() {
     private fun fetchSongs() {
         fetchJob?.cancel()
         fetchJob = viewModelScope.launch(Dispatchers.IO) {
-            songs.postValue(database.songDao().getAllCursor())
+            _songs.postValue(database.songDao().getAllCursor())
         }
     }
 

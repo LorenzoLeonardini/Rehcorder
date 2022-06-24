@@ -15,11 +15,15 @@ import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
 import dev.leonardini.rehcorder.MainActivity
 import dev.leonardini.rehcorder.R
+import dev.leonardini.rehcorder.Utils
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
 import java.io.File
 import java.io.IOException
 
+/**
+ * Foreground service to record audio
+ */
 class RecorderService : Service() {
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -28,12 +32,15 @@ class RecorderService : Service() {
     private var recorder: MediaRecorder? = null
     private var id: Long = -1
     private var fileName: String? = null
-    private var unprocessedMicrophone: Boolean = true
 
+    /**
+     * Select best audio source for the recording. If the user wants it and the device supports it,
+     * it will use the UNPROCESSED source (or VOICE_RECOGNITION) so that the audio will be as clean
+     * as possible. Meant for music.
+     */
     private fun getBestAudioSource(): Int {
         val preference = PreferenceManager.getDefaultSharedPreferences(this)
-        unprocessedMicrophone = preference.getBoolean("unprocessed_microphone", true)
-        if (!unprocessedMicrophone) {
+        if (!preference.getBoolean("unprocessed_microphone", true)) {
             Log.i("Recorder", "Using default mic")
             return MediaRecorder.AudioSource.MIC
         }
@@ -83,11 +90,9 @@ class RecorderService : Service() {
         if (!folder.exists())
             folder.mkdirs()
 
+        // This constructor is deprecated, but the new one is only for API >= 31, makes no sense to check
         recorder =
-            (if (Build.VERSION.SDK_INT >= 31)
-                MediaRecorder(applicationContext)
-            else
-                MediaRecorder()).apply {
+            MediaRecorder().apply {
                 setAudioSource(getBestAudioSource())
                 setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
                 setOutputFile(fileName)
@@ -112,12 +117,16 @@ class RecorderService : Service() {
         }
         recorder = null
 
-        // Normalizing everything, even processed microphone in order to improve
-        // and compress audio (ffmpeg chooses the best sample rate)
+        // Normalizing everything, even processed microphone in order to
+        // compress file size (ffmpeg chooses the best sample rate)
+
+        // Update rehearsal status
         Thread {
             Database.getInstance(applicationContext).rehearsalDao()
                 .updateStatus(id, Rehearsal.RECORDED)
         }.start()
+
+        // Start normalizer service
         val intent = Intent(this, NormalizerService::class.java)
         intent.putExtra("id", id)
         intent.putExtra("file", fileName)
@@ -132,19 +141,23 @@ class RecorderService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         requestForeground()
+
         if (intent == null) {
             return START_NOT_STICKY
         }
 
         if (intent.action == "RECORD") {
             if (fileName != null) {
+                Log.e("Recorder", "Can only do one recording at a time")
                 return START_NOT_STICKY
             }
+
             id = intent.getLongExtra("id", -1L)
             if (id == -1L) {
                 throw IllegalArgumentException("Missing id in start service intent")
             }
             fileName = intent.getStringExtra("file")!!
+
             startRecording()
         } else if (intent.action == "STOP") {
             stopRecording()

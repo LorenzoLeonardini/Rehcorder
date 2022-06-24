@@ -9,6 +9,9 @@ import android.util.TypedValue
 import androidx.appcompat.widget.AppCompatSeekBar
 import dev.leonardini.rehcorder.R
 
+/**
+ * Seek bar extension providing support for regions highlights
+ */
 class HighlightedSeekBar : AppCompatSeekBar {
 
     private val paint: Paint = Paint()
@@ -43,7 +46,6 @@ class HighlightedSeekBar : AppCompatSeekBar {
             true
         )
         paint.color = a.getColor(R.styleable.HighlightedSeekBar_selectionColor, typedValue.data)
-        // Read attributes
 
         a.recycle()
 

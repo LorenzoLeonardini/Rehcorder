@@ -11,7 +11,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.leonardini.rehcorder.R
-import dev.leonardini.rehcorder.SongActivity
+import dev.leonardini.rehcorder.SongInfoActivity
 import dev.leonardini.rehcorder.adapters.SongsAdapter
 import dev.leonardini.rehcorder.databinding.FragmentSongsBinding
 import dev.leonardini.rehcorder.db.Database
@@ -19,9 +19,6 @@ import dev.leonardini.rehcorder.ui.dialogs.RenameDialogFragment
 import dev.leonardini.rehcorder.viewmodels.SongsViewModel
 import dev.leonardini.rehcorder.viewmodels.SongsViewModelFactory
 
-/**
- * A simple [Fragment] subclass as the default destination in the navigation.
- */
 class SongsFragment : Fragment(), SongsAdapter.OnSongEditClickListener,
     SongsAdapter.OnHeaderBoundListener, SongsAdapter.OnItemClickListener {
 
@@ -34,7 +31,6 @@ class SongsFragment : Fragment(), SongsAdapter.OnSongEditClickListener,
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
-    private lateinit var model: SongsViewModel
     private lateinit var adapter: SongsAdapter
 
     override fun onCreateView(
@@ -46,8 +42,7 @@ class SongsFragment : Fragment(), SongsAdapter.OnSongEditClickListener,
         val model: SongsViewModel by viewModels {
             SongsViewModelFactory(Database.getInstance(requireActivity().applicationContext))
         }
-        this.model = model
-        model.getSongs().observe(viewLifecycleOwner) { cursor ->
+        model.songs.observe(viewLifecycleOwner) { cursor ->
             if (cursor.count > 0 && adapter.itemCount == 0) {
                 binding.recyclerView.visibility = View.VISIBLE
                 binding.emptyView.visibility = View.GONE
@@ -77,7 +72,7 @@ class SongsFragment : Fragment(), SongsAdapter.OnSongEditClickListener,
         setHasOptionsMenu(true)
 
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
-        adapter = SongsAdapter(this, this, this, null)
+        adapter = SongsAdapter(this, this, this)
         binding.recyclerView.adapter = adapter
     }
 
@@ -108,7 +103,7 @@ class SongsFragment : Fragment(), SongsAdapter.OnSongEditClickListener,
     }
 
     override fun onItemClicked(holder: SongsAdapter.SongViewHolder) {
-        val intent = Intent(requireContext(), SongActivity::class.java)
+        val intent = Intent(requireContext(), SongInfoActivity::class.java)
         intent.putExtra("songId", holder.id)
         startActivity(intent)
     }

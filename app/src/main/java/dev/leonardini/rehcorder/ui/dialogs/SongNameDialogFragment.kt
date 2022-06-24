@@ -13,6 +13,9 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import dev.leonardini.rehcorder.R
 
+/**
+ * Material dialog providing a text input to name a song
+ */
 class SongNameDialogFragment : AppCompatDialogFragment(), DialogInterface.OnClickListener {
 
     private lateinit var v: View

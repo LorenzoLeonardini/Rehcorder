@@ -28,7 +28,7 @@ import dev.leonardini.rehcorder.ui.dialogs.SongPickerDialogFragment
 import java.io.File
 import kotlin.math.floor
 
-class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeListener,
+class SplitterActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeListener,
     View.OnClickListener, MediaPlayer.OnCompletionListener {
 
     companion object {
@@ -36,12 +36,11 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         private const val SEEK = "seek"
         private const val SONG_REGIONS = "songRegions"
 
-        fun secondsToTimeString(time: Long): String {
-            val hours = time / 3600
-            val minutes = (time / 60) % 60
-            val seconds = time % 60
-            return String.format("%02d:%02d:%02d", hours, minutes, seconds)
-        }
+        private const val FILE_NOT_FOUND_DIALOG = "FileNotFound"
+        private const val SONG_PICKER_DIALOG = "SongPickerDialog"
+        const val NEW_SONG_NAME_DIALOG = "NewSongNameDialog"
+        private const val EXIT_DIALOG = "ExitDialog"
+        private const val INCOMPLETE_PROCESS_DIALOG = "IncompleteProcessDialog"
     }
 
     private lateinit var database: AppDatabase
@@ -74,6 +73,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
             return
         }
 
+        // Setup local variables based on rehearsal
         binding.toolbar.title =
             intent.getStringExtra("rehearsalName") ?: intent.getStringExtra("fileName")!!
 
@@ -83,20 +83,21 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         fileName = intent.getStringExtra("fileName")!!
         externalStorage = intent.getBooleanExtra("externalStorage", false)
 
+        // Setup media player
         audioManager = applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         audioManager.mode = AudioManager.MODE_NORMAL
 
         val baseDir = if (externalStorage) getExternalFilesDir(null) ?: filesDir else filesDir
-        if (!File("${baseDir.absolutePath}/recordings/$fileName").exists()) {
+        if (!File(Utils.getRecordingPath(baseDir, fileName)).exists()) {
             MaterialInfoDialogFragment(
                 R.string.dialog_not_found_title,
                 R.string.dialog_not_found_message
-            ).show(supportFragmentManager, "FileNotFound")
+            ).show(supportFragmentManager, FILE_NOT_FOUND_DIALOG)
             finish()
         }
 
         mediaPlayer = MediaPlayer()
-        mediaPlayer.setDataSource("${baseDir.absolutePath}/recordings/$fileName")
+        mediaPlayer.setDataSource(Utils.getRecordingPath(baseDir, fileName))
         mediaPlayer.setAudioAttributes(
             AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                 .setUsage(AudioAttributes.USAGE_MEDIA).build()
@@ -106,9 +107,10 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
 
         binding.content.waveform.setAudioSession(mediaPlayer.audioSessionId)
 
-        binding.content.audioLength.text = secondsToTimeString(mediaPlayer.duration / 1000L)
+        binding.content.audioLength.text = Utils.secondsToTimeString(mediaPlayer.duration / 1000L)
         binding.content.seekBar.max = mediaPlayer.duration
 
+        // Register listeners
         binding.content.playPause.setOnClickListener(this)
         binding.content.seekBack.setOnClickListener(this)
         binding.content.seekForward.setOnClickListener(this)
@@ -116,6 +118,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         binding.content.undo.setOnClickListener(this)
         binding.content.save.setOnClickListener(this)
 
+        // Recover state
         if (savedInstanceState != null) {
             if (savedInstanceState.getInt(SEEK, -1) > 0) {
                 mediaPlayer.seekTo(savedInstanceState.getInt(SEEK))
@@ -134,17 +137,19 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
 
         restoreSongRegionSelectionState(savedInstanceState == null)
 
+        // Setup seek bar
         runOnUiThread(this)
         binding.content.seekBar.setOnSeekBarChangeListener(this)
 
-        supportFragmentManager.setFragmentResultListener("SongPickerDialog", this) { _, bundle ->
+        // Fragment result listeners
+        supportFragmentManager.setFragmentResultListener(SONG_PICKER_DIALOG, this) { _, bundle ->
             val id = bundle.getLong("id")
             songRegions.add(id)
             if (savedCurrentPlayingStatus) {
                 mediaPlayer.start()
             }
         }
-        supportFragmentManager.setFragmentResultListener("NewSongNameDialog", this) { _, bundle ->
+        supportFragmentManager.setFragmentResultListener(NEW_SONG_NAME_DIALOG, this) { _, bundle ->
             val which = bundle.getInt("which")
             if (which == AlertDialog.BUTTON_POSITIVE) {
                 val name = bundle.getString("name")
@@ -153,13 +158,16 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
                     song.uid = database.songDao().insert(song)
                     runOnUiThread {
                         songRegions.add(song.uid)
+                        if (savedCurrentPlayingStatus) {
+                            mediaPlayer.start()
+                        }
                     }
                 }.start()
             } else {
                 runSongSelector()
             }
         }
-        supportFragmentManager.setFragmentResultListener("ExitDialog", this) { _, bundle ->
+        supportFragmentManager.setFragmentResultListener(EXIT_DIALOG, this) { _, bundle ->
             val which = bundle.getInt("which")
             if (which == AlertDialog.BUTTON_POSITIVE) {
                 finish()
@@ -175,7 +183,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         MaterialDialogFragment(
             R.string.dialog_confirm_exit_title,
             R.string.dialog_confirm_exit_message,
-        ).show(supportFragmentManager, "ExitDialog")
+        ).show(supportFragmentManager, EXIT_DIALOG)
     }
 
     private fun restoreSongRegionSelectionState(doRunSongSelector: Boolean) {
@@ -197,7 +205,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
         if (!stopped) {
             binding.content.seekBar.progress = mediaPlayer.currentPosition
             binding.content.currentTime.text =
-                secondsToTimeString(mediaPlayer.currentPosition / 1000L)
+                Utils.secondsToTimeString(mediaPlayer.currentPosition / 1000L)
 
             binding.content.seekBar.postDelayed(this, 1000)
         }
@@ -210,7 +218,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
         if (fromUser) {
             mediaPlayer.seekTo(progress.coerceAtMost(mediaPlayer.duration))
-            binding.content.currentTime.text = secondsToTimeString(progress / 1000L)
+            binding.content.currentTime.text = Utils.secondsToTimeString(progress / 1000L)
         }
     }
 
@@ -223,15 +231,18 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
                 mediaPlayer.start()
                 binding.content.playPause.setIconResource(R.drawable.ic_pause)
             }
+
         } else if (v == binding.content.seekBack) {
             val position = (mediaPlayer.currentPosition - 10000).coerceAtLeast(0)
             binding.content.seekBar.progress = position
             mediaPlayer.seekTo(position)
+
         } else if (v == binding.content.seekForward) {
             val position =
                 (mediaPlayer.currentPosition + 10000).coerceAtMost(mediaPlayer.duration)
             binding.content.seekBar.progress = position
             mediaPlayer.seekTo(position)
+
         } else if (v == binding.content.toggleSong) {
             if (songRegions.size % 3 == 0) {
                 // New song
@@ -250,6 +261,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
                 runSongSelector()
             }
             binding.content.undo.isEnabled = true
+
         } else if (v == binding.content.undo) {
             if (songRegions.size > 0) {
                 songRegions.removeLast()
@@ -262,18 +274,19 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
                 binding.content.seekBar.clearRegions()
                 restoreSongRegionSelectionState(true)
             }
+
         } else if (v == binding.content.save) {
             if (songRegions.size == 0 || songRegions.size % 3 != 0) {
                 MaterialInfoDialogFragment(
                     R.string.dialog_save_error_title,
                     R.string.dialog_save_error_message
-                ).show(supportFragmentManager, "IncompleteProcess")
+                ).show(supportFragmentManager, INCOMPLETE_PROCESS_DIALOG)
             } else {
                 val baseDir =
                     if (externalStorage) getExternalFilesDir(null) ?: filesDir else filesDir
                 val intent = Intent(this, SplitterService::class.java)
                 intent.putExtra("id", rehearsalId)
-                intent.putExtra("file", "${baseDir.absolutePath}/recordings/$fileName")
+                intent.putExtra("file", Utils.getRecordingPath(baseDir, fileName))
                 intent.putExtra("regions", songRegions)
 
                 Thread {
@@ -302,7 +315,7 @@ class ProcessActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeLi
             runOnUiThread {
                 SongPickerDialogFragment(ArrayList(songs)).show(
                     supportFragmentManager,
-                    "SongPickerDialog"
+                    SONG_PICKER_DIALOG
                 )
             }
         }.start()

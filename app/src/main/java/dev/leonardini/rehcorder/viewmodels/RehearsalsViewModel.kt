@@ -13,23 +13,20 @@ class RehearsalsViewModel(private val database: AppDatabase) : ViewModel() {
     private var fetchJob: Job? = null
     private var rehearsalFetchJob: Job? = null
 
-    private val rehearsals: MutableLiveData<Cursor> by lazy {
+    val rehearsals: LiveData<Cursor>
+        get() = _rehearsals
+    private val _rehearsals: MutableLiveData<Cursor> by lazy {
         MutableLiveData<Cursor>().also {
             fetchRehearsals()
         }
     }
-    private val inNeedOfProcessRehearsal: MutableLiveData<Rehearsal?> by lazy {
+
+    val inNeedOfProcessRehearsal: LiveData<Rehearsal?>
+        get() = _inNeedOfProcessRehearsal
+    private val _inNeedOfProcessRehearsal: MutableLiveData<Rehearsal?> by lazy {
         MutableLiveData<Rehearsal?>().also {
             fetchInNeedOfProcess()
         }
-    }
-
-    fun getRehearsals(): LiveData<Cursor> {
-        return rehearsals
-    }
-
-    fun getInNeedOfProcessRehearsal(): LiveData<Rehearsal?> {
-        return inNeedOfProcessRehearsal
     }
 
     fun updateRehearsalName(id: Long, name: String?) {
@@ -51,14 +48,14 @@ class RehearsalsViewModel(private val database: AppDatabase) : ViewModel() {
     private fun fetchRehearsals() {
         fetchJob?.cancel()
         fetchJob = viewModelScope.launch(Dispatchers.IO) {
-            rehearsals.postValue(database.rehearsalDao().getAllCursor())
+            _rehearsals.postValue(database.rehearsalDao().getAllCursor())
         }
     }
 
     private fun fetchInNeedOfProcess() {
         rehearsalFetchJob?.cancel()
         rehearsalFetchJob = viewModelScope.launch(Dispatchers.IO) {
-            inNeedOfProcessRehearsal.postValue(database.rehearsalDao().getUnprocessedRehearsal())
+            _inNeedOfProcessRehearsal.postValue(database.rehearsalDao().getUnprocessedRehearsal())
         }
     }
 }

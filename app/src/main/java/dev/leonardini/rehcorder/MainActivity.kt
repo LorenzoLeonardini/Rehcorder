@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
-    var recording: Boolean = false
+    private var recording: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -64,23 +64,25 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
         binding.fab.setOnClickListener(this)
         val fabMargin = binding.fab.marginBottom
         binding.fab.setOnApplyWindowInsetsListener { v, insets ->
+            // Deprecated in API 30, it's fine to use
             (v.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin =
                 fabMargin + insets.systemWindowInsetBottom
             v.requestLayout()
             insets
         }
 
+        // Recover state
         if (savedInstanceState != null) {
             recording = savedInstanceState.getBoolean("recording")
         } else if (intent.getBooleanExtra("Recording", false)) {
-            binding.bottomNavigation.selectedItemId = R.id.page_record
-            binding.bottomNavigation.menu[0].isEnabled = false
-            binding.bottomNavigation.menu[2].isEnabled = false
             findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.to_recording_fragment)
-
             recording = true
         }
         if (recording) {
+            binding.bottomNavigation.selectedItemId = R.id.page_record
+            binding.bottomNavigation.menu[0].isEnabled = false
+            binding.bottomNavigation.menu[2].isEnabled = false
+
             binding.fab.setImageResource(R.drawable.ic_stop)
         }
     }
