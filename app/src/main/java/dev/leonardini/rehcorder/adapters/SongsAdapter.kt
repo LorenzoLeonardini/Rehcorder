@@ -13,9 +13,8 @@ class SongsAdapter(
     private val editElementListener: OnSongEditClickListener,
     private val headerBoundListener: OnHeaderBoundListener,
     private val itemClickListener: OnItemClickListener,
-    cursor: Cursor?
 ) :
-    RecyclerViewCursorAdapter<RecyclerView.ViewHolder>(cursor) {
+    RecyclerViewCursorAdapter<RecyclerView.ViewHolder>(null) {
 
     private var uidIdx: Int = -1
     private var nameIdx: Int = -1
@@ -46,17 +45,17 @@ class SongsAdapter(
         val name: String = cursor.getString(nameIdx)
         val versionsCount: Int = cursor.getInt(versionsCountIdx)
 
-        (holder as SongViewHolder).let { holder ->
-            holder.id = id
-            holder.name = name
-            holder.binding.songTitle.text = name
-            holder.binding.songVersions.text =
-                holder.binding.songVersions.resources.getQuantityString(
+        (holder as SongViewHolder).let { _holder ->
+            _holder.id = id
+            _holder.name = name
+            _holder.binding.songTitle.text = name
+            _holder.binding.songVersions.text =
+                _holder.binding.songVersions.resources.getQuantityString(
                     R.plurals.s_versions,
                     versionsCount,
                     versionsCount
                 )
-            holder.binding.divider.visibility =
+            _holder.binding.divider.visibility =
                 if (position != itemCount - 2) View.VISIBLE else View.INVISIBLE
         }
     }
@@ -71,6 +70,7 @@ class SongsAdapter(
         private val itemClickListener: OnItemClickListener
     ) :
         RecyclerView.ViewHolder(itemView), View.OnClickListener {
+
         val binding: SongLayoutBinding = SongLayoutBinding.bind(itemView)
         var id: Long = -1
         var name: String? = null

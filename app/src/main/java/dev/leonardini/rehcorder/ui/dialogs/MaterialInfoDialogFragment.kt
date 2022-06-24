@@ -6,6 +6,9 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatDialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
+/**
+ * Generic informative material dialog, no cancel option
+ */
 class MaterialInfoDialogFragment(
     private val title: Int,
     private val message: Int,

@@ -11,28 +11,28 @@ import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ShareCompat
-import androidx.core.content.FileProvider
 import androidx.core.view.WindowCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.leonardini.rehcorder.adapters.RehearsalInfoAdapter
 import dev.leonardini.rehcorder.databinding.ActivityRehearsalBinding
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.ui.dialogs.MaterialDialogFragment
-import dev.leonardini.rehcorder.ui.dialogs.MaterialInfoDialogFragment
 import dev.leonardini.rehcorder.ui.dialogs.MaterialLoadingDialogFragment
-import dev.leonardini.rehcorder.viewmodels.RehearsalViewModel
+import dev.leonardini.rehcorder.viewmodels.RehearsalInfoViewModel
 import dev.leonardini.rehcorder.viewmodels.RehearsalViewModelFactory
-import java.io.File
 import java.text.DateFormat
 import java.util.*
 
-class RehearsalActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShareClickListener,
+class RehearsalInfoActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShareClickListener,
     RehearsalInfoAdapter.OnHeaderBoundListener, RehearsalInfoAdapter.OnItemClickListener {
 
     private lateinit var binding: ActivityRehearsalBinding
     private lateinit var adapter: RehearsalInfoAdapter
-    private lateinit var model: RehearsalViewModel
+    private lateinit var model: RehearsalInfoViewModel
+
+    companion object {
+        private const val DELETE_REHEARSAL_DIALOG = "DeleteRehearsalDialog"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -50,17 +50,17 @@ class RehearsalActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShare
         }
 
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
-        adapter = RehearsalInfoAdapter(this, this, this, null)
+        adapter = RehearsalInfoAdapter(this, this, this)
         binding.recyclerView.adapter = adapter
 
-        val model: RehearsalViewModel by viewModels {
+        val model: RehearsalInfoViewModel by viewModels {
             RehearsalViewModelFactory(
                 Database.getInstance(applicationContext),
                 intent.getLongExtra("rehearsalId", -1)
             )
         }
         this.model = model
-        model.getRehearsal().observe(this) { rehearsal ->
+        model.rehearsal.observe(this) { rehearsal ->
             val formattedDate = "${
                 DateFormat.getDateInstance().format(Date(rehearsal.date * 1000))
             } - ${DateFormat.getTimeInstance().format(Date(rehearsal.date * 1000))}"
@@ -68,11 +68,14 @@ class RehearsalActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShare
             binding.toolbar.title = rehearsal.name ?: formattedDate
             binding.toolbar.subtitle = if (rehearsal.name != null) formattedDate else ""
         }
-        model.getRehearsalSongs().observe(this) { cursor ->
+        model.rehearsalSongs.observe(this) { cursor ->
             adapter.swapCursor(cursor)
         }
 
-        supportFragmentManager.setFragmentResultListener("DeleteRehearsal", this) { _, bundle ->
+        supportFragmentManager.setFragmentResultListener(
+            DELETE_REHEARSAL_DIALOG,
+            this
+        ) { _, bundle ->
             val which = bundle.getInt("which")
             if (which != AlertDialog.BUTTON_NEGATIVE) {
                 val loadingFragment = MaterialLoadingDialogFragment()
@@ -103,7 +106,7 @@ class RehearsalActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShare
                 MaterialDialogFragment(
                     R.string.dialog_delete_rehearsal_title,
                     R.string.dialog_delete_rehearsal_message
-                ).show(supportFragmentManager, "DeleteRehearsal")
+                ).show(supportFragmentManager, DELETE_REHEARSAL_DIALOG)
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -113,29 +116,11 @@ class RehearsalActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShare
     override fun onShare(holder: RehearsalInfoAdapter.RehearsalInfoViewHolder) {
         val baseDir =
             if (holder.externalStorage) getExternalFilesDir(null) ?: filesDir else filesDir
-
-        val file = File("${baseDir.absolutePath}/songs/${holder.fileName}_${holder.version}.m4a")
-        if (!file.exists()) {
-            MaterialInfoDialogFragment(
-                R.string.dialog_not_found_title,
-                R.string.dialog_not_found_message
-            ).show(supportFragmentManager, "FileNotFound")
-            return
-        }
-
-        val uri = FileProvider.getUriForFile(
-            this,
-            "${applicationContext.packageName}.provider",
-            file
-        )
-        val builder = ShareCompat.IntentBuilder(this)
-        builder.addStream(uri)
-        builder.setType("audio/*")
-        builder.startChooser()
+        Utils.shareSong(this, baseDir, holder.fileName!!)
     }
 
     override fun onBound(holder: RehearsalInfoAdapter.HeaderViewHolder) {
-        model.getRehearsal().value?.let { rehearsal ->
+        model.rehearsal.value?.let { rehearsal ->
             holder.binding.card.visibility =
                 if (rehearsal.hasLocationData) View.VISIBLE else View.GONE
             if (rehearsal.hasLocationData) {
@@ -164,27 +149,7 @@ class RehearsalActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShare
     override fun onItemClicked(holder: RehearsalInfoAdapter.RehearsalInfoViewHolder) {
         val baseDir =
             if (holder.externalStorage) getExternalFilesDir(null) ?: filesDir else filesDir
-
-        val file = File("${baseDir.absolutePath}/songs/${holder.fileName}_${holder.version}.m4a")
-        if (!file.exists()) {
-            MaterialInfoDialogFragment(
-                R.string.dialog_not_found_title,
-                R.string.dialog_not_found_message
-            ).show(supportFragmentManager, "FileNotFound")
-            return
-        }
-
-        val uri = FileProvider.getUriForFile(
-            this,
-            "${applicationContext.packageName}.provider",
-            file
-        )
-        val intent = Intent()
-        intent.action = Intent.ACTION_VIEW
-        intent.setDataAndType(uri, "audio/*")
-        intent.flags =
-            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_GRANT_READ_URI_PERMISSION
-        startActivity(intent)
+        Utils.playSongIntent(this, baseDir, holder.fileName!!)
     }
 
 }

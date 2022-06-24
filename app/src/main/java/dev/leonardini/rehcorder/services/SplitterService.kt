@@ -5,17 +5,24 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.os.*
+import android.os.Build
+import android.os.Handler
+import android.os.IBinder
+import android.os.Looper
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
 import com.arthenica.ffmpegkit.*
 import dev.leonardini.rehcorder.R
+import dev.leonardini.rehcorder.Utils
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
 import java.io.File
 import java.util.*
 
+/**
+ * Foreground service to split audio recordings using ffmpeg
+ */
 class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
     StatisticsCallback {
     override fun onBind(intent: Intent?): IBinder? {
@@ -27,11 +34,10 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
     private var currentId: Long = -1L
     private var currentRehearsalFile: String = ""
     private var currentRegions: Queue<Triple<Long, Long, Long>> = LinkedList()
-    private var currentSongFile: String = ""
     private var currentMaxProgress: Int = 0
 
     private fun createNotificationBuilder(notificationManager: NotificationManager? = null): NotificationCompat.Builder {
-        var nm = notificationManager
+        val nm = notificationManager
             ?: getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         Utils.createServiceNotificationChannelIfNotExists(nm)
 
@@ -58,7 +64,7 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
         val nm: NotificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        var notification = createNotificationBuilder(nm)
+        val notification = createNotificationBuilder(nm)
             .setProgress(currentMaxProgress, currentMaxProgress - currentRegions.size, false)
             .build()
 
@@ -66,6 +72,7 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
     }
 
     private fun start() {
+        // No current region, means new file
         if (currentRegions.size == 0) {
             val (id, fileName, regions) = queue.poll() ?: return
             currentId = id
@@ -77,6 +84,7 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
             currentMaxProgress = currentRegions.size
             updateProgress()
         }
+
         val (start, end, id) = currentRegions.poll() ?: return
         val startSeek = start / 1000f
         val endSeek = end / 1000f
@@ -86,30 +94,31 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
         Thread {
             Log.i("Splitter", "Splitting $currentRehearsalFile for song id $id")
 
-            val externalStorage =
-                Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED && getExternalFilesDir(
-                    null
-                ) != null
-            val baseDir = getExternalFilesDir(null) ?: filesDir
+            val (externalStorage, baseDir) = Utils.getPreferredStorageLocation(this)
 
-            val folder = File("${baseDir.absolutePath}/songs/")
+            // Check folder or create
+            val folder = File(Utils.getSongPath(baseDir, ""))
             if (!folder.exists())
                 folder.mkdirs()
 
+            // Insert into database and generate file name
             val database = Database.getInstance(applicationContext)
-
             val song = database.songDao().getSong(id)!!
-
+            var songFileFriendlyName = song.name.replace(" ", "_").replace(Regex("\\W+"), "")
             val songRecordingUid =
                 database.songRecordingDao()
                     .insert(id, currentId, song.name.replace(" ", "_"), externalStorage)
             val songRecording = database.songRecordingDao().get(songRecordingUid)!!
+            songFileFriendlyName =
+                "${song.uid}_${songFileFriendlyName}_${songRecording.version}.m4a"
+            database.songRecordingDao().updateFileName(songRecordingUid, songFileFriendlyName)
 
-            currentSongFile = "${songRecording.fileName}_${songRecording.version}.m4a"
-            Log.i("Splitter", "Splitting into ${baseDir.absolutePath}/songs/$currentSongFile")
+            val songPath = Utils.getSongPath(baseDir, songFileFriendlyName)
+
+            Log.i("Splitter", "Splitting into $songPath")
 
             FFmpegKit.executeAsync(
-                "-y -ss $startSeek -to $endSeek -i $currentRehearsalFile ${baseDir.absolutePath}/songs/$currentSongFile",
+                "-y -ss $startSeek -to $endSeek -i $currentRehearsalFile $songPath",
                 this,
                 this,
                 this
@@ -118,29 +127,36 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        requestForeground()
+
         if (intent == null) {
             return START_NOT_STICKY
         }
         Log.i("Splitter", "Started service")
 
-        requestForeground()
         val id = intent.getLongExtra("id", -1L)
         if (id == -1L) {
             throw IllegalArgumentException("Missing id in start service intent")
         }
         val file = intent.getStringExtra("file")!!
+
+        @Suppress("UNCHECKED_CAST")
         val regions = intent.getSerializableExtra("regions") as ArrayList<Long>
+
         queue.add(Triple(id, file, regions))
         if (!running) {
             start()
         }
 
-        return START_NOT_STICKY
+        return START_REDELIVER_INTENT
     }
 
     // End callback
     override fun apply(session: FFmpegSession?) {
         // TODO: should probably check exit code, but we've seen it's not really relevant
+        // TODO: ffmpeg sometimes returns with code 0 and still displays an error in stdout
+
+        // If no more regions to split, the current audio processing is finished
         if (currentRegions.size == 0) {
             Database.getInstance(applicationContext).rehearsalDao()
                 .updateStatus(currentId, Rehearsal.PROCESSED)

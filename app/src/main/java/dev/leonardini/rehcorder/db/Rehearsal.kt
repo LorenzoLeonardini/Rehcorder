@@ -1,10 +1,10 @@
 package dev.leonardini.rehcorder.db
 
 import android.content.Context
-import android.os.Environment
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import dev.leonardini.rehcorder.Utils
 
 @Entity(tableName = "rehearsal")
 data class Rehearsal(
@@ -31,12 +31,7 @@ data class Rehearsal(
             val timestamp = System.currentTimeMillis() / 1000
             val fileName = "$timestamp.m4a"
 
-            val externalStorage =
-                Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED && applicationContext.getExternalFilesDir(
-                    null
-                ) != null
-            val baseDir =
-                applicationContext.getExternalFilesDir(null) ?: applicationContext.filesDir
+            val (externalStorage, baseDir) = Utils.getPreferredStorageLocation(applicationContext)
 
             val id = Database.getInstance(applicationContext).rehearsalDao().insert(
                 Rehearsal(
@@ -49,7 +44,7 @@ data class Rehearsal(
                 )
             )
 
-            return Pair(id, "${baseDir.absolutePath}/recordings/$fileName")
+            return Pair(id, Utils.getRecordingPath(baseDir, fileName))
         }
     }
 

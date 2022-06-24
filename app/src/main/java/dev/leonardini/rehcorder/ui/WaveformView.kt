@@ -8,6 +8,9 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import dev.leonardini.rehcorder.R
 
+/**
+ * Simple waveform view for audio playback
+ */
 // Extending TextView to exploit its onMeasure
 class WaveformView : androidx.appcompat.widget.AppCompatTextView, Visualizer.OnDataCaptureListener {
 

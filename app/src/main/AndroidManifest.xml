@@ -34,13 +34,13 @@
             android:exported="false" />
 
         <activity
-            android:name=".ProcessActivity"
+            android:name=".SplitterActivity"
             android:exported="false" />
         <activity
-            android:name=".RehearsalActivity"
+            android:name=".RehearsalInfoActivity"
             android:exported="false" />
         <activity
-            android:name=".SongActivity"
+            android:name=".SongInfoActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

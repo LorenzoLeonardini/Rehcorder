@@ -4,6 +4,10 @@ import android.database.Cursor
 import androidx.recyclerview.widget.RecyclerView
 
 // https://androidwave.com/implementation-of-recyclerview-with-cursor-adapter/
+/**
+ * RecyclerView Adapter for Sqlite Database Cursors.
+ * Adds extra view type to insert a header in the view.
+ */
 abstract class RecyclerViewCursorAdapter<V : RecyclerView.ViewHolder>(c: Cursor?) :
     RecyclerView.Adapter<V>() {
 
@@ -11,8 +15,20 @@ abstract class RecyclerViewCursorAdapter<V : RecyclerView.ViewHolder>(c: Cursor?
     private var dataValid: Boolean = false
     private var rowIDColumn = -1
 
+    /**
+     * Like normal adapters onBindViewHolder, with a cursor to access data
+     */
     abstract fun onBindViewHolder(holder: V, cursor: Cursor, position: Int)
+
+    /**
+     * Like normal adapters onBindViewHolder, but specifically meant for the additional
+     * header view type
+     */
     abstract fun onBindHeaderViewHolder(holder: V)
+
+    /**
+     * Listener for when the cursor gets swapped with new data
+     */
     abstract fun onCursorSwapped(cursor: Cursor)
 
     companion object ViewTypes {
@@ -59,6 +75,10 @@ abstract class RecyclerViewCursorAdapter<V : RecyclerView.ViewHolder>(c: Cursor?
         return cursor!!.getLong(rowIDColumn)
     }
 
+    /**
+     * Returns the cursor pointing to the desired item
+     * @param position Element position (ignoring the header)
+     */
     fun getItem(position: Int): Cursor? {
         if (position == 0) {
             return null
@@ -67,6 +87,10 @@ abstract class RecyclerViewCursorAdapter<V : RecyclerView.ViewHolder>(c: Cursor?
         return cursor
     }
 
+    /**
+     * Swap the internal cursor for a new one containing updated data
+     * The old cursor gets closed
+     */
     fun swapCursor(newCursor: Cursor?) {
         if (newCursor == cursor) {
             return

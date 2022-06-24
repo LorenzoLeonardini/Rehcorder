@@ -13,13 +13,18 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.arthenica.ffmpegkit.*
 import dev.leonardini.rehcorder.R
+import dev.leonardini.rehcorder.Utils
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
 import java.io.File
 import java.util.*
 
+/**
+ * Runs ffmpeg normalization on the provided audio file
+ */
 class NormalizerService : Service(), FFmpegSessionCompleteCallback, LogCallback,
     StatisticsCallback {
+
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
@@ -65,28 +70,33 @@ class NormalizerService : Service(), FFmpegSessionCompleteCallback, LogCallback,
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        requestForeground()
+
         if (intent == null) {
             return START_NOT_STICKY
         }
         Log.i("Normalizer", "Started service")
 
-        requestForeground()
         val id = intent.getLongExtra("id", -1L)
         if (id == -1L) {
             throw IllegalArgumentException("Missing id in start service intent")
         }
         val file = intent.getStringExtra("file")!!
+
         queue.add(Pair(id, file))
+
         if (!running) {
             start()
         }
 
-        return START_NOT_STICKY
+        return START_REDELIVER_INTENT
     }
 
     // End callback
     override fun apply(session: FFmpegSession?) {
         // TODO: should probably check exit code, but we've seen it's not really relevant
+        // TODO: ffmpeg sometimes returns with code 0 and still displays an error in stdout
+
         val file = File("${File(currentFile).parentFile!!.parentFile!!.absolutePath}/tmp.m4a")
         val destinationFile = File(currentFile)
         val result = file.renameTo(destinationFile)

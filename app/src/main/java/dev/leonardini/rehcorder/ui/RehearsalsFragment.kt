@@ -2,7 +2,6 @@ package dev.leonardini.rehcorder.ui
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -14,9 +13,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import dev.leonardini.rehcorder.ProcessActivity
 import dev.leonardini.rehcorder.R
-import dev.leonardini.rehcorder.RehearsalActivity
+import dev.leonardini.rehcorder.RehearsalInfoActivity
+import dev.leonardini.rehcorder.SplitterActivity
 import dev.leonardini.rehcorder.adapters.RehearsalsAdapter
 import dev.leonardini.rehcorder.databinding.FragmentRehearsalsBinding
 import dev.leonardini.rehcorder.db.Database
@@ -57,7 +56,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
             RehearsalsViewModelFactory(Database.getInstance(requireActivity().applicationContext))
         }
         this.model = model
-        model.getRehearsals().observe(viewLifecycleOwner) { cursor ->
+        model.rehearsals.observe(viewLifecycleOwner) { cursor ->
             if (cursor.count > 0 && adapter.itemCount == 0) {
                 binding.recyclerView.visibility = View.VISIBLE
                 binding.emptyView.visibility = View.GONE
@@ -67,22 +66,10 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
             }
             adapter.swapCursor(cursor)
         }
-        model.getInNeedOfProcessRehearsal().observe(viewLifecycleOwner) { rehearsal ->
+        model.inNeedOfProcessRehearsal.observe(viewLifecycleOwner) {
             adapter.notifyItemChanged(0)
         }
 
-        requireActivity().supportFragmentManager.setFragmentResultListener(
-            RECORDED_DIALOG_TAG,
-            viewLifecycleOwner
-        ) { _, _ -> }
-        requireActivity().supportFragmentManager.setFragmentResultListener(
-            PROCESSING_DIALOG_TAG,
-            viewLifecycleOwner
-        ) { _, _ -> }
-        requireActivity().supportFragmentManager.setFragmentResultListener(
-            ERROR_STATE_DIALOG_TAG,
-            viewLifecycleOwner
-        ) { _, _ -> }
         requireActivity().supportFragmentManager.setFragmentResultListener(
             RENAME_DIALOG_TAG,
             viewLifecycleOwner
@@ -92,6 +79,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
             model.updateRehearsalName(id, name!!.ifBlank { null })
         }
 
+        // Necessary to update list after returning from editing/etc
         activityLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
                 model.update()
@@ -105,7 +93,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
         setHasOptionsMenu(true)
 
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
-        adapter = RehearsalsAdapter(this, this, this, null)
+        adapter = RehearsalsAdapter(this, this, this)
         binding.recyclerView.adapter = adapter
     }
 
@@ -135,9 +123,8 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
     }
 
     override fun onBound(holder: RehearsalsAdapter.HeaderViewHolder) {
-        Log.i("Header", "BOUND")
         holder.binding.card.visibility =
-            if (model.getInNeedOfProcessRehearsal().value != null) View.VISIBLE else View.GONE
+            if (model.inNeedOfProcessRehearsal.value != null) View.VISIBLE else View.GONE
         holder.binding.processNow.setOnClickListener(this)
     }
 
@@ -156,7 +143,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
                         )
                     }
                     Rehearsal.NORMALIZED -> {
-                        val intent = Intent(context, ProcessActivity::class.java)
+                        val intent = Intent(context, SplitterActivity::class.java)
                         intent.putExtra("fileName", holder.fileName)
                         intent.putExtra("rehearsalId", holder.id)
                         intent.putExtra("rehearsalName", holder.name ?: holder.formattedDate)
@@ -173,7 +160,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
                         )
                     }
                     Rehearsal.PROCESSED -> {
-                        val intent = Intent(requireContext(), RehearsalActivity::class.java)
+                        val intent = Intent(requireContext(), RehearsalInfoActivity::class.java)
                         intent.putExtra("rehearsalId", holder.id)
                         activityLauncher.launch(intent)
                     }
@@ -192,8 +179,8 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
     }
 
     override fun onClick(v: View?) {
-        model.getInNeedOfProcessRehearsal().value?.let {
-            val intent = Intent(context, ProcessActivity::class.java)
+        model.inNeedOfProcessRehearsal.value?.let {
+            val intent = Intent(context, SplitterActivity::class.java)
             intent.putExtra("fileName", it.fileName)
             intent.putExtra("rehearsalId", it.uid)
             intent.putExtra("rehearsalName", it.name)

@@ -3,7 +3,6 @@ package dev.leonardini.rehcorder.ui.dialogs
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import androidx.appcompat.app.AppCompatDialogFragment
@@ -12,6 +11,9 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import dev.leonardini.rehcorder.R
 
+/**
+ * Material dialog providing a text input to rename a rehearsal
+ */
 class RenameDialogFragment(
     private val rehearsalId: Long,
     private val currentName: String?,
@@ -59,7 +61,6 @@ class RenameDialogFragment(
             "name",
             v.findViewById<TextInputEditText>(R.id.text_field_input).text.toString().trim()
         )
-        Log.i("Test", tag ?: this::class.simpleName!!)
         requireActivity().supportFragmentManager.setFragmentResult(
             tag ?: this::class.simpleName!!,
             bundle

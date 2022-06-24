@@ -2,15 +2,15 @@ package dev.leonardini.rehcorder.ui
 
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.vectordrawable.graphics.drawable.Animatable2Compat
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
-import dev.leonardini.rehcorder.MainActivity
-import dev.leonardini.rehcorder.ProcessActivity
 import dev.leonardini.rehcorder.R
+import dev.leonardini.rehcorder.Utils
 import dev.leonardini.rehcorder.databinding.FragmentRecordingBinding
 
 class RecordingFragment : Fragment(), Runnable {
@@ -33,6 +33,7 @@ class RecordingFragment : Fragment(), Runnable {
 
         _binding = FragmentRecordingBinding.inflate(inflater, container, false)
 
+        // Pulsating animation
         animation =
             AnimatedVectorDrawableCompat.create(requireContext(), R.drawable.recording_animation)!!
         animation.registerAnimationCallback(object : Animatable2Compat.AnimationCallback() {
@@ -45,9 +46,10 @@ class RecordingFragment : Fragment(), Runnable {
         binding.animation.setBackgroundDrawable(animation)
         animation.start()
 
+        // Recover state
         stopTimestamp = savedInstanceState?.getLong("stopTimestamp", -1) ?: -1
-
-        isRecording = (requireActivity() as MainActivity).recording
+        isRecording = savedInstanceState?.getBoolean("isRecording", false) ?: true
+        Log.i("TEST", "$isRecording")
         if (stopTimestamp > 0 || isRecording) {
             startTimestamp =
                 savedInstanceState?.getLong("startTimestamp") ?: arguments?.getLong("timestamp")
@@ -66,11 +68,12 @@ class RecordingFragment : Fragment(), Runnable {
         stopTimestamp = System.currentTimeMillis() / 1000
     }
 
+    // Runnable implementation for restarting the pulsating animation
     override fun run() {
         val runningFor =
             (if (stopTimestamp > 0) stopTimestamp else System.currentTimeMillis() / 1000) - startTimestamp
         _binding?.recordingText?.text =
-            ProcessActivity.secondsToTimeString(runningFor)
+            Utils.secondsToTimeString(runningFor)
         if (isRecording)
             _binding?.recordingText?.postDelayed(this, 1000)
     }
@@ -78,6 +81,7 @@ class RecordingFragment : Fragment(), Runnable {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
+        outState.putBoolean("isRecording", isRecording)
         outState.putLong("startTimestamp", startTimestamp)
         outState.putLong("stopTimestamp", stopTimestamp)
     }

@@ -12,13 +12,15 @@ import dev.leonardini.rehcorder.databinding.RehearsalLayoutBinding
 import java.text.DateFormat
 import java.util.*
 
+/**
+ * RecyclerView Adapter for a list of all Rehearsals
+ */
 class RehearsalsAdapter(
     private val editElementListener: OnRehearsalEditClickListener,
     private val headerBoundListener: OnHeaderBoundListener,
     private val itemClickListener: OnItemClickListener,
-    cursor: Cursor?
 ) :
-    RecyclerViewCursorAdapter<RecyclerView.ViewHolder>(cursor) {
+    RecyclerViewCursorAdapter<RecyclerView.ViewHolder>(null) {
 
     private var uidIdx: Int = -1
     private var nameIdx: Int = -1
@@ -61,21 +63,21 @@ class RehearsalsAdapter(
             DateFormat.getDateInstance().format(Date(date * 1000))
         } - ${DateFormat.getTimeInstance().format(Date(date * 1000))}"
 
-        (holder as RehearsalViewHolder).let { holder ->
-            holder.id = id
-            holder.name = name
-            holder.formattedDate = formattedDate
-            holder.fileName = fileName
-            holder.externalStorage = externalStorage
-            holder.binding.rehearsalTitle.text = name ?: formattedDate
-            holder.binding.rehearsalDate.text = formattedDate
-            holder.binding.rehearsalSongs.text =
-                holder.binding.rehearsalSongs.resources.getQuantityString(
+        (holder as RehearsalViewHolder).let { _holder ->
+            _holder.id = id
+            _holder.name = name
+            _holder.formattedDate = formattedDate
+            _holder.fileName = fileName
+            _holder.externalStorage = externalStorage
+            _holder.binding.rehearsalTitle.text = name ?: formattedDate
+            _holder.binding.rehearsalDate.text = formattedDate
+            _holder.binding.rehearsalSongs.text =
+                _holder.binding.rehearsalSongs.resources.getQuantityString(
                     R.plurals.r_count,
                     songsCount,
                     songsCount
                 )
-            holder.binding.divider.visibility =
+            _holder.binding.divider.visibility =
                 if (position != itemCount - 2) View.VISIBLE else View.INVISIBLE
         }
     }
@@ -90,6 +92,7 @@ class RehearsalsAdapter(
         private val itemClickListener: OnItemClickListener
     ) :
         RecyclerView.ViewHolder(itemView), View.OnClickListener {
+
         val binding: RehearsalLayoutBinding = RehearsalLayoutBinding.bind(itemView)
         var id: Long = -1
         var name: String? = null

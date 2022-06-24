@@ -8,8 +8,12 @@ import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatDialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dev.leonardini.rehcorder.R
+import dev.leonardini.rehcorder.SplitterActivity
 import dev.leonardini.rehcorder.db.Song
 
+/**
+ * Material dialog providing a list input to select a song
+ */
 class SongPickerDialogFragment(
     private val songs: ArrayList<Song>,
 ) : AppCompatDialogFragment(), DialogInterface.OnClickListener {
@@ -22,7 +26,7 @@ class SongPickerDialogFragment(
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         songs.add(0, Song(name = requireContext().getString(R.string.s_picker_new_song)))
-        _songs = savedInstanceState?.getParcelableArrayList<Song>("songs") ?: songs
+        _songs = savedInstanceState?.getParcelableArrayList("songs") ?: songs
         _adapter = ArrayAdapter(
             requireContext(),
             R.layout.autocomplete_list_item,
@@ -48,7 +52,10 @@ class SongPickerDialogFragment(
 
     override fun onClick(dialog: DialogInterface?, which: Int) {
         if (which == 0) {
-            SongNameDialogFragment().show(parentFragmentManager, "NewSongNameDialog")
+            SongNameDialogFragment().show(
+                parentFragmentManager,
+                SplitterActivity.NEW_SONG_NAME_DIALOG
+            )
         } else {
             val bundle = Bundle()
             bundle.putLong("id", _adapter.getItem(which)!!.uid)

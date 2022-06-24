@@ -7,6 +7,7 @@
     <string name="rename">Rinomina</string>
     <string name="save">Salva</string>
     <string name="cancel">Annulla</string>
+    <string name="loading">Caricamento…</string>
 
     <!-- Menu -->
     <string name="menu_songs">Brani</string>
