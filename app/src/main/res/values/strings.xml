@@ -58,6 +58,8 @@
     <string name="dialog_delete_rehearsal_message">If you delete a rehearsal you also delete all the recordings and its already processed songs.</string>
     <string name="dialog_save_error_title">Error</string>
     <string name="dialog_save_error_message">You must select at least a song, and you have to specify a starting point and an ending point for each of the songs.</string>
+    <string name="dialog_confirm_exit_title">Confirm exit</string>
+    <string name="dialog_confirm_exit_message">If you exit now you will lose all your progress and will have to start splitting the audio from scratch.</string>
 
     <!-- Process -->
     <string name="begin_song">Begin song</string>
