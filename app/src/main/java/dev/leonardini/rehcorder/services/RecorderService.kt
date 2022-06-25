@@ -147,6 +147,8 @@ class RecorderService : Service() {
             }
         }
 
+        fileName = null
+        _startTimestamp = -1L
         stopSelf(currentRequestId)
     }
 
