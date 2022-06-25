@@ -74,8 +74,10 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
         // Recover state
         if (savedInstanceState != null) {
             recording = savedInstanceState.getBoolean("recording")
-        } else if (intent.getBooleanExtra("Recording", false)) {
-            findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.to_recording_fragment)
+        } else if (intent.getBooleanExtra("recording", false)) {
+            val args = Bundle()
+            args.putLong("timestamp", intent.getLongExtra("startTimestamp", System.currentTimeMillis() / 1000))
+            findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.to_recording_fragment, args)
             recording = true
         }
         if (recording) {
@@ -130,8 +132,9 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
         binding.bottomNavigation.menu[0].isEnabled = false
         binding.bottomNavigation.menu[2].isEnabled = false
 
+        val timestamp = System.currentTimeMillis() / 1000
         val args = Bundle()
-        args.putLong("timestamp", System.currentTimeMillis() / 1000)
+        args.putLong("timestamp", timestamp)
 
         findNavController(R.id.nav_host_fragment_content_main).navigate(
             R.id.to_recording_fragment,
@@ -145,6 +148,7 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
             intent.action = "RECORD"
             intent.putExtra("id", id)
             intent.putExtra("file", file)
+            intent.putExtra("startTimestamp", timestamp)
             if (Build.VERSION.SDK_INT >= 26) {
                 startForegroundService(intent)
             } else {

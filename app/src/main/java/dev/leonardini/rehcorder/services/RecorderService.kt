@@ -31,6 +31,7 @@ class RecorderService : Service() {
 
     private var recorder: MediaRecorder? = null
     private var id: Long = -1
+    private var startTimestamp: Long = -1
     private var fileName: String? = null
 
     /**
@@ -61,7 +62,8 @@ class RecorderService : Service() {
         Utils.createServiceNotificationChannelIfNotExists(nm)
 
         val int = Intent(this, MainActivity::class.java)
-        int.putExtra("Recording", true)
+        int.putExtra("recording", true)
+        int.putExtra("startTimestamp", startTimestamp)
         val pendingIntent = PendingIntent.getActivity(
             this,
             0,
@@ -140,6 +142,7 @@ class RecorderService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        startTimestamp = intent?.getLongExtra("startTimestamp", -1L) ?: -1L
         requestForeground()
 
         if (intent == null) {
