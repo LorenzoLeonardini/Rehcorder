@@ -46,6 +46,7 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
             .setContentTitle(resources.getString(R.string.notification_splitter_title))
             .setSmallIcon(R.drawable.ic_mic)
             .setContentText(resources.getString(R.string.notification_splitter_text))
+            .setOnlyAlertOnce(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
     }
