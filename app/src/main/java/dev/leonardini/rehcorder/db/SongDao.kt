@@ -15,6 +15,7 @@ interface SongDao {
         "SELECT song.*, COUNT(song_recording.uid) AS versions_count FROM song " +
                 "LEFT JOIN song_recording ON song.uid=song_recording.song_id " +
                 "GROUP BY song.uid, name " +
+                "HAVING versions_count>0 " +
                 "ORDER BY name"
     )
     fun getAllCursor(): Cursor
