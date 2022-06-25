@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -30,7 +31,7 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
     NavigationBarView.OnItemSelectedListener, View.OnClickListener {
 
     companion object {
-        private const val REQUEST_RECORD_AUDIO_PERMISSION = 42
+        private const val REQUEST_PERMISSIONS = 42
         private const val PERMISSION_DIALOG_TAG = "PermissionDialog"
     }
 
@@ -93,11 +94,13 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
     }
 
     private var permissionToRecordAccepted: Boolean = false
-    private var permissions = arrayOf(Manifest.permission.RECORD_AUDIO)
-
-    private fun recordingPermissionsGranted() = permissions.all {
-        ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
-    }
+    private var permissionToGetFineLocationAccepted: Boolean = false
+    private var permissionToGetCoarseLocationAccepted: Boolean = false
+    private var permissions = arrayOf(
+        Manifest.permission.RECORD_AUDIO,
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.ACCESS_COARSE_LOCATION
+    )
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
@@ -110,10 +113,24 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        permissionToRecordAccepted = if (requestCode == REQUEST_RECORD_AUDIO_PERMISSION) {
-            grantResults[0] == PackageManager.PERMISSION_GRANTED
-        } else {
-            false
+        for (i in permissions.indices) {
+            if (requestCode != REQUEST_PERMISSIONS) {
+                continue
+            }
+            val granted = grantResults[i] == PackageManager.PERMISSION_GRANTED
+            when (permissions[i]) {
+                Manifest.permission.RECORD_AUDIO -> {
+                    permissionToRecordAccepted = granted
+                }
+                Manifest.permission.ACCESS_FINE_LOCATION -> {
+                    permissionToGetFineLocationAccepted = granted
+                }
+                Manifest.permission.ACCESS_COARSE_LOCATION -> {
+                    permissionToGetCoarseLocationAccepted = granted
+                }
+            }
+
+            Log.i("Permissions", "Permission $i : ${permissions[i]} ${grantResults[i]}")
         }
         if (!permissionToRecordAccepted) {
             MaterialInfoDialogFragment(
@@ -146,16 +163,23 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
         recording = true
 
         Thread {
-            val (id, file) = Rehearsal.create(applicationContext)
-            val intent = Intent(this, RecorderService::class.java)
-            intent.action = "RECORD"
-            intent.putExtra("id", id)
-            intent.putExtra("file", file)
-            intent.putExtra("startTimestamp", timestamp)
-            if (Build.VERSION.SDK_INT >= 26) {
-                startForegroundService(intent)
-            } else {
-                startService(intent)
+            val (id, file) = Rehearsal.create(
+                applicationContext,
+                permissionToGetCoarseLocationAccepted,
+                permissionToGetFineLocationAccepted
+            )
+
+            runOnUiThread {
+                val intent = Intent(this, RecorderService::class.java)
+                intent.action = "RECORD"
+                intent.putExtra("id", id)
+                intent.putExtra("file", file)
+                intent.putExtra("startTimestamp", timestamp)
+                if (Build.VERSION.SDK_INT >= 26) {
+                    startForegroundService(intent)
+                } else {
+                    startService(intent)
+                }
             }
         }.start()
     }
@@ -224,15 +248,27 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
             if (recording) {
                 stopRecording()
             } else {
-                if (recordingPermissionsGranted()) {
-                    permissionToRecordAccepted = true
-                    startRecording()
-                } else {
+                permissionToRecordAccepted = ContextCompat.checkSelfPermission(
+                    baseContext,
+                    Manifest.permission.RECORD_AUDIO
+                ) == PackageManager.PERMISSION_GRANTED
+                permissionToGetCoarseLocationAccepted = ContextCompat.checkSelfPermission(
+                    baseContext,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+                permissionToGetFineLocationAccepted = ContextCompat.checkSelfPermission(
+                    baseContext,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+
+                if (!permissionToRecordAccepted || (!permissionToGetCoarseLocationAccepted && !permissionToGetFineLocationAccepted)) {
                     ActivityCompat.requestPermissions(
                         this,
                         permissions,
-                        REQUEST_RECORD_AUDIO_PERMISSION
+                        REQUEST_PERMISSIONS
                     )
+                } else {
+                    startRecording()
                 }
             }
         }

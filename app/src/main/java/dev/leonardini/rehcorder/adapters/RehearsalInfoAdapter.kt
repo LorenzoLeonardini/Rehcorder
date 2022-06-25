@@ -14,6 +14,7 @@ import dev.leonardini.rehcorder.databinding.TrackItemBinding
  */
 class RehearsalInfoAdapter(
     private val shareElementListener: OnTrackShareClickListener,
+    private val headerBoundListener: OnHeaderBoundListener,
     private val itemClickListener: OnItemClickListener,
 ) :
     RecyclerViewCursorAdapter<RecyclerView.ViewHolder>(null) {
@@ -68,6 +69,7 @@ class RehearsalInfoAdapter(
     }
 
     override fun onBindHeaderViewHolder(holder: RecyclerView.ViewHolder) {
+        headerBoundListener.onBound(holder as HeaderViewHolder)
     }
 
     class RehearsalInfoViewHolder(
@@ -104,6 +106,10 @@ class RehearsalInfoAdapter(
 
     interface OnTrackShareClickListener {
         fun onShare(holder: RehearsalInfoViewHolder)
+    }
+
+    interface OnHeaderBoundListener {
+        fun onBound(holder: HeaderViewHolder)
     }
 
     interface OnItemClickListener {

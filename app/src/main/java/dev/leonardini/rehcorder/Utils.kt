@@ -4,12 +4,18 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.location.Criteria
+import android.location.Location
+import android.location.LocationManager
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ShareCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.location.LocationManagerCompat
+import androidx.core.util.Consumer
 import dev.leonardini.rehcorder.ui.dialogs.MaterialInfoDialogFragment
 import java.io.File
 
@@ -106,6 +112,73 @@ object Utils {
             intent.flags =
                 Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_GRANT_READ_URI_PERMISSION
             activity.startActivity(intent)
+        }
+    }
+
+    fun getLocation(
+        applicationContext: Context,
+        fine: Boolean,
+        coarse: Boolean
+    ): Pair<Pair<Boolean, Boolean>, Triple<Double, Double, String?>> {
+        var hasLocationData = false
+        var latitude = -1.0
+        var longitude = -1.0
+        var willComputeNewLocation = false
+        var provider: String? = null
+        val locationManager =
+            applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        try {
+            if (coarse || fine) {
+                // Provider criteria
+                val criteria = Criteria()
+                criteria.accuracy = if (fine) Criteria.ACCURACY_FINE else Criteria.ACCURACY_COARSE
+                criteria.isCostAllowed = false
+                criteria.isAltitudeRequired = false
+                criteria.isSpeedRequired = false
+
+                // Pick best provider
+                provider = locationManager.getBestProvider(criteria, true)
+                if (provider != null) {
+                    val location = locationManager.getLastKnownLocation(provider)
+                    // If null or older than 30 minutes
+                    if (location == null || location.time < System.currentTimeMillis() - 30 * 60 * 1000) {
+                        // request new location
+                        willComputeNewLocation = true
+                    }
+                    if (location != null) {
+                        // meanwhile set last known location
+                        hasLocationData = true
+                        latitude = location.latitude
+                        longitude = location.longitude
+                    }
+                }
+            }
+        } catch (exception: SecurityException) {
+        }
+
+        return Pair(
+            Pair(hasLocationData, willComputeNewLocation),
+            Triple(latitude, longitude, provider)
+        )
+    }
+
+    fun getUpdatedLocation(
+        applicationContext: Context,
+        provider: String,
+        consumer: Consumer<Location>
+    ) {
+        val locationManager =
+            applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        try {
+            LocationManagerCompat.getCurrentLocation(
+                locationManager,
+                provider,
+                null,
+                ContextCompat.getMainExecutor(applicationContext),
+                consumer
+            )
+        } catch (exception: SecurityException) {
         }
     }
 }

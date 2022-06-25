@@ -1,8 +1,12 @@
 package dev.leonardini.rehcorder
 
+import android.content.Intent
+import android.location.Geocoder
+import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -19,10 +23,11 @@ import java.text.DateFormat
 import java.util.*
 
 class RehearsalInfoActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShareClickListener,
-    RehearsalInfoAdapter.OnItemClickListener {
+    RehearsalInfoAdapter.OnHeaderBoundListener, RehearsalInfoAdapter.OnItemClickListener {
 
     private lateinit var binding: ActivityRehearsalBinding
     private lateinit var adapter: RehearsalInfoAdapter
+    private lateinit var model: RehearsalInfoViewModel
 
     companion object {
         private const val DELETE_REHEARSAL_DIALOG = "DeleteRehearsalDialog"
@@ -44,7 +49,7 @@ class RehearsalInfoActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackS
         }
 
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
-        adapter = RehearsalInfoAdapter(this, this)
+        adapter = RehearsalInfoAdapter(this, this, this)
         binding.recyclerView.adapter = adapter
 
         val model: RehearsalInfoViewModel by viewModels {
@@ -53,6 +58,7 @@ class RehearsalInfoActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackS
                 intent.getLongExtra("rehearsalId", -1)
             )
         }
+        this.model = model
         model.rehearsal.observe(this) { rehearsal ->
             val formattedDate = "${
                 DateFormat.getDateInstance().format(Date(rehearsal.date * 1000))
@@ -110,6 +116,37 @@ class RehearsalInfoActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackS
         val baseDir =
             if (holder.externalStorage) getExternalFilesDir(null) ?: filesDir else filesDir
         Utils.shareSong(this, baseDir, holder.fileName!!)
+    }
+
+    override fun onBound(holder: RehearsalInfoAdapter.HeaderViewHolder) {
+        model.rehearsal.value?.let { rehearsal ->
+            holder.binding.card.visibility =
+                if (rehearsal.hasLocationData) View.VISIBLE else View.GONE
+            if (rehearsal.hasLocationData) {
+                // Fallback coordinates in case Geocoder is not present
+                holder.binding.location.text =
+                    String.format("%.5f %.5f", rehearsal.latitude, rehearsal.longitude)
+
+                // Geocoding
+                if (Geocoder.isPresent()) {
+                    val geocoder = Geocoder(this, resources.configuration.locale)
+                    val address =
+                        geocoder.getFromLocation(
+                            rehearsal.latitude!!,
+                            rehearsal.longitude!!,
+                            1
+                        )[0]
+                    holder.binding.location.text = address.getAddressLine(0)
+                }
+
+                // Open Maps
+                holder.binding.card.setOnClickListener {
+                    val locationUri =
+                        Uri.parse("geo:${rehearsal.latitude},${rehearsal.longitude}?q=${rehearsal.latitude},${rehearsal.longitude}")
+                    startActivity(Intent(Intent.ACTION_VIEW, locationUri))
+                }
+            }
+        }
     }
 
     override fun onItemClicked(holder: RehearsalInfoAdapter.RehearsalInfoViewHolder) {
