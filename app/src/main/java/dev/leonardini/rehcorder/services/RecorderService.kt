@@ -32,7 +32,7 @@ class RecorderService : Service() {
     companion object {
         private var id: Long = -1
         private var _startTimestamp: Long = -1L
-        val startTimestamp :Long
+        val startTimestamp: Long
             get() = _startTimestamp
         private var fileName: String? = null
     }
@@ -121,7 +121,7 @@ class RecorderService : Service() {
             }
     }
 
-    private fun stopRecording() {
+    private fun stopRecording(currentRequestId: Int) {
         recorder?.apply {
             stop()
             release()
@@ -147,7 +147,7 @@ class RecorderService : Service() {
             }
         }
 
-        stopSelf()
+        stopSelf(currentRequestId)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -172,7 +172,7 @@ class RecorderService : Service() {
 
             startRecording()
         } else if (intent.action == "STOP") {
-            stopRecording()
+            stopRecording(startId)
         }
 
         return START_NOT_STICKY

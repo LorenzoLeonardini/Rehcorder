@@ -29,12 +29,13 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
         return null
     }
 
-    private var queue: Queue<Triple<Long, String, ArrayList<Long>>> = LinkedList()
+    private var queue: Queue<Pair<Triple<Long, String, ArrayList<Long>>, Int>> = LinkedList()
     private var running: Boolean = false
     private var currentId: Long = -1L
     private var currentRehearsalFile: String = ""
     private var currentRegions: Queue<Triple<Long, Long, Long>> = LinkedList()
     private var currentMaxProgress: Int = 0
+    private var currentRequestId: Int = 0
 
     private fun createNotificationBuilder(notificationManager: NotificationManager? = null): NotificationCompat.Builder {
         val nm = notificationManager
@@ -74,7 +75,9 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
     private fun start() {
         // No current region, means new file
         if (currentRegions.size == 0) {
-            val (id, fileName, regions) = queue.poll() ?: return
+            val (data, requestId) = queue.poll() ?: return
+            currentRequestId = requestId
+            val (id, fileName, regions) = data
             currentId = id
             currentRehearsalFile = fileName
             for (i in 0 until regions.size / 3) {
@@ -143,7 +146,7 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
         @Suppress("UNCHECKED_CAST")
         val regions = intent.getSerializableExtra("regions") as ArrayList<Long>
 
-        queue.add(Triple(id, file, regions))
+        queue.add(Pair(Triple(id, file, regions), startId))
         if (!running) {
             start()
         }
@@ -171,7 +174,8 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
         Handler(Looper.getMainLooper()).post {
             updateProgress()
             if (queue.size == 0 && currentRegions.size == 0) {
-                stopSelf()
+                running = false
+                stopSelf(currentRequestId)
             } else {
                 start()
             }

@@ -29,10 +29,11 @@ class NormalizerService : Service(), FFmpegSessionCompleteCallback, LogCallback,
         return null
     }
 
-    private var queue: Queue<Pair<Long, String>> = LinkedList()
+    private var queue: Queue<Triple<Long, String, Int>> = LinkedList()
     private var running: Boolean = false
     private var currentId: Long = -1L
     private var currentFile: String = ""
+    private var currentRequestId: Int = 0
 
     private fun requestForeground() {
         val nm: NotificationManager =
@@ -55,9 +56,10 @@ class NormalizerService : Service(), FFmpegSessionCompleteCallback, LogCallback,
     }
 
     private fun start() {
-        val (id, fileName) = queue.poll() ?: return
+        val (id, fileName, requestId) = queue.poll() ?: return
         currentId = id
         currentFile = fileName
+        currentRequestId = requestId
 
         running = true
         Log.i("Normalizer", "Normalizing $fileName")
@@ -83,7 +85,7 @@ class NormalizerService : Service(), FFmpegSessionCompleteCallback, LogCallback,
         }
         val file = intent.getStringExtra("file")!!
 
-        queue.add(Pair(id, file))
+        queue.add(Triple(id, file, startId))
 
         if (!running) {
             start()
@@ -107,7 +109,8 @@ class NormalizerService : Service(), FFmpegSessionCompleteCallback, LogCallback,
 
         Handler(Looper.getMainLooper()).post {
             if (queue.size == 0) {
-                stopSelf()
+                running = false
+                stopSelf(currentRequestId)
             } else {
                 start()
             }
