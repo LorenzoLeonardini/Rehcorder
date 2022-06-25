@@ -35,7 +35,7 @@ class RehearsalInfoViewModel(private val database: AppDatabase, private val rehe
             ).delete()
 
             rehearsalSongs.value!!.let { songs ->
-                for (i in 1 until songs.count) {
+                for (i in 0 until songs.count) {
                     songs.moveToPosition(i)
                     val fileName: String =
                         songs.getString(songs.getColumnIndexOrThrow("file_name"))

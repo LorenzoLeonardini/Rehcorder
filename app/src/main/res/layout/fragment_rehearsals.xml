@@ -25,6 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
+        android:paddingHorizontal="8dp"
         android:paddingBottom="32dp"
         android:text="@string/r_no_recordings"
         app:layout_constraintBottom_toBottomOf="parent"
