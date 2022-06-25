@@ -25,14 +25,23 @@ import java.io.IOException
  * Foreground service to record audio
  */
 class RecorderService : Service() {
+
+    // https://stackoverflow.com/a/608600/4840510
+    // https://groups.google.com/g/android-developers/c/jEvXMWgbgzE
+    // Solution by hackbod, an Android engineer @ Google
+    companion object {
+        private var id: Long = -1
+        private var _startTimestamp: Long = -1L
+        val startTimestamp :Long
+            get() = _startTimestamp
+        private var fileName: String? = null
+    }
+
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
 
     private var recorder: MediaRecorder? = null
-    private var id: Long = -1
-    private var startTimestamp: Long = -1
-    private var fileName: String? = null
 
     /**
      * Select best audio source for the recording. If the user wants it and the device supports it,
@@ -62,13 +71,13 @@ class RecorderService : Service() {
         Utils.createServiceNotificationChannelIfNotExists(nm)
 
         val int = Intent(this, MainActivity::class.java)
-        int.putExtra("recording", true)
-        int.putExtra("startTimestamp", startTimestamp)
+        int.flags =
+            Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         val pendingIntent = PendingIntent.getActivity(
             this,
             0,
             int,
-            if (Build.VERSION.SDK_INT >= 23) PendingIntent.FLAG_IMMUTABLE else 0
+            (if (Build.VERSION.SDK_INT >= 23) PendingIntent.FLAG_IMMUTABLE else 0) or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
         var notificationBuilder = NotificationCompat.Builder(this, "dev.leonardini.rehcorder")
@@ -116,40 +125,40 @@ class RecorderService : Service() {
         recorder?.apply {
             stop()
             release()
-        }
-        recorder = null
+            recorder = null
 
-        // Normalizing everything, even processed microphone in order to
-        // compress file size (ffmpeg chooses the best sample rate)
+            // Normalizing everything, even processed microphone in order to
+            // compress file size (ffmpeg chooses the best sample rate)
 
-        // Update rehearsal status
-        Thread {
-            Database.getInstance(applicationContext).rehearsalDao()
-                .updateStatus(id, Rehearsal.RECORDED)
-        }.start()
+            // Update rehearsal status
+            Thread {
+                Database.getInstance(applicationContext).rehearsalDao()
+                    .updateStatus(id, Rehearsal.RECORDED)
+            }.start()
 
-        // Start normalizer service
-        val intent = Intent(this, NormalizerService::class.java)
-        intent.putExtra("id", id)
-        intent.putExtra("file", fileName)
-        if (Build.VERSION.SDK_INT >= 26) {
-            startForegroundService(intent)
-        } else {
-            startService(intent)
+            // Start normalizer service
+            val intent = Intent(this@RecorderService, NormalizerService::class.java)
+            intent.putExtra("id", id)
+            intent.putExtra("file", fileName)
+            if (Build.VERSION.SDK_INT >= 26) {
+                startForegroundService(intent)
+            } else {
+                startService(intent)
+            }
         }
 
         stopSelf()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startTimestamp = intent?.getLongExtra("startTimestamp", -1L) ?: -1L
-        requestForeground()
+        _startTimestamp = intent?.getLongExtra("startTimestamp", -1L) ?: -1L
 
         if (intent == null) {
             return START_NOT_STICKY
         }
 
         if (intent.action == "RECORD") {
+            requestForeground()
             if (fileName != null) {
                 Log.e("Recorder", "Can only do one recording at a time")
                 return START_NOT_STICKY

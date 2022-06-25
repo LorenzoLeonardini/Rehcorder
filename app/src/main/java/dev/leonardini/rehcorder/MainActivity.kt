@@ -74,10 +74,13 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
         // Recover state
         if (savedInstanceState != null) {
             recording = savedInstanceState.getBoolean("recording")
-        } else if (intent.getBooleanExtra("recording", false)) {
+        } else if (RecorderService.startTimestamp != -1L) {
             val args = Bundle()
-            args.putLong("timestamp", intent.getLongExtra("startTimestamp", System.currentTimeMillis() / 1000))
-            findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.to_recording_fragment, args)
+            args.putLong("timestamp", RecorderService.startTimestamp)
+            findNavController(R.id.nav_host_fragment_content_main).navigate(
+                R.id.to_recording_fragment,
+                args
+            )
             recording = true
         }
         if (recording) {
@@ -160,11 +163,7 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
     private fun stopRecording() {
         val intent = Intent(this, RecorderService::class.java)
         intent.action = "STOP"
-        if (Build.VERSION.SDK_INT >= 26) {
-            startForegroundService(intent)
-        } else {
-            startService(intent)
-        }
+        startService(intent)
 
         supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main)
             ?.let { navFragment ->
