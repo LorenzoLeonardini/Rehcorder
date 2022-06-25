@@ -123,8 +123,12 @@ class RecorderService : Service() {
 
     private fun stopRecording(currentRequestId: Int) {
         recorder?.apply {
-            stop()
-            release()
+            try {
+                stop()
+                release()
+            } catch (e :Exception) {
+                Log.e("Recorder", "Exception while stopping recorder")
+            }
             recorder = null
 
             // Normalizing everything, even processed microphone in order to
