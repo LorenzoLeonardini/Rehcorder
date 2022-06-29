@@ -1,17 +1,27 @@
 package dev.leonardini.rehcorder.viewmodels
 
+import android.app.Application
 import android.database.Cursor
-import androidx.lifecycle.*
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import dev.leonardini.rehcorder.db.AppDatabase
+import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-class RehearsalsViewModel(private val database: AppDatabase) : ViewModel() {
+class RehearsalsViewModel(application: Application) : AndroidViewModel(application) {
 
     private var fetchJob: Job? = null
     private var rehearsalFetchJob: Job? = null
+    private val database: AppDatabase
+
+    init {
+        database = Database.getInstance(application)
+    }
 
     val rehearsals: LiveData<Cursor>
         get() = _rehearsals
@@ -57,15 +67,5 @@ class RehearsalsViewModel(private val database: AppDatabase) : ViewModel() {
         rehearsalFetchJob = viewModelScope.launch(Dispatchers.IO) {
             _inNeedOfProcessRehearsal.postValue(database.rehearsalDao().getUnprocessedRehearsal())
         }
-    }
-}
-
-class RehearsalsViewModelFactory(private val database: AppDatabase) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(RehearsalsViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return RehearsalsViewModel(database) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

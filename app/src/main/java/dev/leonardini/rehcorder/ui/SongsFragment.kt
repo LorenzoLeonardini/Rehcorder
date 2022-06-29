@@ -14,10 +14,8 @@ import dev.leonardini.rehcorder.R
 import dev.leonardini.rehcorder.SongInfoActivity
 import dev.leonardini.rehcorder.adapters.SongsAdapter
 import dev.leonardini.rehcorder.databinding.FragmentSongsBinding
-import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.ui.dialogs.RenameDialogFragment
 import dev.leonardini.rehcorder.viewmodels.SongsViewModel
-import dev.leonardini.rehcorder.viewmodels.SongsViewModelFactory
 
 class SongsFragment : Fragment(), SongsAdapter.OnSongEditClickListener,
     SongsAdapter.OnHeaderBoundListener, SongsAdapter.OnItemClickListener {
@@ -39,9 +37,7 @@ class SongsFragment : Fragment(), SongsAdapter.OnSongEditClickListener,
     ): View {
         _binding = FragmentSongsBinding.inflate(inflater, container, false)
 
-        val model: SongsViewModel by viewModels {
-            SongsViewModelFactory(Database.getInstance(requireActivity().applicationContext))
-        }
+        val model: SongsViewModel by viewModels()
         model.songs.observe(viewLifecycleOwner) { cursor ->
             if (cursor.count > 0 && adapter.itemCount == 0) {
                 binding.recyclerView.visibility = View.VISIBLE

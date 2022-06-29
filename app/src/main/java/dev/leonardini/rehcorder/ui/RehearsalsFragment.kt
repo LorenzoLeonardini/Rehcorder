@@ -18,12 +18,10 @@ import dev.leonardini.rehcorder.RehearsalInfoActivity
 import dev.leonardini.rehcorder.SplitterActivity
 import dev.leonardini.rehcorder.adapters.RehearsalsAdapter
 import dev.leonardini.rehcorder.databinding.FragmentRehearsalsBinding
-import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
 import dev.leonardini.rehcorder.ui.dialogs.MaterialInfoDialogFragment
 import dev.leonardini.rehcorder.ui.dialogs.RenameDialogFragment
 import dev.leonardini.rehcorder.viewmodels.RehearsalsViewModel
-import dev.leonardini.rehcorder.viewmodels.RehearsalsViewModelFactory
 
 class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickListener,
     RehearsalsAdapter.OnHeaderBoundListener, RehearsalsAdapter.OnItemClickListener,
@@ -52,9 +50,7 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
     ): View {
         _binding = FragmentRehearsalsBinding.inflate(inflater, container, false)
 
-        val model: RehearsalsViewModel by viewModels {
-            RehearsalsViewModelFactory(Database.getInstance(requireActivity().applicationContext))
-        }
+        val model: RehearsalsViewModel by viewModels()
         this.model = model
         model.rehearsals.observe(viewLifecycleOwner) { cursor ->
             if (cursor.count > 0 && adapter.itemCount == 0) {

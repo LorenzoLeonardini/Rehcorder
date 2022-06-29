@@ -7,7 +7,6 @@ import androidx.core.view.WindowCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.leonardini.rehcorder.adapters.SongInfoAdapter
 import dev.leonardini.rehcorder.databinding.ActivitySongBinding
-import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.viewmodels.SongInfoViewModel
 import dev.leonardini.rehcorder.viewmodels.SongViewModelFactory
 
@@ -38,7 +37,7 @@ class SongInfoActivity : AppCompatActivity(), SongInfoAdapter.OnTrackShareClickL
 
         val model: SongInfoViewModel by viewModels {
             SongViewModelFactory(
-                Database.getInstance(applicationContext),
+                application,
                 intent.getLongExtra("songId", -1)
             )
         }

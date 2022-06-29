@@ -1,15 +1,25 @@
 package dev.leonardini.rehcorder.viewmodels
 
+import android.app.Application
 import android.database.Cursor
-import androidx.lifecycle.*
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import dev.leonardini.rehcorder.db.AppDatabase
+import dev.leonardini.rehcorder.db.Database
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-class SongsViewModel(private val database: AppDatabase) : ViewModel() {
+class SongsViewModel(application: Application) : AndroidViewModel(application) {
 
     private var fetchJob: Job? = null
+    private val database: AppDatabase
+
+    init {
+        database = Database.getInstance(application)
+    }
 
     val songs: LiveData<Cursor>
         get() = _songs
@@ -34,14 +44,4 @@ class SongsViewModel(private val database: AppDatabase) : ViewModel() {
         }
     }
 
-}
-
-class SongsViewModelFactory(private val database: AppDatabase) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(SongsViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return SongsViewModel(database) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
-    }
 }

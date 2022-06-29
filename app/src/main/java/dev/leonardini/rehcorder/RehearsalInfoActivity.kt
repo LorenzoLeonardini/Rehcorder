@@ -10,7 +10,6 @@ import androidx.core.view.WindowCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.leonardini.rehcorder.adapters.RehearsalInfoAdapter
 import dev.leonardini.rehcorder.databinding.ActivityRehearsalBinding
-import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.ui.dialogs.MaterialDialogFragment
 import dev.leonardini.rehcorder.ui.dialogs.MaterialLoadingDialogFragment
 import dev.leonardini.rehcorder.viewmodels.RehearsalInfoViewModel
@@ -49,7 +48,7 @@ class RehearsalInfoActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackS
 
         val model: RehearsalInfoViewModel by viewModels {
             RehearsalViewModelFactory(
-                Database.getInstance(applicationContext),
+                application,
                 intent.getLongExtra("rehearsalId", -1)
             )
         }

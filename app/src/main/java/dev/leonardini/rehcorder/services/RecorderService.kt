@@ -126,7 +126,7 @@ class RecorderService : Service() {
             try {
                 stop()
                 release()
-            } catch (e :Exception) {
+            } catch (e: Exception) {
                 Log.e("Recorder", "Exception while stopping recorder")
             }
             recorder = null
