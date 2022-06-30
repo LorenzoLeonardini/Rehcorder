@@ -170,14 +170,14 @@ class SplitterActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeL
         supportFragmentManager.setFragmentResultListener(EXIT_DIALOG, this) { _, bundle ->
             val which = bundle.getInt("which")
             if (which == AlertDialog.BUTTON_POSITIVE) {
-                finish()
+                super.onBackPressed()
             }
         }
     }
 
     override fun onBackPressed() {
         if (songRegions.size == 0) {
-            finish()
+            super.onBackPressed()
             return
         }
         MaterialDialogFragment(
