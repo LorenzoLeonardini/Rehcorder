@@ -2,13 +2,18 @@ package dev.leonardini.rehcorder.viewmodels
 
 import android.app.Application
 import android.content.Context
-import android.database.Cursor
 import androidx.lifecycle.*
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
+import androidx.paging.insertSeparators
 import dev.leonardini.rehcorder.Utils
+import dev.leonardini.rehcorder.adapters.RehearsalsInfoHeader
 import dev.leonardini.rehcorder.db.AppDatabase
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import java.io.File
 
 class RehearsalInfoViewModel(application: Application, private val rehearsalId: Long) :
@@ -20,32 +25,36 @@ class RehearsalInfoViewModel(application: Application, private val rehearsalId: 
         database = Database.getInstance(application)
     }
 
-    val rehearsal: LiveData<Rehearsal> = liveData(Dispatchers.IO) {
+    val rehearsal: LiveData<Rehearsal> = liveData {
         emit(database.rehearsalDao().getRehearsal(rehearsalId))
     }
 
-    val rehearsalSongs: LiveData<Cursor> = liveData(Dispatchers.IO) {
-        emit(database.songRecordingDao().getRehearsalSortedCursor(rehearsalId))
-    }
+    val rehearsalSongs = Pager(PagingConfig(pageSize = 10)) {
+        database.songRecordingDao().getRehearsalSongs(rehearsalId)
+    }.flow.map { pagingData ->
+        pagingData.insertSeparators { before, _ ->
+            when (before) {
+                null -> RehearsalsInfoHeader()
+                else -> null
+            }
+        }
+    }.cachedIn(viewModelScope)
 
     fun deleteRehearsal(applicationContext: Context) {
-        rehearsal.value!!.let { rehearsal ->
-            val externalStorageBaseDir =
-                applicationContext.getExternalFilesDir(null) ?: applicationContext.filesDir
-            File(
-                Utils.getRecordingPath(
-                    if (rehearsal.externalStorage) externalStorageBaseDir else applicationContext.filesDir,
-                    rehearsal.fileName
-                )
-            ).delete()
+        viewModelScope.launch {
+            rehearsal.value!!.let { rehearsal ->
+                val externalStorageBaseDir =
+                    applicationContext.getExternalFilesDir(null) ?: applicationContext.filesDir
+                File(
+                    Utils.getRecordingPath(
+                        if (rehearsal.externalStorage) externalStorageBaseDir else applicationContext.filesDir,
+                        rehearsal.fileName
+                    )
+                ).delete()
 
-            rehearsalSongs.value!!.let { songs ->
-                for (i in 0 until songs.count) {
-                    songs.moveToPosition(i)
-                    val fileName: String =
-                        songs.getString(songs.getColumnIndexOrThrow("file_name"))
-                    val externalStorage: Boolean =
-                        songs.getInt(songs.getColumnIndexOrThrow("external_storage")) == 1
+                for (song in database.songRecordingDao().getRehearsalSongsRecordings(rehearsalId)) {
+                    val fileName: String = song.fileName
+                    val externalStorage: Boolean = song.externalStorage
 
                     File(
                         Utils.getSongPath(
@@ -54,12 +63,11 @@ class RehearsalInfoViewModel(application: Application, private val rehearsalId: 
                         )
                     ).delete()
                 }
+
+                database.songRecordingDao().deleteRehearsal(rehearsalId)
+                database.rehearsalDao().delete(rehearsalId)
             }
-
-            database.songRecordingDao().deleteRehearsal(rehearsalId)
-            database.rehearsalDao().delete(rehearsalId)
         }
-
     }
 }
 
@@ -67,7 +75,7 @@ class RehearsalViewModelFactory(
     private val application: Application,
     private val rehearsalId: Long
 ) :
-    ViewModelProvider.Factory {
+    ViewModelProvider.NewInstanceFactory() {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(RehearsalInfoViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")

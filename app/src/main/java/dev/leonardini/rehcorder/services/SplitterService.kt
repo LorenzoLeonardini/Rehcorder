@@ -17,6 +17,9 @@ import dev.leonardini.rehcorder.R
 import dev.leonardini.rehcorder.Utils
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 import java.util.*
 
@@ -95,10 +98,10 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
 
         running = true
 
-        Thread {
+        CoroutineScope(Dispatchers.Main).launch {
             Log.i("Splitter", "Splitting $currentRehearsalFile for song id $id")
 
-            val (externalStorage, baseDir) = Utils.getPreferredStorageLocation(this)
+            val (externalStorage, baseDir) = Utils.getPreferredStorageLocation(this@SplitterService)
 
             // Check folder or create
             val folder = File(Utils.getSongPath(baseDir, ""))
@@ -123,11 +126,11 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
 
             FFmpegKit.executeAsync(
                 "-y -ss $startSeek -to $endSeek -i $currentRehearsalFile $songPath",
-                this,
-                this,
-                this
+                this@SplitterService,
+                this@SplitterService,
+                this@SplitterService
             )
-        }.start()
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -162,8 +165,10 @@ class SplitterService : Service(), FFmpegSessionCompleteCallback, LogCallback,
 
         // If no more regions to split, the current audio processing is finished
         if (currentRegions.size == 0) {
-            Database.getInstance(applicationContext).rehearsalDao()
-                .updateStatus(currentId, Rehearsal.PROCESSED)
+            CoroutineScope(Dispatchers.Main).launch {
+                Database.getInstance(applicationContext).rehearsalDao()
+                    .updateStatus(currentId, Rehearsal.PROCESSED)
+            }
 
             val preference = PreferenceManager.getDefaultSharedPreferences(this)
             val deleteRecording = preference.getBoolean("delete_recording", false)

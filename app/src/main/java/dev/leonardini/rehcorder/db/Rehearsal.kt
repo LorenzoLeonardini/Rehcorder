@@ -19,7 +19,7 @@ data class Rehearsal(
         const val PROCESSING = 4
         const val PROCESSED = 5
 
-        fun create(applicationContext: Context): Pair<Long, String> {
+        suspend fun create(applicationContext: Context): Pair<Long, String> {
             val timestamp = System.currentTimeMillis() / 1000
             val fileName = "$timestamp.m4a"
 

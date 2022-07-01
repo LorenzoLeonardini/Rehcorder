@@ -18,6 +18,9 @@ import dev.leonardini.rehcorder.R
 import dev.leonardini.rehcorder.Utils
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
 
@@ -135,10 +138,10 @@ class RecorderService : Service() {
             // compress file size (ffmpeg chooses the best sample rate)
 
             // Update rehearsal status
-            Thread {
+            CoroutineScope(Dispatchers.Main).launch {
                 Database.getInstance(applicationContext).rehearsalDao()
                     .updateStatus(id, Rehearsal.RECORDED)
-            }.start()
+            }
 
             // Start normalizer service
             val intent = Intent(this@RecorderService, NormalizerService::class.java)

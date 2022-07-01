@@ -1,15 +1,13 @@
 package dev.leonardini.rehcorder.db
 
-import android.database.Cursor
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import dev.leonardini.rehcorder.adapters.UiModel
 
 @Dao
 interface SongDao {
-
-    @Query("SELECT * FROM song")
-    fun getAll(): List<Song>
 
     @Query(
         "SELECT song.*, COUNT(song_recording.uid) AS versions_count FROM song " +
@@ -18,18 +16,21 @@ interface SongDao {
                 "HAVING versions_count>0 " +
                 "ORDER BY name"
     )
-    fun getAllCursor(): Cursor
+    fun getAll(): PagingSource<Int, SongWithVersionCount>
 
     @Query("SELECT * FROM song ORDER BY name")
-    fun getAllSorted(): List<Song>
+    suspend fun getAllSorted(): List<Song>
 
     @Query("SELECT * FROM song WHERE uid=:id LIMIT 1")
-    fun getSong(id: Long): Song?
+    suspend fun getSong(id: Long): Song?
 
     @Insert
-    fun insert(songs: Song): Long
+    suspend fun insert(songs: Song): Long
 
     @Query("UPDATE song SET name=:name WHERE uid=:id")
-    fun updateName(id: Long, name: String?)
+    suspend fun updateName(id: Long, name: String?)
 
 }
+
+data class SongWithVersionCount(val uid: Long, val name: String, val versions_count: Int) :
+    UiModel()

@@ -1,12 +1,16 @@
 package dev.leonardini.rehcorder.viewmodels
 
 import android.app.Application
-import android.database.Cursor
 import androidx.lifecycle.*
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
+import androidx.paging.insertSeparators
+import dev.leonardini.rehcorder.adapters.SongsInfoHeader
 import dev.leonardini.rehcorder.db.AppDatabase
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Song
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.map
 
 class SongInfoViewModel(application: Application, private val songId: Long) :
     AndroidViewModel(application) {
@@ -17,17 +21,24 @@ class SongInfoViewModel(application: Application, private val songId: Long) :
         database = Database.getInstance(application)
     }
 
-    val song: LiveData<Song> = liveData(Dispatchers.IO) {
+    val song: LiveData<Song> = liveData {
         emit(database.songDao().getSong(songId)!!)
     }
 
-    val songRehearsals: LiveData<Cursor> = liveData(Dispatchers.IO) {
-        emit(database.songRecordingDao().getSongSortedCursor(songId))
-    }
+    val songRehearsals = Pager(PagingConfig(pageSize = 10)) {
+        database.songRecordingDao().getSongRehearsals(songId)
+    }.flow.map { pagingData ->
+        pagingData.insertSeparators { before, _ ->
+            when (before) {
+                null -> SongsInfoHeader()
+                else -> null
+            }
+        }
+    }.cachedIn(viewModelScope)
 }
 
 class SongViewModelFactory(private val application: Application, private val songId: Long) :
-    ViewModelProvider.Factory {
+    ViewModelProvider.NewInstanceFactory() {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(SongInfoViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")

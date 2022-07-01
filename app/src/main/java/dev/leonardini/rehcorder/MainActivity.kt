@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.get
 import androidx.core.view.marginBottom
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -25,6 +26,7 @@ import dev.leonardini.rehcorder.db.Rehearsal
 import dev.leonardini.rehcorder.services.RecorderService
 import dev.leonardini.rehcorder.ui.RecordingFragment
 import dev.leonardini.rehcorder.ui.dialogs.MaterialInfoDialogFragment
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedListener,
     NavigationBarView.OnItemSelectedListener, View.OnClickListener {
@@ -145,9 +147,9 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
         )
         recording = true
 
-        Thread {
+        lifecycleScope.launch {
             val (id, file) = Rehearsal.create(applicationContext)
-            val intent = Intent(this, RecorderService::class.java)
+            val intent = Intent(this@MainActivity, RecorderService::class.java)
             intent.action = "RECORD"
             intent.putExtra("id", id)
             intent.putExtra("file", file)
@@ -157,7 +159,7 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
             } else {
                 startService(intent)
             }
-        }.start()
+        }
     }
 
     private fun stopRecording() {

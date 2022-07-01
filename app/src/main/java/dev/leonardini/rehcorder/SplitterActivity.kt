@@ -7,12 +7,12 @@ import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
-import android.view.Menu
 import android.view.View
 import android.widget.SeekBar
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -25,6 +25,7 @@ import dev.leonardini.rehcorder.services.SplitterService
 import dev.leonardini.rehcorder.ui.dialogs.MaterialDialogFragment
 import dev.leonardini.rehcorder.ui.dialogs.MaterialInfoDialogFragment
 import dev.leonardini.rehcorder.ui.dialogs.SongPickerDialogFragment
+import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.math.floor
 
@@ -138,7 +139,7 @@ class SplitterActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeL
         restoreSongRegionSelectionState(savedInstanceState == null)
 
         // Setup seek bar
-        runOnUiThread(this)
+        binding.content.seekBar.post(this)
         binding.content.seekBar.setOnSeekBarChangeListener(this)
 
         // Fragment result listeners
@@ -153,16 +154,14 @@ class SplitterActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeL
             val which = bundle.getInt("which")
             if (which == AlertDialog.BUTTON_POSITIVE) {
                 val name = bundle.getString("name")
-                Thread {
+                lifecycleScope.launch {
                     val song = Song(name = name!!)
                     song.uid = database.songDao().insert(song)
-                    runOnUiThread {
-                        songRegions.add(song.uid)
-                        if (savedCurrentPlayingStatus) {
-                            mediaPlayer.start()
-                        }
+                    songRegions.add(song.uid)
+                    if (savedCurrentPlayingStatus) {
+                        mediaPlayer.start()
                     }
-                }.start()
+                }
             } else {
                 runSongSelector()
             }
@@ -289,18 +288,16 @@ class SplitterActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeL
                 intent.putExtra("file", Utils.getRecordingPath(baseDir, fileName))
                 intent.putExtra("regions", songRegions)
 
-                Thread {
+                lifecycleScope.launch {
                     Database.getInstance(applicationContext).rehearsalDao()
                         .updateStatus(rehearsalId, Rehearsal.PROCESSING)
-                    runOnUiThread {
-                        if (Build.VERSION.SDK_INT >= 26) {
-                            startForegroundService(intent)
-                        } else {
-                            startService(intent)
-                        }
-                        finish()
+                    if (Build.VERSION.SDK_INT >= 26) {
+                        startForegroundService(intent)
+                    } else {
+                        startService(intent)
                     }
-                }.start()
+                    finish()
+                }
             }
         }
     }
@@ -310,15 +307,14 @@ class SplitterActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeL
         if (savedCurrentPlayingStatus) {
             mediaPlayer.pause()
         }
-        Thread {
+
+        lifecycleScope.launch {
             val songs = database.songDao().getAllSorted()
-            runOnUiThread {
-                SongPickerDialogFragment(ArrayList(songs)).show(
-                    supportFragmentManager,
-                    SONG_PICKER_DIALOG
-                )
-            }
-        }.start()
+            SongPickerDialogFragment(ArrayList(songs)).show(
+                supportFragmentManager,
+                SONG_PICKER_DIALOG
+            )
+        }
     }
 
     override fun onStartTrackingTouch(seekBar: SeekBar?) {}
@@ -332,11 +328,6 @@ class SplitterActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeL
         mediaPlayer.release()
         audioManager.mode = AudioManager.MODE_NORMAL
         super.onDestroy()
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        return super.onCreateOptionsMenu(menu)
     }
 
     override fun onSupportNavigateUp(): Boolean {

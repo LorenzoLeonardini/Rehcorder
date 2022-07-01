@@ -1,14 +1,15 @@
 package dev.leonardini.rehcorder.adapters
 
-import android.database.Cursor
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.database.getStringOrNull
+import androidx.paging.PagingDataAdapter
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import dev.leonardini.rehcorder.R
 import dev.leonardini.rehcorder.databinding.SongInfoHeaderBinding
 import dev.leonardini.rehcorder.databinding.TrackItemBinding
+import dev.leonardini.rehcorder.db.SongRehearsals
 import java.text.DateFormat
 import java.util.*
 
@@ -19,63 +20,79 @@ class SongInfoAdapter(
     private val shareElementListener: OnTrackShareClickListener,
     private val itemClickListener: OnItemClickListener,
 ) :
-    RecyclerViewCursorAdapter<RecyclerView.ViewHolder>(null) {
+    PagingDataAdapter<UiModel, RecyclerView.ViewHolder>(COMPARATOR) {
 
-    private var uidIdx: Int = -1
-    private var nameIdx: Int = -1
-    private var dateIdx: Int = -1
-    private var versionIdx: Int = -1
-    private var fileNameIdx: Int = -1
-    private var externalStorageIdx: Int = -1
+    object COMPARATOR : DiffUtil.ItemCallback<UiModel>() {
+        override fun areItemsTheSame(
+            oldItem: UiModel,
+            newItem: UiModel
+        ): Boolean {
+            return (oldItem is SongsInfoHeader
+                    && newItem is SongsInfoHeader)
+                    || (oldItem is SongRehearsals
+                    && newItem is SongRehearsals
+                    && oldItem.uid == newItem.uid)
+        }
+
+        override fun areContentsTheSame(
+            oldItem: UiModel,
+            newItem: UiModel
+        ): Boolean {
+            return (oldItem is SongsInfoHeader
+                    && newItem is SongsInfoHeader)
+                    || (oldItem is SongRehearsals
+                    && newItem is SongRehearsals
+                    && oldItem == newItem)
+        }
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return when (peek(position)) {
+            is SongRehearsals -> UiModelType.ITEM
+            is SongsInfoHeader -> UiModelType.HEADER
+            else -> throw IllegalStateException("Unknown view")
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return if (viewType == HEADER_VIEW) {
-            val v =
-                LayoutInflater.from(parent.context)
+        return when (viewType) {
+            UiModelType.ITEM -> {
+                val v =
+                    LayoutInflater.from(parent.context)
+                        .inflate(R.layout.track_item, parent, false)
+                SongInfoViewHolder(v, shareElementListener, itemClickListener)
+            }
+            UiModelType.HEADER -> {
+                val v = LayoutInflater.from(parent.context)
                     .inflate(R.layout.song_info_header, parent, false)
-            HeaderViewHolder(v)
-        } else {
-            val v =
-                LayoutInflater.from(parent.context)
-                    .inflate(R.layout.track_item, parent, false)
-            SongInfoViewHolder(v, shareElementListener, itemClickListener)
+                HeaderViewHolder(v)
+            }
+            else -> throw IllegalStateException("Unknown view type")
         }
     }
 
-    override fun onCursorSwapped(cursor: Cursor) {
-        uidIdx = cursor.getColumnIndexOrThrow("uid")
-        nameIdx = cursor.getColumnIndexOrThrow("name")
-        dateIdx = cursor.getColumnIndexOrThrow("date")
-        versionIdx = cursor.getColumnIndexOrThrow("version")
-        fileNameIdx = cursor.getColumnIndexOrThrow("file_name")
-        externalStorageIdx = cursor.getColumnIndexOrThrow("external_storage")
-    }
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        when (val item = getItem(position)) {
+            is SongRehearsals -> {
+                val formattedDate = "${
+                    DateFormat.getDateInstance().format(Date(item.date * 1000))
+                } - ${DateFormat.getTimeInstance().format(Date(item.date * 1000))}"
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, cursor: Cursor, position: Int) {
-        val id: Long = cursor.getLong(uidIdx)
-        val name: String? = cursor.getStringOrNull(nameIdx)
-        val date: Long = cursor.getLong(dateIdx)
-        val version: Int = cursor.getInt(versionIdx)
-        val fileName: String = cursor.getString(fileNameIdx)
-        val externalStorage: Boolean = cursor.getInt(externalStorageIdx) == 1
-        val formattedDate = "${
-            DateFormat.getDateInstance().format(Date(date * 1000))
-        } - ${DateFormat.getTimeInstance().format(Date(date * 1000))}"
-
-        (holder as SongInfoViewHolder).let { _holder ->
-            _holder.id = id
-            _holder.name = name
-            _holder.version = version
-            _holder.fileName = fileName
-            _holder.externalStorage = externalStorage
-            _holder.binding.trackTitle.text = name ?: formattedDate
-            _holder.binding.trackDate.text = formattedDate
-            _holder.binding.divider.visibility =
-                if (position != itemCount - 2) View.VISIBLE else View.INVISIBLE
+                (holder as SongInfoViewHolder).let { _holder ->
+                    _holder.id = item.uid
+                    _holder.name = item.name
+                    _holder.version = item.version
+                    _holder.fileName = item.file_name
+                    _holder.externalStorage = item.external_storage
+                    _holder.binding.trackTitle.text = item.name ?: formattedDate
+                    _holder.binding.trackDate.text = formattedDate
+                    _holder.binding.divider.visibility =
+                        if (position != itemCount - 1) View.VISIBLE else View.INVISIBLE
+                }
+            }
+            is SongsInfoHeader -> {
+            }
         }
-    }
-
-    override fun onBindHeaderViewHolder(holder: RecyclerView.ViewHolder) {
     }
 
     class SongInfoViewHolder(
@@ -119,3 +136,5 @@ class SongInfoAdapter(
     }
 
 }
+
+class SongsInfoHeader : UiModel()

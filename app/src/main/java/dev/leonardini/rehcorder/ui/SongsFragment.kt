@@ -8,6 +8,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.leonardini.rehcorder.R
@@ -16,6 +19,8 @@ import dev.leonardini.rehcorder.adapters.SongsAdapter
 import dev.leonardini.rehcorder.databinding.FragmentSongsBinding
 import dev.leonardini.rehcorder.ui.dialogs.RenameDialogFragment
 import dev.leonardini.rehcorder.viewmodels.SongsViewModel
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class SongsFragment : Fragment(), SongsAdapter.OnSongEditClickListener,
     SongsAdapter.OnHeaderBoundListener, SongsAdapter.OnItemClickListener {
@@ -37,16 +42,37 @@ class SongsFragment : Fragment(), SongsAdapter.OnSongEditClickListener,
     ): View {
         _binding = FragmentSongsBinding.inflate(inflater, container, false)
 
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setHasOptionsMenu(true)
+
+        binding.recyclerView.layoutManager = LinearLayoutManager(context)
+        adapter = SongsAdapter(this, this, this)
+        binding.recyclerView.adapter = adapter
+
         val model: SongsViewModel by viewModels()
-        model.songs.observe(viewLifecycleOwner) { cursor ->
-            if (cursor.count > 0 && adapter.itemCount == 0) {
-                binding.recyclerView.visibility = View.VISIBLE
-                binding.emptyView.visibility = View.GONE
-            } else if (cursor.count == 0 && adapter.itemCount > 0) {
-                binding.recyclerView.visibility = View.GONE
-                binding.emptyView.visibility = View.VISIBLE
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                model.songs.collectLatest { pagingData ->
+                    adapter.submitData(pagingData)
+                }
             }
-            adapter.swapCursor(cursor)
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                adapter.loadStateFlow.collectLatest {
+                    if (adapter.itemCount == 1) {
+                        binding.recyclerView.visibility = View.GONE
+                        binding.emptyView.visibility = View.VISIBLE
+                    } else if (adapter.itemCount > 1) {
+                        binding.recyclerView.visibility = View.VISIBLE
+                        binding.emptyView.visibility = View.GONE
+                    }
+                }
+            }
         }
 
         requireActivity().supportFragmentManager.setFragmentResultListener(
@@ -59,17 +85,6 @@ class SongsFragment : Fragment(), SongsAdapter.OnSongEditClickListener,
                 model.updateSongName(id, name)
             }
         }
-
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        setHasOptionsMenu(true)
-
-        binding.recyclerView.layoutManager = LinearLayoutManager(context)
-        adapter = SongsAdapter(this, this, this)
-        binding.recyclerView.adapter = adapter
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

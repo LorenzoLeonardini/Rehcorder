@@ -1,14 +1,15 @@
 package dev.leonardini.rehcorder.adapters
 
-import android.database.Cursor
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.database.getStringOrNull
+import androidx.paging.PagingDataAdapter
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import dev.leonardini.rehcorder.R
 import dev.leonardini.rehcorder.databinding.RehearsalHeaderBinding
 import dev.leonardini.rehcorder.databinding.RehearsalLayoutBinding
+import dev.leonardini.rehcorder.db.RehearsalWithSongsCount
 import java.text.DateFormat
 import java.util.*
 
@@ -20,70 +21,84 @@ class RehearsalsAdapter(
     private val headerBoundListener: OnHeaderBoundListener,
     private val itemClickListener: OnItemClickListener,
 ) :
-    RecyclerViewCursorAdapter<RecyclerView.ViewHolder>(null) {
+    PagingDataAdapter<UiModel, RecyclerView.ViewHolder>(COMPARATOR) {
 
-    private var uidIdx: Int = -1
-    private var nameIdx: Int = -1
-    private var dateIdx: Int = -1
-    private var songsCountIdx: Int = -1
-    private var fileNameIdx: Int = -1
-    private var externalStorageIdx: Int = -1
+    object COMPARATOR : DiffUtil.ItemCallback<UiModel>() {
+        override fun areItemsTheSame(
+            oldItem: UiModel,
+            newItem: UiModel
+        ): Boolean {
+            return (oldItem is RehearsalsHeader
+                    && newItem is RehearsalsHeader)
+                    || (oldItem is RehearsalWithSongsCount
+                    && newItem is RehearsalWithSongsCount
+                    && oldItem.uid == newItem.uid)
+        }
+
+        override fun areContentsTheSame(
+            oldItem: UiModel,
+            newItem: UiModel
+        ): Boolean {
+            return oldItem is RehearsalWithSongsCount
+                    && newItem is RehearsalWithSongsCount
+                    && oldItem == newItem
+        }
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return when (peek(position)) {
+            is RehearsalWithSongsCount -> UiModelType.ITEM
+            is RehearsalsHeader -> UiModelType.HEADER
+            else -> throw IllegalStateException("Unknown view")
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return if (viewType == HEADER_VIEW) {
-            val v =
-                LayoutInflater.from(parent.context)
+        return when (viewType) {
+            UiModelType.ITEM -> {
+                val v =
+                    LayoutInflater.from(parent.context)
+                        .inflate(R.layout.rehearsal_layout, parent, false)
+                RehearsalViewHolder(v, editElementListener, itemClickListener)
+            }
+            UiModelType.HEADER -> {
+                val v = LayoutInflater.from(parent.context)
                     .inflate(R.layout.rehearsal_header, parent, false)
-            HeaderViewHolder(v)
-        } else {
-            val v =
-                LayoutInflater.from(parent.context)
-                    .inflate(R.layout.rehearsal_layout, parent, false)
-            RehearsalViewHolder(v, editElementListener, itemClickListener)
+                HeaderViewHolder(v)
+            }
+            else -> throw IllegalStateException("Unknown view type")
         }
     }
 
-    override fun onCursorSwapped(cursor: Cursor) {
-        uidIdx = cursor.getColumnIndexOrThrow("uid")
-        nameIdx = cursor.getColumnIndexOrThrow("name")
-        dateIdx = cursor.getColumnIndexOrThrow("date")
-        songsCountIdx = cursor.getColumnIndexOrThrow("songs_count")
-        fileNameIdx = cursor.getColumnIndexOrThrow("file_name")
-        externalStorageIdx = cursor.getColumnIndexOrThrow("external_storage")
-    }
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        when (val item = getItem(position)) {
+            is RehearsalWithSongsCount -> {
+                val formattedDate = "${
+                    DateFormat.getDateInstance().format(Date(item.date * 1000))
+                } - ${DateFormat.getTimeInstance().format(Date(item.date * 1000))}"
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, cursor: Cursor, position: Int) {
-        val id: Long = cursor.getLong(uidIdx)
-        val name: String? = cursor.getStringOrNull(nameIdx)
-        val date: Long = cursor.getLong(dateIdx)
-        val songsCount: Int = cursor.getInt(songsCountIdx)
-        val fileName: String = cursor.getString(fileNameIdx)
-        val externalStorage: Boolean = cursor.getInt(externalStorageIdx) == 1
-        val formattedDate = "${
-            DateFormat.getDateInstance().format(Date(date * 1000))
-        } - ${DateFormat.getTimeInstance().format(Date(date * 1000))}"
-
-        (holder as RehearsalViewHolder).let { _holder ->
-            _holder.id = id
-            _holder.name = name
-            _holder.formattedDate = formattedDate
-            _holder.fileName = fileName
-            _holder.externalStorage = externalStorage
-            _holder.binding.rehearsalTitle.text = name ?: formattedDate
-            _holder.binding.rehearsalDate.text = formattedDate
-            _holder.binding.rehearsalSongs.text =
-                _holder.binding.rehearsalSongs.resources.getQuantityString(
-                    R.plurals.r_count,
-                    songsCount,
-                    songsCount
-                )
-            _holder.binding.divider.visibility =
-                if (position != itemCount - 2) View.VISIBLE else View.INVISIBLE
+                (holder as RehearsalViewHolder).let { _holder ->
+                    _holder.id = item.uid
+                    _holder.name = item.name
+                    _holder.formattedDate = formattedDate
+                    _holder.fileName = item.file_name
+                    _holder.externalStorage = item.external_storage
+                    _holder.binding.rehearsalTitle.text = item.name ?: formattedDate
+                    _holder.binding.rehearsalDate.text = formattedDate
+                    _holder.binding.rehearsalSongs.text =
+                        _holder.binding.rehearsalSongs.resources.getQuantityString(
+                            R.plurals.r_count,
+                            item.songs_count,
+                            item.songs_count
+                        )
+                    _holder.binding.divider.visibility =
+                        if (position != itemCount - 1) View.VISIBLE else View.INVISIBLE
+                }
+            }
+            is RehearsalsHeader -> {
+                headerBoundListener.onBound(holder as HeaderViewHolder)
+            }
         }
-    }
-
-    override fun onBindHeaderViewHolder(holder: RecyclerView.ViewHolder) {
-        headerBoundListener.onBound(holder as HeaderViewHolder)
     }
 
     class RehearsalViewHolder(
@@ -131,3 +146,5 @@ class RehearsalsAdapter(
     }
 
 }
+
+class RehearsalsHeader : UiModel()

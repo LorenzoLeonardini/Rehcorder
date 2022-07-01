@@ -7,6 +7,9 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.leonardini.rehcorder.adapters.RehearsalInfoAdapter
 import dev.leonardini.rehcorder.databinding.ActivityRehearsalBinding
@@ -14,6 +17,8 @@ import dev.leonardini.rehcorder.ui.dialogs.MaterialDialogFragment
 import dev.leonardini.rehcorder.ui.dialogs.MaterialLoadingDialogFragment
 import dev.leonardini.rehcorder.viewmodels.RehearsalInfoViewModel
 import dev.leonardini.rehcorder.viewmodels.RehearsalViewModelFactory
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.*
 
@@ -60,8 +65,13 @@ class RehearsalInfoActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackS
             binding.toolbar.title = rehearsal.name ?: formattedDate
             binding.toolbar.subtitle = if (rehearsal.name != null) formattedDate else ""
         }
-        model.rehearsalSongs.observe(this) { cursor ->
-            adapter.swapCursor(cursor)
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                model.rehearsalSongs.collectLatest { pagingData ->
+                    adapter.submitData(pagingData)
+                }
+            }
         }
 
         supportFragmentManager.setFragmentResultListener(
@@ -72,13 +82,9 @@ class RehearsalInfoActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackS
             if (which != AlertDialog.BUTTON_NEGATIVE) {
                 val loadingFragment = MaterialLoadingDialogFragment()
                 loadingFragment.show(supportFragmentManager, "Loading")
-                Thread {
-                    model.deleteRehearsal(applicationContext)
-                    runOnUiThread {
-                        loadingFragment.dismiss()
-                        finish()
-                    }
-                }.start()
+                model.deleteRehearsal(applicationContext)
+                loadingFragment.dismiss()
+                finish()
             }
         }
     }

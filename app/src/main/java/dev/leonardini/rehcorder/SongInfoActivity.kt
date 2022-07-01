@@ -4,11 +4,16 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.leonardini.rehcorder.adapters.SongInfoAdapter
 import dev.leonardini.rehcorder.databinding.ActivitySongBinding
 import dev.leonardini.rehcorder.viewmodels.SongInfoViewModel
 import dev.leonardini.rehcorder.viewmodels.SongViewModelFactory
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class SongInfoActivity : AppCompatActivity(), SongInfoAdapter.OnTrackShareClickListener,
     SongInfoAdapter.OnItemClickListener {
@@ -44,8 +49,12 @@ class SongInfoActivity : AppCompatActivity(), SongInfoAdapter.OnTrackShareClickL
         model.song.observe(this) { song ->
             binding.toolbar.title = song.name
         }
-        model.songRehearsals.observe(this) { cursor ->
-            adapter.swapCursor(cursor)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                model.songRehearsals.collectLatest { pagingData ->
+                    adapter.submitData(pagingData)
+                }
+            }
         }
     }
 

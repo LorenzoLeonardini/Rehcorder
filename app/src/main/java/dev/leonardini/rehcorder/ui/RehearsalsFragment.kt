@@ -6,11 +6,12 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.leonardini.rehcorder.R
@@ -22,6 +23,8 @@ import dev.leonardini.rehcorder.db.Rehearsal
 import dev.leonardini.rehcorder.ui.dialogs.MaterialInfoDialogFragment
 import dev.leonardini.rehcorder.ui.dialogs.RenameDialogFragment
 import dev.leonardini.rehcorder.viewmodels.RehearsalsViewModel
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickListener,
     RehearsalsAdapter.OnHeaderBoundListener, RehearsalsAdapter.OnItemClickListener,
@@ -42,44 +45,13 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
     private lateinit var model: RehearsalsViewModel
     private lateinit var adapter: RehearsalsAdapter
 
-    private lateinit var activityLauncher: ActivityResultLauncher<Intent>
+    private var inNeedOfProcessing: Rehearsal? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentRehearsalsBinding.inflate(inflater, container, false)
-
-        val model: RehearsalsViewModel by viewModels()
-        this.model = model
-        model.rehearsals.observe(viewLifecycleOwner) { cursor ->
-            if (cursor.count > 0 && adapter.itemCount == 0) {
-                binding.recyclerView.visibility = View.VISIBLE
-                binding.emptyView.visibility = View.GONE
-            } else if (cursor.count == 0 && adapter.itemCount > 0) {
-                binding.recyclerView.visibility = View.GONE
-                binding.emptyView.visibility = View.VISIBLE
-            }
-            adapter.swapCursor(cursor)
-        }
-        model.inNeedOfProcessRehearsal.observe(viewLifecycleOwner) {
-            adapter.notifyItemChanged(0)
-        }
-
-        requireActivity().supportFragmentManager.setFragmentResultListener(
-            RENAME_DIALOG_TAG,
-            viewLifecycleOwner
-        ) { _, bundle ->
-            val name = bundle.getString("name")
-            val id = bundle.getLong("id")
-            model.updateRehearsalName(id, name!!.ifBlank { null })
-        }
-
-        // Necessary to update list after returning from editing/etc
-        activityLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-                model.update()
-            }
 
         return binding.root
     }
@@ -91,6 +63,46 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
         adapter = RehearsalsAdapter(this, this, this)
         binding.recyclerView.adapter = adapter
+
+        val model: RehearsalsViewModel by viewModels()
+        this.model = model
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                model.rehearsals.collectLatest { pagingData ->
+                    adapter.submitData(pagingData)
+                }
+            }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                adapter.loadStateFlow.collectLatest {
+                    if (adapter.itemCount == 1) {
+                        binding.recyclerView.visibility = View.GONE
+                        binding.emptyView.visibility = View.VISIBLE
+                    } else if (adapter.itemCount > 1) {
+                        binding.recyclerView.visibility = View.VISIBLE
+                        binding.emptyView.visibility = View.GONE
+                    }
+                }
+            }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                model.inNeedOfProcessRehearsal.collectLatest { rehearsal ->
+                    inNeedOfProcessing = rehearsal
+                    adapter.notifyItemChanged(0)
+                }
+            }
+        }
+
+        requireActivity().supportFragmentManager.setFragmentResultListener(
+            RENAME_DIALOG_TAG,
+            viewLifecycleOwner
+        ) { _, bundle ->
+            val name = bundle.getString("name")
+            val id = bundle.getLong("id")
+            model.updateRehearsalName(id, name!!.ifBlank { null })
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -120,68 +132,65 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
 
     override fun onBound(holder: RehearsalsAdapter.HeaderViewHolder) {
         holder.binding.card.visibility =
-            if (model.inNeedOfProcessRehearsal.value != null) View.VISIBLE else View.GONE
+            if (inNeedOfProcessing != null) View.VISIBLE else View.GONE
         holder.binding.processNow.setOnClickListener(this)
     }
 
     override fun onItemClicked(holder: RehearsalsAdapter.RehearsalViewHolder) {
-        Thread {
-            val status = model.getRehearsalStatus(holder.id)
-            requireActivity().runOnUiThread {
-                when (status) {
-                    Rehearsal.RECORDED -> {
-                        MaterialInfoDialogFragment(
-                            R.string.dialog_recorded_title,
-                            R.string.dialog_recorded_message,
-                        ).show(
-                            parentFragmentManager,
-                            RECORDED_DIALOG_TAG
-                        )
-                    }
-                    Rehearsal.NORMALIZED -> {
-                        val intent = Intent(context, SplitterActivity::class.java)
-                        intent.putExtra("fileName", holder.fileName)
-                        intent.putExtra("rehearsalId", holder.id)
-                        intent.putExtra("rehearsalName", holder.name ?: holder.formattedDate)
-                        intent.putExtra("externalStorage", holder.externalStorage)
-                        activityLauncher.launch(intent)
-                    }
-                    Rehearsal.PROCESSING -> {
-                        MaterialInfoDialogFragment(
-                            R.string.dialog_processing_title,
-                            R.string.dialog_processing_message,
-                        ).show(
-                            parentFragmentManager,
-                            PROCESSING_DIALOG_TAG
-                        )
-                    }
-                    Rehearsal.PROCESSED -> {
-                        val intent = Intent(requireContext(), RehearsalInfoActivity::class.java)
-                        intent.putExtra("rehearsalId", holder.id)
-                        activityLauncher.launch(intent)
-                    }
-                    else -> {
-                        MaterialInfoDialogFragment(
-                            R.string.dialog_error_state_title,
-                            R.string.dialog_error_state_message,
-                        ).show(
-                            parentFragmentManager,
-                            ERROR_STATE_DIALOG_TAG
-                        )
-                    }
+        viewLifecycleOwner.lifecycleScope.launch {
+            when (model.getRehearsalStatus(holder.id)) {
+                Rehearsal.RECORDED -> {
+                    MaterialInfoDialogFragment(
+                        R.string.dialog_recorded_title,
+                        R.string.dialog_recorded_message,
+                    ).show(
+                        parentFragmentManager,
+                        RECORDED_DIALOG_TAG
+                    )
+                }
+                Rehearsal.NORMALIZED -> {
+                    val intent = Intent(context, SplitterActivity::class.java)
+                    intent.putExtra("fileName", holder.fileName)
+                    intent.putExtra("rehearsalId", holder.id)
+                    intent.putExtra("rehearsalName", holder.name ?: holder.formattedDate)
+                    intent.putExtra("externalStorage", holder.externalStorage)
+                    startActivity(intent)
+                }
+                Rehearsal.PROCESSING -> {
+                    MaterialInfoDialogFragment(
+                        R.string.dialog_processing_title,
+                        R.string.dialog_processing_message,
+                    ).show(
+                        parentFragmentManager,
+                        PROCESSING_DIALOG_TAG
+                    )
+                }
+                Rehearsal.PROCESSED -> {
+                    val intent = Intent(requireContext(), RehearsalInfoActivity::class.java)
+                    intent.putExtra("rehearsalId", holder.id)
+                    startActivity(intent)
+                }
+                else -> {
+                    MaterialInfoDialogFragment(
+                        R.string.dialog_error_state_title,
+                        R.string.dialog_error_state_message,
+                    ).show(
+                        parentFragmentManager,
+                        ERROR_STATE_DIALOG_TAG
+                    )
                 }
             }
-        }.start()
+        }
     }
 
     override fun onClick(v: View?) {
-        model.inNeedOfProcessRehearsal.value?.let {
+        inNeedOfProcessing?.let {
             val intent = Intent(context, SplitterActivity::class.java)
             intent.putExtra("fileName", it.fileName)
             intent.putExtra("rehearsalId", it.uid)
             intent.putExtra("rehearsalName", it.name)
             intent.putExtra("externalStorage", it.externalStorage)
-            activityLauncher.launch(intent)
+            startActivity(intent)
         }
     }
 }

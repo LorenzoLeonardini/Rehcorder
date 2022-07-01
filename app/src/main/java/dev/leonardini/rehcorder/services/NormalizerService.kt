@@ -16,6 +16,9 @@ import dev.leonardini.rehcorder.R
 import dev.leonardini.rehcorder.Utils
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 import java.util.*
 
@@ -104,8 +107,10 @@ class NormalizerService : Service(), FFmpegSessionCompleteCallback, LogCallback,
         val result = file.renameTo(destinationFile)
         Log.i("Normalizer", "Renaming result : $result")
 
-        Database.getInstance(applicationContext).rehearsalDao()
-            .updateStatus(currentId, Rehearsal.NORMALIZED)
+        CoroutineScope(Dispatchers.Main).launch {
+            Database.getInstance(applicationContext).rehearsalDao()
+                .updateStatus(currentId, Rehearsal.NORMALIZED)
+        }
 
         Handler(Looper.getMainLooper()).post {
             if (queue.size == 0) {

@@ -1,71 +1,47 @@
 package dev.leonardini.rehcorder.viewmodels
 
 import android.app.Application
-import android.database.Cursor
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
+import androidx.paging.insertSeparators
+import dev.leonardini.rehcorder.adapters.RehearsalsHeader
 import dev.leonardini.rehcorder.db.AppDatabase
 import dev.leonardini.rehcorder.db.Database
-import dev.leonardini.rehcorder.db.Rehearsal
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class RehearsalsViewModel(application: Application) : AndroidViewModel(application) {
 
-    private var fetchJob: Job? = null
-    private var rehearsalFetchJob: Job? = null
     private val database: AppDatabase
 
     init {
         database = Database.getInstance(application)
     }
 
-    val rehearsals: LiveData<Cursor>
-        get() = _rehearsals
-    private val _rehearsals: MutableLiveData<Cursor> by lazy {
-        MutableLiveData<Cursor>().also {
-            fetchRehearsals()
+    val rehearsals = Pager(PagingConfig(pageSize = 10)) {
+        database.rehearsalDao().getAll()
+    }.flow.map { pagingData ->
+        pagingData.insertSeparators { before, _ ->
+            when (before) {
+                null -> RehearsalsHeader()
+                else -> null
+            }
         }
-    }
+    }.cachedIn(viewModelScope)
 
-    val inNeedOfProcessRehearsal: LiveData<Rehearsal?>
-        get() = _inNeedOfProcessRehearsal
-    private val _inNeedOfProcessRehearsal: MutableLiveData<Rehearsal?> by lazy {
-        MutableLiveData<Rehearsal?>().also {
-            fetchInNeedOfProcess()
-        }
-    }
+    val inNeedOfProcessRehearsal = database.rehearsalDao().getUnprocessedRehearsal()
 
     fun updateRehearsalName(id: Long, name: String?) {
         viewModelScope.launch {
             database.rehearsalDao().updateName(id, name)
-            fetchRehearsals()
         }
     }
 
-    fun getRehearsalStatus(id: Long): Int {
+    suspend fun getRehearsalStatus(id: Long): Int {
         return database.rehearsalDao().getRehearsal(id).status
     }
 
-    fun update() {
-        fetchRehearsals()
-        fetchInNeedOfProcess()
-    }
-
-    private fun fetchRehearsals() {
-        fetchJob?.cancel()
-        fetchJob = viewModelScope.launch(Dispatchers.IO) {
-            _rehearsals.postValue(database.rehearsalDao().getAllCursor())
-        }
-    }
-
-    private fun fetchInNeedOfProcess() {
-        rehearsalFetchJob?.cancel()
-        rehearsalFetchJob = viewModelScope.launch(Dispatchers.IO) {
-            _inNeedOfProcessRehearsal.postValue(database.rehearsalDao().getUnprocessedRehearsal())
-        }
-    }
 }
