@@ -57,8 +57,7 @@ class HighlightedSeekBar : AppCompatSeekBar {
         val height = measuredHeight - paddingTop - paddingBottom
 
         // This will look horrible
-        val barHeight =
-            if (Build.VERSION.SDK_INT >= 29) currentDrawable!!.intrinsicHeight else (height / 4)
+        val barHeight = progressDrawable.intrinsicHeight
         val top = (height - barHeight) / 2f
 
         for (region in regions) {
