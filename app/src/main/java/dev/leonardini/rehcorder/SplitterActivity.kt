@@ -56,6 +56,7 @@ class SplitterActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeL
     private lateinit var mediaPlayer: MediaPlayer
     private var stopped: Boolean = false
     private var savedCurrentPlayingStatus: Boolean = false
+    private var savedCurrentPlayingStatusOnStop: Boolean = false
 
     // triplets of ints indicating start,end,songId
     private lateinit var songRegions: ArrayList<Long>
@@ -343,5 +344,20 @@ class SplitterActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeL
         outState.putLongArray(SONG_REGIONS, songRegions.toLongArray())
 
         super.onSaveInstanceState(outState)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if(savedCurrentPlayingStatusOnStop) {
+            mediaPlayer.start()
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        savedCurrentPlayingStatusOnStop = mediaPlayer.isPlaying
+        if(savedCurrentPlayingStatusOnStop) {
+            mediaPlayer.pause()
+        }
     }
 }
