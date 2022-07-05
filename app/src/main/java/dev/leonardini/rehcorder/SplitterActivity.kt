@@ -16,7 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
-import dev.leonardini.rehcorder.databinding.ActivityProcessBinding
+import dev.leonardini.rehcorder.databinding.ActivitySplitterBinding
 import dev.leonardini.rehcorder.db.AppDatabase
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
@@ -47,7 +47,7 @@ class SplitterActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeL
     private lateinit var database: AppDatabase
 
     private lateinit var appBarConfiguration: AppBarConfiguration
-    private lateinit var binding: ActivityProcessBinding
+    private lateinit var binding: ActivitySplitterBinding
 
     private var rehearsalId: Long = -1L
     private lateinit var fileName: String
@@ -64,7 +64,7 @@ class SplitterActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeL
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
 
-        binding = ActivityProcessBinding.inflate(layoutInflater)
+        binding = ActivitySplitterBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         setSupportActionBar(binding.toolbar)

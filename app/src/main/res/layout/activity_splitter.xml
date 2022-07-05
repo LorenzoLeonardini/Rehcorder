@@ -23,6 +23,6 @@
 
     <include
         android:id="@+id/content"
-        layout="@layout/content_process" />
+        layout="@layout/content_splitter" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
