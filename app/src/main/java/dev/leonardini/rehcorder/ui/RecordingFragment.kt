@@ -23,6 +23,8 @@ class RecordingFragment : Fragment(), Runnable {
 
     private lateinit var animation: AnimatedVectorDrawableCompat
     private var isRecording = false
+    private var isAnimationPaused = false
+    private var isTimerPaused = false
     private var startTimestamp: Long = 0
     private var stopTimestamp: Long = -1
 
@@ -38,13 +40,12 @@ class RecordingFragment : Fragment(), Runnable {
             AnimatedVectorDrawableCompat.create(requireContext(), R.drawable.recording_animation)!!
         animation.registerAnimationCallback(object : Animatable2Compat.AnimationCallback() {
             override fun onAnimationEnd(drawable: Drawable?) {
-                _binding?.animation?.post {
+                if (!isAnimationPaused) {
                     animation.start()
                 }
             }
         })
         binding.animation.setBackgroundDrawable(animation)
-        animation.start()
 
         // Recover state
         stopTimestamp = savedInstanceState?.getLong("stopTimestamp", -1) ?: -1
@@ -62,6 +63,19 @@ class RecordingFragment : Fragment(), Runnable {
         return binding.root
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        if (isRecording) {
+            isAnimationPaused = false
+            animation.start()
+            if (isTimerPaused) {
+                isTimerPaused = false
+                binding.recordingText.post(this)
+            }
+        }
+    }
+
     fun stopRecording() {
         isRecording = false
         binding.animation.visibility = View.GONE
@@ -74,8 +88,10 @@ class RecordingFragment : Fragment(), Runnable {
             (if (stopTimestamp > 0) stopTimestamp else System.currentTimeMillis() / 1000) - startTimestamp
         _binding?.recordingText?.text =
             Utils.secondsToTimeString(runningFor)
-        if (isRecording)
+        if (isRecording && !isAnimationPaused)
             _binding?.recordingText?.postDelayed(this, 1000)
+        else
+            isTimerPaused = true
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -90,5 +106,10 @@ class RecordingFragment : Fragment(), Runnable {
         animation.clearAnimationCallbacks()
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onStop() {
+        super.onStop()
+        isAnimationPaused = true
     }
 }
