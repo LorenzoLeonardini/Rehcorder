@@ -352,7 +352,7 @@ class SplitterActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeL
 
     override fun onStart() {
         super.onStart()
-        if(savedCurrentPlayingStatusOnStop) {
+        if (savedCurrentPlayingStatusOnStop) {
             mediaPlayer.start()
         }
     }
@@ -360,7 +360,7 @@ class SplitterActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeL
     override fun onStop() {
         super.onStop()
         savedCurrentPlayingStatusOnStop = mediaPlayer.isPlaying
-        if(savedCurrentPlayingStatusOnStop) {
+        if (savedCurrentPlayingStatusOnStop) {
             mediaPlayer.pause()
         }
     }
