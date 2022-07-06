@@ -34,18 +34,20 @@
     <style name="Theme.Rehcorder" parent="Base.Theme.Rehcorder" />
 
     <style name="Widget.App.Button.List.IconOnly" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:minWidth">48dp</item>
+        <item name="android:minHeight">48dp</item>
         <item name="iconPadding">0dp</item>
         <item name="android:insetTop">0dp</item>
         <item name="android:insetBottom">0dp</item>
-        <item name="android:paddingTop">4.5dp</item>
-        <item name="android:paddingBottom">4.5dp</item>
-        <item name="android:paddingLeft">6dp</item>
-        <item name="android:paddingRight">6dp</item>
-        <item name="android:minWidth">10dp</item>
-        <item name="android:minHeight">10dp</item>
-        <item name="strokeWidth">1.5dp</item>
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingBottom">0dp</item>
+        <item name="android:paddingLeft">4dp</item>
+        <item name="android:paddingRight">4dp</item>
+        <item name="strokeWidth">0dp</item>
         <item name="iconTint">?android:attr/textColorPrimary</item>
         <item name="strokeColor">?android:attr/textColorPrimary</item>
-        <item name="iconSize">16dp</item>
+        <item name="iconSize">40dp</item>
     </style>
 </resources>

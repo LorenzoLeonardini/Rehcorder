@@ -8,6 +8,13 @@
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
     <string name="loading">Loading…</string>
+    <string name="edit">Edit</string>
+    <string name="share">Share</string>
+    <string name="seek_back">Seek back</string>
+    <string name="seek_forward">Seek forward</string>
+    <string name="play">Play</string>
+    <string name="pause">Pause</string>
+    <string name="seek_bar">Seek bar</string>
 
     <!-- Menu -->
     <string name="menu_songs">Songs</string>

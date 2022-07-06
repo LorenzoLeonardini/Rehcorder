@@ -60,6 +60,7 @@
                         android:layout_row="1"
                         android:layout_column="2"
                         android:layout_columnWeight="1"
+                        android:contentDescription="@string/seek_bar"
                         app:selectionColor="@color/appRed" />
 
                     <androidx.appcompat.widget.AppCompatTextView
@@ -105,6 +106,7 @@
                         style="@style/Widget.App.Button.Player.TonalButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:contentDescription="@string/seek_back"
                         app:icon="@drawable/ic_replay_10" />
 
                     <com.google.android.material.button.MaterialButton
@@ -114,6 +116,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="12dp"
                         android:layout_marginRight="12dp"
+                        android:contentDescription="@string/play"
                         app:icon="@drawable/ic_play" />
 
                     <com.google.android.material.button.MaterialButton
@@ -121,6 +124,7 @@
                         style="@style/Widget.App.Button.Player.TonalButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:contentDescription="@string/seek_forward"
                         app:icon="@drawable/ic_forward_10" />
 
                 </androidx.appcompat.widget.LinearLayoutCompat>

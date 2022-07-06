@@ -128,6 +128,7 @@ class SplitterActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeL
             if (savedInstanceState.getBoolean(PLAYING, false)) {
                 mediaPlayer.start()
                 binding.content.playPause.setIconResource(R.drawable.ic_pause)
+                binding.content.playPause.contentDescription = resources.getString(R.string.pause)
             }
             val arr = savedInstanceState.getLongArray(SONG_REGIONS)?.toCollection(ArrayList())
             songRegions = arr ?: ArrayList()
@@ -213,6 +214,7 @@ class SplitterActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeL
 
     override fun onCompletion(mp: MediaPlayer?) {
         binding.content.playPause.setIconResource(R.drawable.ic_play)
+        binding.content.playPause.contentDescription = resources.getString(R.string.play)
     }
 
     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -227,9 +229,11 @@ class SplitterActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeL
             if (mediaPlayer.isPlaying) {
                 mediaPlayer.pause()
                 binding.content.playPause.setIconResource(R.drawable.ic_play)
+                binding.content.playPause.contentDescription = resources.getString(R.string.play)
             } else {
                 mediaPlayer.start()
                 binding.content.playPause.setIconResource(R.drawable.ic_pause)
+                binding.content.playPause.contentDescription = resources.getString(R.string.pause)
             }
 
         } else if (v == binding.content.seekBack) {

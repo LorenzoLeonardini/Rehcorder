@@ -41,13 +41,12 @@
     <com.google.android.material.button.MaterialButton
         android:id="@+id/track_share_button"
         style="@style/Widget.App.Button.List.IconOnly"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:layout_row="1"
         android:layout_column="2"
         android:layout_gravity="center"
+        android:contentDescription="@string/share"
         android:textAlignment="center"
-        app:icon="@drawable/ic_share" />
+        app:icon="@drawable/ic_share_circle" />
 
     <com.google.android.material.divider.MaterialDivider
         android:id="@+id/divider"
