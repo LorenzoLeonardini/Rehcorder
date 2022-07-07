@@ -84,8 +84,6 @@ class RehearsalInfoAdapter(
                             R.string.s_l_version,
                             item.version
                         )
-                    _holder.binding.divider.visibility =
-                        if (position != itemCount - 1) View.VISIBLE else View.INVISIBLE
                 }
             }
             is RehearsalsInfoHeader -> {

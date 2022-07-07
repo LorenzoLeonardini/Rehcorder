@@ -80,8 +80,6 @@ class SongsAdapter(
                             item.versions_count,
                             item.versions_count
                         )
-                    _holder.binding.divider.visibility =
-                        if (position != itemCount - 1) View.VISIBLE else View.INVISIBLE
                 }
             }
             is SongsHeader -> {

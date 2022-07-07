@@ -86,8 +86,6 @@ class SongInfoAdapter(
                     _holder.externalStorage = item.external_storage
                     _holder.binding.trackTitle.text = item.name ?: formattedDate
                     _holder.binding.trackDate.text = formattedDate
-                    _holder.binding.divider.visibility =
-                        if (position != itemCount - 1) View.VISIBLE else View.INVISIBLE
                 }
             }
             is SongsInfoHeader -> {

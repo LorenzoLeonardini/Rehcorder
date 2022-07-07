@@ -10,6 +10,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.leonardini.rehcorder.adapters.SongInfoAdapter
 import dev.leonardini.rehcorder.databinding.ActivitySongBinding
+import dev.leonardini.rehcorder.ui.MyMaterialDividerItemDecoration
 import dev.leonardini.rehcorder.viewmodels.SongInfoViewModel
 import dev.leonardini.rehcorder.viewmodels.SongViewModelFactory
 import kotlinx.coroutines.flow.collectLatest
@@ -36,9 +37,19 @@ class SongInfoActivity : AppCompatActivity(), SongInfoAdapter.OnTrackShareClickL
             return
         }
 
-        binding.recyclerView.layoutManager = LinearLayoutManager(this)
+        val linearLayoutManager = LinearLayoutManager(this)
+        binding.recyclerView.layoutManager = linearLayoutManager
         adapter = SongInfoAdapter(this, this)
         binding.recyclerView.adapter = adapter
+        val itemDecoration = MyMaterialDividerItemDecoration(
+            binding.recyclerView.context,
+            linearLayoutManager.orientation
+        )
+        itemDecoration.isLastItemDecorated = false
+        itemDecoration.isFirstItemDecorated = false
+        itemDecoration.setDividerInsetStartResource(this, R.dimen.divider_inset)
+        itemDecoration.setDividerInsetEndResource(this, R.dimen.divider_inset)
+        binding.recyclerView.addItemDecoration(itemDecoration)
 
         val model: SongInfoViewModel by viewModels {
             SongViewModelFactory(

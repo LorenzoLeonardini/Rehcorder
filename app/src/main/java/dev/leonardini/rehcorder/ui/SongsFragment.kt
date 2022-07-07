@@ -49,9 +49,19 @@ class SongsFragment : Fragment(), SongsAdapter.OnSongEditClickListener,
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
 
-        binding.recyclerView.layoutManager = LinearLayoutManager(context)
+        val linearLayoutManager = LinearLayoutManager(context)
+        binding.recyclerView.layoutManager = linearLayoutManager
         adapter = SongsAdapter(this, this, this)
         binding.recyclerView.adapter = adapter
+        val itemDecoration = MyMaterialDividerItemDecoration(
+            binding.recyclerView.context,
+            linearLayoutManager.orientation
+        )
+        itemDecoration.isLastItemDecorated = false
+        itemDecoration.isFirstItemDecorated = false
+        itemDecoration.setDividerInsetStartResource(requireContext(), R.dimen.divider_inset)
+        itemDecoration.setDividerInsetEndResource(requireContext(), R.dimen.divider_inset)
+        binding.recyclerView.addItemDecoration(itemDecoration)
 
         val model: SongsViewModel by viewModels()
         viewLifecycleOwner.lifecycleScope.launch {

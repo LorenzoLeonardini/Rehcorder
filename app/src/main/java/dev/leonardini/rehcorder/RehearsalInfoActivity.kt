@@ -13,6 +13,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.leonardini.rehcorder.adapters.RehearsalInfoAdapter
 import dev.leonardini.rehcorder.databinding.ActivityRehearsalBinding
+import dev.leonardini.rehcorder.ui.MyMaterialDividerItemDecoration
 import dev.leonardini.rehcorder.ui.dialogs.MaterialDialogFragment
 import dev.leonardini.rehcorder.ui.dialogs.MaterialLoadingDialogFragment
 import dev.leonardini.rehcorder.viewmodels.RehearsalInfoViewModel
@@ -47,9 +48,19 @@ class RehearsalInfoActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackS
             return
         }
 
-        binding.recyclerView.layoutManager = LinearLayoutManager(this)
+        val linearLayoutManager = LinearLayoutManager(this)
+        binding.recyclerView.layoutManager = linearLayoutManager
         adapter = RehearsalInfoAdapter(this, this)
         binding.recyclerView.adapter = adapter
+        val itemDecoration = MyMaterialDividerItemDecoration(
+            binding.recyclerView.context,
+            linearLayoutManager.orientation
+        )
+        itemDecoration.isLastItemDecorated = false
+        itemDecoration.isFirstItemDecorated = false
+        itemDecoration.setDividerInsetStartResource(this, R.dimen.divider_inset)
+        itemDecoration.setDividerInsetEndResource(this, R.dimen.divider_inset)
+        binding.recyclerView.addItemDecoration(itemDecoration)
 
         val model: RehearsalInfoViewModel by viewModels {
             RehearsalViewModelFactory(

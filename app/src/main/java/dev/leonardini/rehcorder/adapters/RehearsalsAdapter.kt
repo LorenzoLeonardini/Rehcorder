@@ -83,6 +83,7 @@ class RehearsalsAdapter(
                     _holder.formattedDate = formattedDate
                     _holder.fileName = item.file_name
                     _holder.externalStorage = item.external_storage
+                    _holder.status = item.status
                     _holder.binding.rehearsalTitle.text = item.name ?: formattedDate
                     _holder.binding.rehearsalDate.text = formattedDate
                     _holder.binding.rehearsalSongs.text =
@@ -91,8 +92,6 @@ class RehearsalsAdapter(
                             item.songs_count,
                             item.songs_count
                         )
-                    _holder.binding.divider.visibility =
-                        if (position != itemCount - 1) View.VISIBLE else View.INVISIBLE
                 }
             }
             is RehearsalsHeader -> {
@@ -114,6 +113,7 @@ class RehearsalsAdapter(
         var formattedDate: String? = null
         var fileName: String? = null
         var externalStorage: Boolean = false
+        var status: Int = -1
 
         init {
             binding.root.setOnClickListener(this)

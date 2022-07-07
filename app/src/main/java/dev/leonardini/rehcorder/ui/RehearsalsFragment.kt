@@ -60,9 +60,19 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
 
-        binding.recyclerView.layoutManager = LinearLayoutManager(context)
+        val linearLayoutManager = LinearLayoutManager(context)
+        binding.recyclerView.layoutManager = linearLayoutManager
         adapter = RehearsalsAdapter(this, this, this)
         binding.recyclerView.adapter = adapter
+        val itemDecoration = MyMaterialDividerItemDecoration(
+            binding.recyclerView.context,
+            linearLayoutManager.orientation
+        )
+        itemDecoration.isLastItemDecorated = false
+        itemDecoration.isFirstItemDecorated = false
+        itemDecoration.setDividerInsetStartResource(requireContext(), R.dimen.divider_inset)
+        itemDecoration.setDividerInsetEndResource(requireContext(), R.dimen.divider_inset)
+        binding.recyclerView.addItemDecoration(itemDecoration)
 
         val model: RehearsalsViewModel by viewModels()
         this.model = model
@@ -137,48 +147,49 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
     }
 
     override fun onItemClicked(holder: RehearsalsAdapter.RehearsalViewHolder) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            when (model.getRehearsalStatus(holder.id)) {
-                Rehearsal.RECORDED -> {
-                    MaterialInfoDialogFragment(
-                        R.string.dialog_recorded_title,
-                        R.string.dialog_recorded_message,
-                    ).show(
-                        parentFragmentManager,
-                        RECORDED_DIALOG_TAG
-                    )
-                }
-                Rehearsal.NORMALIZED -> {
-                    val intent = Intent(context, SplitterActivity::class.java)
-                    intent.putExtra("fileName", holder.fileName)
-                    intent.putExtra("rehearsalId", holder.id)
-                    intent.putExtra("rehearsalName", holder.name ?: holder.formattedDate)
-                    intent.putExtra("externalStorage", holder.externalStorage)
-                    startActivity(intent)
-                }
-                Rehearsal.PROCESSING -> {
-                    MaterialInfoDialogFragment(
-                        R.string.dialog_processing_title,
-                        R.string.dialog_processing_message,
-                    ).show(
-                        parentFragmentManager,
-                        PROCESSING_DIALOG_TAG
-                    )
-                }
-                Rehearsal.PROCESSED -> {
-                    val intent = Intent(requireContext(), RehearsalInfoActivity::class.java)
-                    intent.putExtra("rehearsalId", holder.id)
-                    startActivity(intent)
-                }
-                else -> {
-                    MaterialInfoDialogFragment(
-                        R.string.dialog_error_state_title,
-                        R.string.dialog_error_state_message,
-                    ).show(
-                        parentFragmentManager,
-                        ERROR_STATE_DIALOG_TAG
-                    )
-                }
+        val intent = Intent(requireContext(), RehearsalInfoActivity::class.java)
+        intent.putExtra("rehearsalId", holder.id)
+        startActivity(intent)
+        when (holder.status) {
+            Rehearsal.RECORDED -> {
+                MaterialInfoDialogFragment(
+                    R.string.dialog_recorded_title,
+                    R.string.dialog_recorded_message,
+                ).show(
+                    parentFragmentManager,
+                    RECORDED_DIALOG_TAG
+                )
+            }
+            Rehearsal.NORMALIZED -> {
+                val intent = Intent(context, SplitterActivity::class.java)
+                intent.putExtra("fileName", holder.fileName)
+                intent.putExtra("rehearsalId", holder.id)
+                intent.putExtra("rehearsalName", holder.name ?: holder.formattedDate)
+                intent.putExtra("externalStorage", holder.externalStorage)
+                startActivity(intent)
+            }
+            Rehearsal.PROCESSING -> {
+                MaterialInfoDialogFragment(
+                    R.string.dialog_processing_title,
+                    R.string.dialog_processing_message,
+                ).show(
+                    parentFragmentManager,
+                    PROCESSING_DIALOG_TAG
+                )
+            }
+            Rehearsal.PROCESSED -> {
+                val intent = Intent(requireContext(), RehearsalInfoActivity::class.java)
+                intent.putExtra("rehearsalId", holder.id)
+                startActivity(intent)
+            }
+            else -> {
+                MaterialInfoDialogFragment(
+                    R.string.dialog_error_state_title,
+                    R.string.dialog_error_state_message,
+                ).show(
+                    parentFragmentManager,
+                    ERROR_STATE_DIALOG_TAG
+                )
             }
         }
     }
