@@ -147,9 +147,6 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
     }
 
     override fun onItemClicked(holder: RehearsalsAdapter.RehearsalViewHolder) {
-        val intent = Intent(requireContext(), RehearsalInfoActivity::class.java)
-        intent.putExtra("rehearsalId", holder.id)
-        startActivity(intent)
         when (holder.status) {
             Rehearsal.RECORDED -> {
                 MaterialInfoDialogFragment(
