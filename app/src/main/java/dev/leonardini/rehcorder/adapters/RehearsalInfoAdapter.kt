@@ -7,7 +7,7 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import dev.leonardini.rehcorder.R
-import dev.leonardini.rehcorder.databinding.RehearsalInfoHeaderBinding
+import dev.leonardini.rehcorder.databinding.ListHeaderBinding
 import dev.leonardini.rehcorder.databinding.TrackItemBinding
 import dev.leonardini.rehcorder.db.RehearsalSongs
 
@@ -62,7 +62,7 @@ class RehearsalInfoAdapter(
             }
             UiModelType.HEADER -> {
                 val v = LayoutInflater.from(parent.context)
-                    .inflate(R.layout.rehearsal_info_header, parent, false)
+                    .inflate(R.layout.list_header, parent, false)
                 HeaderViewHolder(v)
             }
             else -> throw IllegalStateException("Unknown view type")
@@ -120,7 +120,10 @@ class RehearsalInfoAdapter(
     }
 
     class HeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val binding: RehearsalInfoHeaderBinding = RehearsalInfoHeaderBinding.bind(itemView)
+        init {
+            val binding: ListHeaderBinding = ListHeaderBinding.bind(itemView)
+            binding.listHeaderTitle.setText(R.string.r_l_title)
+        }
     }
 
     interface OnTrackShareClickListener {

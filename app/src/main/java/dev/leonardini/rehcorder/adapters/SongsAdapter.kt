@@ -7,7 +7,7 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import dev.leonardini.rehcorder.R
-import dev.leonardini.rehcorder.databinding.SongHeaderBinding
+import dev.leonardini.rehcorder.databinding.ListHeaderBinding
 import dev.leonardini.rehcorder.databinding.SongLayoutBinding
 import dev.leonardini.rehcorder.db.SongWithVersionCount
 
@@ -60,7 +60,7 @@ class SongsAdapter(
             }
             UiModelType.HEADER -> {
                 val v = LayoutInflater.from(parent.context)
-                    .inflate(R.layout.song_header, parent, false)
+                    .inflate(R.layout.list_header, parent, false)
                 HeaderViewHolder(v)
             }
             else -> throw IllegalStateException("Unknown view type")
@@ -114,7 +114,10 @@ class SongsAdapter(
     }
 
     class HeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val binding: SongHeaderBinding = SongHeaderBinding.bind(itemView)
+        init {
+            val binding: ListHeaderBinding = ListHeaderBinding.bind(itemView)
+            binding.listHeaderTitle.setText(R.string.s_title)
+        }
     }
 
     interface OnSongEditClickListener {

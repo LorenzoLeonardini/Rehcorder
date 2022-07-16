@@ -2,18 +2,16 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:paddingTop="8dp">
+    android:layout_height="wrap_content">
 
     <TextView
-        android:id="@+id/textview_title"
+        android:id="@+id/list_header_title"
         style="@style/Widget.Rehcorder.Title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="8dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="4dp"
-        android:text="@string/s_l_title"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
