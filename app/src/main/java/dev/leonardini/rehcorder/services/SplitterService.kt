@@ -15,6 +15,7 @@ import dev.leonardini.rehcorder.Utils
 import dev.leonardini.rehcorder.db.AppDatabase
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
+import dev.leonardini.rehcorder.ui.SettingsFragment
 import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.util.*
@@ -89,7 +90,7 @@ class SplitterService : ForegroundIntentService("SplitterService") {
                 .updateStatus(rehearsalId, Rehearsal.PROCESSED)
 
             val preference = PreferenceManager.getDefaultSharedPreferences(this@SplitterService)
-            val deleteRecording = preference.getBoolean("delete_recording", false)
+            val deleteRecording = preference.getBoolean(SettingsFragment.DELETE_RECORDING, false)
             if (deleteRecording) {
                 File(fileName).delete()
             }

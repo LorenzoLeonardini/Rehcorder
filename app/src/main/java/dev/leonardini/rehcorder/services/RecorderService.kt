@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.media.AudioManager
 import android.media.MediaRecorder
 import android.os.Build
@@ -18,6 +19,7 @@ import dev.leonardini.rehcorder.R
 import dev.leonardini.rehcorder.Utils
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
+import dev.leonardini.rehcorder.ui.SettingsFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -40,6 +42,18 @@ class RecorderService : Service() {
         private var fileName: String? = null
     }
 
+    private var preferenceManager: SharedPreferences? = null
+
+    override fun onCreate() {
+        super.onCreate()
+        preferenceManager = PreferenceManager.getDefaultSharedPreferences(this)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        preferenceManager = null
+    }
+
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
@@ -52,8 +66,7 @@ class RecorderService : Service() {
      * as possible. Meant for music.
      */
     private fun getBestAudioSource(): Int {
-        val preference = PreferenceManager.getDefaultSharedPreferences(this)
-        if (!preference.getBoolean("unprocessed_microphone", true)) {
+        if (!preferenceManager!!.getBoolean(SettingsFragment.UNPROCESSED_MICROPHONE, true)) {
             Log.i("Recorder", "Using default mic")
             return MediaRecorder.AudioSource.MIC
         }
@@ -110,7 +123,14 @@ class RecorderService : Service() {
                 setAudioSource(getBestAudioSource())
                 setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
                 setOutputFile(fileName)
-                setAudioSamplingRate(44100)
+                setAudioSamplingRate(
+                    Integer.parseInt(
+                        preferenceManager!!.getString(
+                            SettingsFragment.SAMPLE_RATE,
+                            "44100"
+                        ) ?: "44100"
+                    )
+                )
                 setAudioEncodingBitRate(192000)
                 setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
 

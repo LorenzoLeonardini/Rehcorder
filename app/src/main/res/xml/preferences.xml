@@ -1,36 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <androidx.preference.SwitchPreferenceCompat
-        android:defaultValue="true"
-        android:icon="@drawable/ic_mic"
-        android:key="unprocessed_microphone"
-        android:summary="@string/settings_mic_summary"
-        android:title="@string/settings_mic_title" />
+    <androidx.preference.PreferenceCategory
+        android:key="recordings"
+        android:title="@string/settings_recordings">
 
-    <androidx.preference.SwitchPreferenceCompat
-        android:defaultValue="false"
-        android:icon="@drawable/ic_sd_storage"
-        android:key="delete_recording"
-        android:summary="@string/settings_storage_summary"
-        android:title="@string/settings_storage_title" />
+        <androidx.preference.SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:icon="@drawable/ic_mic"
+            android:key="unprocessed_microphone"
+            android:summary="@string/settings_mic_summary"
+            android:title="@string/settings_mic_title" />
 
-    <androidx.preference.Preference
-        android:icon="@drawable/ic_code"
-        android:key="source_code"
-        android:summary="https://github.com"
-        android:title="@string/settings_source_code">
-        <intent
-            android:action="android.intent.action.VIEW"
-            android:data="https://github.com/LorenzoLeonardini/Rehcorder" />
-    </androidx.preference.Preference>
+        <androidx.preference.ListPreference
+            android:defaultValue="44100"
+            android:entries="@array/settings_sample_rate"
+            android:entryValues="@array/settings_sample_rate"
+            android:icon="@drawable/ic_audio_file"
+            android:key="sample_rate"
+            android:summary="@string/settings_sample_rate_summary"
+            android:title="@string/settings_sample_rate_title" />
 
-    <androidx.preference.Preference
-        android:icon="@drawable/ic_info"
+        <androidx.preference.SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:icon="@drawable/ic_sd_storage"
+            android:key="delete_recording"
+            android:summary="@string/settings_storage_summary"
+            android:title="@string/settings_storage_title" />
+
+    </androidx.preference.PreferenceCategory>
+
+    <androidx.preference.PreferenceCategory
         android:key="about"
-        android:summary="https://leonardini.dev"
         android:title="@string/settings_about">
-        <intent
-            android:action="android.intent.action.VIEW"
-            android:data="https://leonardini.dev" />
-    </androidx.preference.Preference>
+
+        <androidx.preference.Preference
+            android:icon="@drawable/ic_code"
+            android:key="source_code"
+            android:summary="https://github.com"
+            android:title="@string/settings_source_code">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="https://github.com/LorenzoLeonardini/Rehcorder" />
+        </androidx.preference.Preference>
+
+        <androidx.preference.Preference
+            android:icon="@drawable/ic_info"
+            android:key="website"
+            android:summary="https://leonardini.dev"
+            android:title="@string/settings_website">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="https://leonardini.dev" />
+        </androidx.preference.Preference>
+
+    </androidx.preference.PreferenceCategory>
 </androidx.preference.PreferenceScreen>
