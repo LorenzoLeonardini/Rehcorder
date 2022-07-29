@@ -103,5 +103,6 @@
     <string name="notification_normalizer_text">Audio is being normalized in the background</string>
     <string name="notification_splitter_title">Splitting audio…</string>
     <string name="notification_splitter_text">Audio is being split into tracks in the background</string>
+    <string name="title_activity_compose_tutorial">ComposeTutorialActivity</string>
 
 </resources>

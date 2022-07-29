@@ -17,6 +17,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Rehcorder"
         tools:targetApi="31">
+        <activity
+            android:name=".ComposeTutorialActivity"
+            android:exported="true"
+            android:label="@string/title_activity_compose_tutorial"
+            android:theme="@style/Theme.Rehcorder">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <service
             android:name=".services.RecorderService"
             android:enabled="true"
