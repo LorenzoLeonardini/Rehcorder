@@ -30,6 +30,9 @@ interface SongDao {
     @Query("UPDATE song SET name=:name WHERE uid=:id")
     suspend fun updateName(id: Long, name: String?)
 
+    @Query("DELETE FROM song WHERE uid=:id")
+    suspend fun delete(id: Long)
+
 }
 
 data class SongWithVersionCount(val uid: Long, val name: String, val versions_count: Int) :

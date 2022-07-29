@@ -72,6 +72,8 @@
     <string name="dialog_save_error_message">Devi selezionare almeno un brano, e per ogni brano devi specificare un punto di inizio e un punto di fine.</string>
     <string name="dialog_confirm_exit_title">Vuoi davvero uscire?</string>
     <string name="dialog_confirm_exit_message">Se esci ora perderai tutto il tuo progresso e dovrai ricominciare a dividere la registrazione da capo.</string>
+    <string name="dialog_delete_song_title">Vuoi confermare?</string>
+    <string name="dialog_delete_song_message">Stai per cancellare definitivamente un brano con tutte le sue versioni, non sarai in grado di recuperare le registrazioni cancellate.</string>
 
     <!-- Process -->
     <string name="begin_song">Inizio brano</string>

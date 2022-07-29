@@ -22,7 +22,12 @@ interface SongRecordingDao {
     @Query(
         "SELECT * FROM song_recording WHERE song_recording.recording_id=:id"
     )
-    suspend fun getRehearsalSongsRecordings(id: Long): List<SongRecording>
+    suspend fun getRehearsalSongsRecordingsFromRehearsal(id: Long): List<SongRecording>
+
+    @Query(
+        "SELECT * FROM song_recording WHERE song_recording.song_id=:id"
+    )
+    suspend fun getRehearsalSongsRecordingsFromSong(id: Long): List<SongRecording>
 
     @Query(
         "SELECT song_recording.*, rehearsal.name, rehearsal.date FROM song_recording " +
@@ -51,6 +56,9 @@ interface SongRecordingDao {
 
     @Query("DELETE FROM song_recording WHERE recording_id=:id")
     suspend fun deleteRehearsal(id: Long)
+
+    @Query("DELETE FROM song_recording WHERE song_id=:id")
+    suspend fun deleteSong(id: Long)
 }
 
 data class RehearsalSongs(
