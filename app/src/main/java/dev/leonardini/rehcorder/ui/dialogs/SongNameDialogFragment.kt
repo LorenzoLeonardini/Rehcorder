@@ -1,5 +1,6 @@
 package dev.leonardini.rehcorder.ui.dialogs
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
@@ -22,6 +23,7 @@ class SongNameDialogFragment : AppCompatDialogFragment(), DialogInterface.OnClic
     private var _currentName: String? = null
     private lateinit var materialDialog: Dialog
 
+    @SuppressLint("InflateParams")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         _currentName = savedInstanceState?.getString("name") ?: ""
 

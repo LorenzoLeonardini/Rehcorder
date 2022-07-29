@@ -1,5 +1,6 @@
 package dev.leonardini.rehcorder.ui
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
@@ -20,6 +21,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         setPreferencesFromResource(R.xml.preferences, rootKey)
     }
 
+    @SuppressLint("RestrictedApi")
     override fun onDisplayPreferenceDialog(preference: Preference) {
         var handled = false
         if (callbackFragment is OnPreferenceDisplayDialogCallback) {

@@ -1,5 +1,6 @@
 package dev.leonardini.rehcorder.ui
 
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.DialogInterface
 import android.graphics.Bitmap
@@ -20,6 +21,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 /**
  * Code stolen from PreferenceDialogFragmentCompat, had to replace the old AlertDialog.Builder with MaterialAlertDialogBuilder
  */
+@SuppressLint("RestrictedApi")
 class ListPreferenceDialogFragment : ListPreferenceDialogFragmentCompat() {
 
     companion object {

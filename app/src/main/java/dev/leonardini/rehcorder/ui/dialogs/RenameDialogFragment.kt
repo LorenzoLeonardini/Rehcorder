@@ -1,5 +1,6 @@
 package dev.leonardini.rehcorder.ui.dialogs
 
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
@@ -27,6 +28,7 @@ class RenameDialogFragment(
 
     constructor() : this(-1, null, -1)
 
+    @SuppressLint("InflateParams")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         _rehearsalId = savedInstanceState?.getLong("rehearsalId") ?: rehearsalId
         _currentName = savedInstanceState?.getString("currentName") ?: currentName

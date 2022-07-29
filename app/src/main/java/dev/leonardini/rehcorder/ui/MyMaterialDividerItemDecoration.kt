@@ -15,6 +15,7 @@
  */
 package dev.leonardini.rehcorder.ui
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Rect
@@ -47,6 +48,7 @@ import com.google.android.material.resources.MaterialResources
  * recyclerView.addItemDecoration(dividerItemDecoration);
 </pre> *
  */
+@SuppressLint("RestrictedApi", "PrivateResource")
 class MyMaterialDividerItemDecoration(
     context: Context, attrs: AttributeSet?, defStyleAttr: Int, orientation: Int
 ) :
