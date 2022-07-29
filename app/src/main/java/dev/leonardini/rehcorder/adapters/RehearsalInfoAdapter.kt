@@ -1,5 +1,6 @@
 package dev.leonardini.rehcorder.adapters
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -96,7 +97,7 @@ class RehearsalInfoAdapter(
         private val shareElementListener: OnTrackShareClickListener,
         private val itemClickListener: OnItemClickListener
     ) :
-        RecyclerView.ViewHolder(itemView), View.OnClickListener {
+        RecyclerView.ViewHolder(itemView), View.OnClickListener, View.OnLongClickListener {
 
         val binding: TrackItemBinding = TrackItemBinding.bind(itemView)
         var id: Long = -1
@@ -107,6 +108,7 @@ class RehearsalInfoAdapter(
 
         init {
             binding.root.setOnClickListener(this)
+            binding.root.setOnLongClickListener(this)
             binding.trackShareButton.setOnClickListener(this)
         }
 
@@ -116,6 +118,10 @@ class RehearsalInfoAdapter(
             } else {
                 itemClickListener.onItemClicked(this)
             }
+        }
+
+        override fun onLongClick(v: View?): Boolean {
+            return itemClickListener.onItemLongClicked(this)
         }
     }
 
@@ -132,6 +138,7 @@ class RehearsalInfoAdapter(
 
     interface OnItemClickListener {
         fun onItemClicked(holder: RehearsalInfoViewHolder)
+        fun onItemLongClicked(holder: RehearsalInfoViewHolder) :Boolean
     }
 
 }

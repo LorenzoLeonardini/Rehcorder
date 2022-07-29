@@ -6,6 +6,7 @@ import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.ActionMode
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -13,7 +14,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.leonardini.rehcorder.adapters.RehearsalInfoAdapter
 import dev.leonardini.rehcorder.databinding.ActivityRehearsalBinding
-import dev.leonardini.rehcorder.ui.MyMaterialDividerItemDecoration
 import dev.leonardini.rehcorder.ui.dialogs.MaterialDialogFragment
 import dev.leonardini.rehcorder.ui.dialogs.MaterialLoadingDialogFragment
 import dev.leonardini.rehcorder.viewmodels.RehearsalInfoViewModel
@@ -24,10 +24,13 @@ import java.text.DateFormat
 import java.util.*
 
 class RehearsalInfoActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShareClickListener,
-    RehearsalInfoAdapter.OnItemClickListener {
+    RehearsalInfoAdapter.OnItemClickListener, ActionMode.Callback {
 
     private lateinit var binding: ActivityRehearsalBinding
     private lateinit var adapter: RehearsalInfoAdapter
+
+    private var currentlyChecked: ArrayList<Long> = ArrayList<Long>()
+    private var contextualActionMode :ActionMode? = null
 
     companion object {
         private const val DELETE_REHEARSAL_DIALOG = "DeleteRehearsalDialog"
@@ -52,15 +55,6 @@ class RehearsalInfoActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackS
         binding.recyclerView.layoutManager = linearLayoutManager
         adapter = RehearsalInfoAdapter(this, this)
         binding.recyclerView.adapter = adapter
-        val itemDecoration = MyMaterialDividerItemDecoration(
-            binding.recyclerView.context,
-            linearLayoutManager.orientation
-        )
-        itemDecoration.isLastItemDecorated = false
-        itemDecoration.isFirstItemDecorated = false
-        itemDecoration.setDividerInsetStartResource(this, R.dimen.divider_inset)
-        itemDecoration.setDividerInsetEndResource(this, R.dimen.divider_inset)
-        binding.recyclerView.addItemDecoration(itemDecoration)
 
         val model: RehearsalInfoViewModel by viewModels {
             RehearsalViewModelFactory(
@@ -129,9 +123,72 @@ class RehearsalInfoActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackS
     }
 
     override fun onItemClicked(holder: RehearsalInfoAdapter.RehearsalInfoViewHolder) {
+        holder.binding.root.let { card ->
+            if (currentlyChecked.isNotEmpty()) {
+                card.isChecked = !card.isChecked
+                if(card.isChecked) {
+                    currentlyChecked.add(holder.id)
+                } else {
+                    currentlyChecked.remove(holder.id)
+                }
+                contextualActionMode?.title = currentlyChecked.size.toString() + " selected"
+
+                if(currentlyChecked.isEmpty()) {
+                    contextualActionMode?.finish()
+                    contextualActionMode = null
+                }
+                return
+            }
+        }
         val baseDir =
             if (holder.externalStorage) getExternalFilesDir(null) ?: filesDir else filesDir
         Utils.playSongIntent(this, baseDir, holder.fileName!!)
+    }
+
+    override fun onItemLongClicked(holder: RehearsalInfoAdapter.RehearsalInfoViewHolder): Boolean {
+        if(currentlyChecked.isEmpty()) {
+            contextualActionMode = startSupportActionMode(this)
+        }
+
+        holder.binding.root.let { card ->
+            card.isChecked = !card.isChecked
+            if(card.isChecked) {
+                currentlyChecked.add(holder.id)
+            } else {
+                currentlyChecked.remove(holder.id)
+            }
+            contextualActionMode?.title = currentlyChecked.size.toString() + " selected"
+        }
+
+        return true
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putLongArray("currentlyChecked", currentlyChecked.toLongArray())
+    }
+
+    // Contextual action bar
+    override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_delete, menu)
+        return true
+    }
+
+    override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
+        return false
+    }
+
+    override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
+        return when (item?.itemId) {
+
+            else -> false
+        }
+    }
+
+    override fun onDestroyActionMode(mode: ActionMode?) {
+        if(currentlyChecked.isNotEmpty()) {
+            // Problem
+        }
     }
 
 }
