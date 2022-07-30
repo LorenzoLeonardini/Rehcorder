@@ -12,6 +12,7 @@
         <entry key="app/src/main/res/drawable/ic_code.xml" value="0.194" />
         <entry key="app/src/main/res/drawable/ic_delete.xml" value="0.194" />
         <entry key="app/src/main/res/drawable/ic_edit.xml" value="0.1665" />
+        <entry key="app/src/main/res/drawable/ic_feedback.xml" value="0.194" />
         <entry key="app/src/main/res/drawable/ic_forward_10.xml" value="0.194" />
         <entry key="app/src/main/res/drawable/ic_info.xml" value="0.194" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.1" />
@@ -68,7 +69,7 @@
         <entry key="app/src/main/res/menu/menu_main.xml" value="0.1875" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.194" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.194" />
-        <entry key="app/src/main/res/xml/preferences.xml" value="0.1693840579710145" />
+        <entry key="app/src/main/res/xml/preferences.xml" value="0.5" />
       </map>
     </option>
   </component>

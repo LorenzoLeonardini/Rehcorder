@@ -44,6 +44,20 @@
         </androidx.preference.Preference>
 
         <androidx.preference.Preference
+            android:icon="@drawable/ic_feedback"
+            android:key="feedback"
+            android:summary="@string/settings_feedback_summary"
+            android:title="@string/settings_feedback_title">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="mailto:rehcorder@leonardini.dev">
+                <extra
+                    android:name="android.intent.extra.SUBJECT"
+                    android:value="App Feedback" />
+            </intent>
+        </androidx.preference.Preference>
+
+        <androidx.preference.Preference
             android:icon="@drawable/ic_info"
             android:key="website"
             android:summary="https://leonardini.dev"
