@@ -2,7 +2,9 @@
 
 This Application accesses some Personal Data from its Users.
 
-In particular, the Application requires Microphone access in order to perform recordings on the User's device.
+This Application **does not collect** Personal data from its Users.
+
+In particular, the Application requires Microphone access in order to perform recordings on the User's device. All recordings are kept on the device and are never shared with the Owner or any third party.
 
 ## Owner and Data Controller
 
