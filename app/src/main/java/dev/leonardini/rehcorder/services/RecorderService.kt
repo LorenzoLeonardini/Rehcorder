@@ -103,6 +103,7 @@ class RecorderService : Service() {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setContentIntent(pendingIntent)
+            .setOngoing(true)
         if (Build.VERSION.SDK_INT >= 31) {
             notificationBuilder =
                 notificationBuilder.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
