@@ -12,7 +12,6 @@ import dev.leonardini.rehcorder.databinding.SongLayoutBinding
 import dev.leonardini.rehcorder.db.SongWithVersionCount
 
 class SongsAdapter(
-    private val editElementListener: OnSongEditClickListener,
     private val headerBoundListener: OnHeaderBoundListener,
     private val itemClickListener: OnItemClickListener,
 ) :
@@ -56,7 +55,7 @@ class SongsAdapter(
                 val v =
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.song_layout, parent, false)
-                SongViewHolder(v, editElementListener, itemClickListener)
+                SongViewHolder(v, itemClickListener)
             }
             UiModelType.HEADER -> {
                 val v = LayoutInflater.from(parent.context)
@@ -90,7 +89,6 @@ class SongsAdapter(
 
     class SongViewHolder(
         itemView: View,
-        private val editElementListener: OnSongEditClickListener,
         private val itemClickListener: OnItemClickListener
     ) :
         RecyclerView.ViewHolder(itemView), View.OnClickListener {
@@ -101,15 +99,10 @@ class SongsAdapter(
 
         init {
             binding.root.setOnClickListener(this)
-            binding.songEditButton.setOnClickListener(this)
         }
 
         override fun onClick(v: View?) {
-            if (v == binding.songEditButton) {
-                editElementListener.onEdit(id, name)
-            } else {
-                itemClickListener.onItemClicked(this)
-            }
+            itemClickListener.onItemClicked(this)
         }
     }
 

@@ -16,9 +16,9 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
+            app:menu="@menu/menu_song_info"
             app:navigationIcon="@drawable/ic_back"
-            app:title="Song name"
-            app:titleCentered="true" />
+            app:title="Song name" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

@@ -17,7 +17,7 @@ import java.util.*
  * RecyclerView Adapter for information about a Rehearsal
  */
 class SongInfoAdapter(
-    private val shareElementListener: OnTrackShareClickListener,
+    private val buttonElementListener: OnTrackButtonClickListener,
     private val itemClickListener: OnItemClickListener,
 ) :
     PagingDataAdapter<UiModel, RecyclerView.ViewHolder>(COMPARATOR) {
@@ -60,11 +60,11 @@ class SongInfoAdapter(
                 val v =
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.track_item, parent, false)
-                SongInfoViewHolder(v, shareElementListener, itemClickListener)
+                SongInfoViewHolder(v, buttonElementListener, itemClickListener)
             }
             UiModelType.HEADER -> {
                 val v = LayoutInflater.from(parent.context)
-                    .inflate(R.layout.list_header, parent, false)
+                    .inflate(R.layout.song_header, parent, false)
                 HeaderViewHolder(v)
             }
             else -> throw IllegalStateException("Unknown view type")
@@ -95,7 +95,7 @@ class SongInfoAdapter(
 
     class SongInfoViewHolder(
         itemView: View,
-        private val shareElementListener: OnTrackShareClickListener,
+        private val buttonElementListener: OnTrackButtonClickListener,
         private val itemClickListener: OnItemClickListener
     ) :
         RecyclerView.ViewHolder(itemView), View.OnClickListener {
@@ -110,13 +110,14 @@ class SongInfoAdapter(
         init {
             binding.root.setOnClickListener(this)
             binding.trackShareButton.setOnClickListener(this)
+            binding.trackPlayButton.setOnClickListener(this)
         }
 
         override fun onClick(v: View?) {
-            if (v == binding.trackShareButton) {
-                shareElementListener.onShare(this)
-            } else {
-                itemClickListener.onItemClicked(this)
+            when (v) {
+                binding.trackPlayButton -> buttonElementListener.onPlay(this)
+                binding.trackShareButton -> buttonElementListener.onShare(this)
+                else -> itemClickListener.onItemClicked(this)
             }
         }
     }
@@ -128,8 +129,9 @@ class SongInfoAdapter(
         }
     }
 
-    interface OnTrackShareClickListener {
+    interface OnTrackButtonClickListener {
         fun onShare(holder: SongInfoViewHolder)
+        fun onPlay(holder: SongInfoViewHolder)
     }
 
     interface OnItemClickListener {

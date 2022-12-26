@@ -11,7 +11,6 @@ import dev.leonardini.rehcorder.Utils
 import dev.leonardini.rehcorder.adapters.SongsInfoHeader
 import dev.leonardini.rehcorder.db.AppDatabase
 import dev.leonardini.rehcorder.db.Database
-import dev.leonardini.rehcorder.db.Song
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.io.File
@@ -25,9 +24,7 @@ class SongInfoViewModel(application: Application, private val songId: Long) :
         database = Database.getInstance(application)
     }
 
-    val song: LiveData<Song> = liveData {
-        emit(database.songDao().getSong(songId)!!)
-    }
+    val song = database.songDao().getSong(songId)
 
     val songRehearsals = Pager(PagingConfig(pageSize = 10)) {
         database.songRecordingDao().getSongRehearsals(songId)
@@ -39,6 +36,12 @@ class SongInfoViewModel(application: Application, private val songId: Long) :
             }
         }
     }.cachedIn(viewModelScope)
+
+    fun updateSongName(name: String) {
+        viewModelScope.launch {
+            database.songDao().updateName(songId, name)
+        }
+    }
 
     fun deleteSong(applicationContext: Context) {
         viewModelScope.launch {

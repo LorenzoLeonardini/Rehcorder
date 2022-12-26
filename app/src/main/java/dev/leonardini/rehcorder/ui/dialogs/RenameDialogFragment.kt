@@ -16,21 +16,22 @@ import dev.leonardini.rehcorder.R
  * Material dialog providing a text input to rename a rehearsal
  */
 class RenameDialogFragment(
-    private val rehearsalId: Long,
+    private val itemId: Long,
     private val currentName: String?,
     private val hintString: Int
 ) : AppCompatDialogFragment(), DialogInterface.OnClickListener {
 
     private lateinit var v: View
-    private var _rehearsalId: Long = -1
+    private var _itemId: Long = -1
     private var _currentName: String? = null
     private var _hintString: Int = -1
 
     constructor() : this(-1, null, -1)
+    constructor(currentName: String?, hintString :Int) : this(-1, currentName, hintString)
 
     @SuppressLint("InflateParams")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        _rehearsalId = savedInstanceState?.getLong("rehearsalId") ?: rehearsalId
+        _itemId = savedInstanceState?.getLong("itemId") ?: itemId
         _currentName = savedInstanceState?.getString("currentName") ?: currentName
         _hintString = savedInstanceState?.getInt("hintString") ?: hintString
 
@@ -48,7 +49,7 @@ class RenameDialogFragment(
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putLong("rehearsalId", _rehearsalId)
+        outState.putLong("itemId", _itemId)
         outState.putString(
             "currentName",
             v.findViewById<TextInputEditText>(R.id.text_field_input).text.toString().trim()
@@ -58,7 +59,7 @@ class RenameDialogFragment(
 
     override fun onClick(dialog: DialogInterface?, which: Int) {
         val bundle = Bundle()
-        bundle.putLong("id", _rehearsalId)
+        bundle.putLong("id", _itemId)
         bundle.putString(
             "name",
             v.findViewById<TextInputEditText>(R.id.text_field_input).text.toString().trim()

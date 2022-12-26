@@ -15,7 +15,7 @@ import dev.leonardini.rehcorder.db.RehearsalSongs
  * RecyclerView Adapter for information about a Rehearsal
  */
 class RehearsalInfoAdapter(
-    private val shareElementListener: OnTrackShareClickListener,
+    private val buttonElementListener: OnTrackButtonClickListener,
     private val itemClickListener: OnItemClickListener,
 ) :
     PagingDataAdapter<UiModel, RecyclerView.ViewHolder>(COMPARATOR) {
@@ -58,7 +58,7 @@ class RehearsalInfoAdapter(
                 val v =
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.track_item, parent, false)
-                RehearsalInfoViewHolder(v, shareElementListener, itemClickListener)
+                RehearsalInfoViewHolder(v, buttonElementListener, itemClickListener)
             }
             UiModelType.HEADER -> {
                 val v = LayoutInflater.from(parent.context)
@@ -93,7 +93,7 @@ class RehearsalInfoAdapter(
 
     class RehearsalInfoViewHolder(
         itemView: View,
-        private val shareElementListener: OnTrackShareClickListener,
+        private val buttonElementListener: OnTrackButtonClickListener,
         private val itemClickListener: OnItemClickListener
     ) :
         RecyclerView.ViewHolder(itemView), View.OnClickListener {
@@ -108,13 +108,14 @@ class RehearsalInfoAdapter(
         init {
             binding.root.setOnClickListener(this)
             binding.trackShareButton.setOnClickListener(this)
+            binding.trackPlayButton.setOnClickListener(this)
         }
 
         override fun onClick(v: View?) {
-            if (v == binding.trackShareButton) {
-                shareElementListener.onShare(this)
-            } else {
-                itemClickListener.onItemClicked(this)
+            when (v) {
+                binding.trackPlayButton -> buttonElementListener.onPlay(this)
+                binding.trackShareButton -> buttonElementListener.onShare(this)
+                else -> itemClickListener.onItemClicked(this)
             }
         }
     }
@@ -126,8 +127,9 @@ class RehearsalInfoAdapter(
         }
     }
 
-    interface OnTrackShareClickListener {
+    interface OnTrackButtonClickListener {
         fun onShare(holder: RehearsalInfoViewHolder)
+        fun onPlay(holder: RehearsalInfoViewHolder)
     }
 
     interface OnItemClickListener {

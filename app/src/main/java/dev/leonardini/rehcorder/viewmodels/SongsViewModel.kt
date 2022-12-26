@@ -11,7 +11,6 @@ import dev.leonardini.rehcorder.adapters.SongsHeader
 import dev.leonardini.rehcorder.db.AppDatabase
 import dev.leonardini.rehcorder.db.Database
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 
 class SongsViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -31,11 +30,5 @@ class SongsViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }.cachedIn(viewModelScope)
-
-    fun updateSongName(id: Long, name: String) {
-        viewModelScope.launch {
-            database.songDao().updateName(id, name)
-        }
-    }
 
 }

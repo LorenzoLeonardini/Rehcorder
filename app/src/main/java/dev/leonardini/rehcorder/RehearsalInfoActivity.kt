@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.*
 
-class RehearsalInfoActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackShareClickListener,
+class RehearsalInfoActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackButtonClickListener,
     RehearsalInfoAdapter.OnItemClickListener {
 
     private lateinit var binding: ActivityRehearsalBinding
@@ -128,10 +128,14 @@ class RehearsalInfoActivity : AppCompatActivity(), RehearsalInfoAdapter.OnTrackS
         Utils.shareSong(this, baseDir, holder.fileName!!)
     }
 
-    override fun onItemClicked(holder: RehearsalInfoAdapter.RehearsalInfoViewHolder) {
+    override fun onPlay(holder: RehearsalInfoAdapter.RehearsalInfoViewHolder) {
         val baseDir =
             if (holder.externalStorage) getExternalFilesDir(null) ?: filesDir else filesDir
         Utils.playSongIntent(this, baseDir, holder.fileName!!)
+    }
+
+    override fun onItemClicked(holder: RehearsalInfoAdapter.RehearsalInfoViewHolder) {
+        onPlay(holder)
     }
 
 }

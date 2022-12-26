@@ -78,29 +78,27 @@ class RehearsalsFragment : Fragment(), RehearsalsAdapter.OnRehearsalEditClickLis
         this.model = model
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                model.rehearsals.collectLatest { pagingData ->
-                    adapter.submitData(pagingData)
-                }
-            }
-        }
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                adapter.loadStateFlow.collectLatest {
-                    if (adapter.itemCount == 1) {
-                        binding.recyclerView.visibility = View.GONE
-                        binding.emptyView.visibility = View.VISIBLE
-                    } else if (adapter.itemCount > 1) {
-                        binding.recyclerView.visibility = View.VISIBLE
-                        binding.emptyView.visibility = View.GONE
+                launch {
+                    model.rehearsals.collectLatest { pagingData ->
+                        adapter.submitData(pagingData)
                     }
                 }
-            }
-        }
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                model.inNeedOfProcessRehearsal.collectLatest { rehearsal ->
-                    inNeedOfProcessing = rehearsal
-                    adapter.notifyItemChanged(0)
+                launch {
+                    adapter.loadStateFlow.collectLatest {
+                        if (adapter.itemCount == 1) {
+                            binding.recyclerView.visibility = View.GONE
+                            binding.emptyView.visibility = View.VISIBLE
+                        } else if (adapter.itemCount > 1) {
+                            binding.recyclerView.visibility = View.VISIBLE
+                            binding.emptyView.visibility = View.GONE
+                        }
+                    }
+                }
+                launch {
+                    model.inNeedOfProcessRehearsal.collectLatest { rehearsal ->
+                        inNeedOfProcessing = rehearsal
+                        adapter.notifyItemChanged(0)
+                    }
                 }
             }
         }

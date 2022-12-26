@@ -103,7 +103,7 @@ class SplitterService : ForegroundIntentService("SplitterService") {
         rehearsalId: Long,
         externalStorage: Boolean
     ): String {
-        val song = database.songDao().getSong(regionId)!!
+        val song = database.songDao().getSongAsync(regionId)!!
         var songFileFriendlyName = song.name.replace(" ", "_").replace(Regex("\\W+"), "")
         val songRecordingUid =
             database.songRecordingDao()

@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-
-    <style name="Widget.Rehcorder.Title" parent="TextAppearance.Material3.TitleLarge">
-        <item name="android:textFontWeight">500</item>
-    </style>
-
-</resources>

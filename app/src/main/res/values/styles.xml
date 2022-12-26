@@ -26,8 +26,6 @@
         <item name="iconSize">32dp</item>
     </style>
 
-    <style name="Widget.Rehcorder.Title" parent="TextAppearance.Material3.TitleLarge" />
-
     <style name="ProcessContainerLandscape" parent="">
         <item name="android:layout_marginTop">8dp</item>
         <item name="layout_constraintLeft_toLeftOf">parent</item>

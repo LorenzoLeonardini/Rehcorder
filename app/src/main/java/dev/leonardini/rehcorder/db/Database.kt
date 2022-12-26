@@ -2,8 +2,6 @@ package dev.leonardini.rehcorder.db
 
 import android.content.Context
 import androidx.room.Room
-import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
 
 /**
  * Singleton to retrieve AppDatabase instance

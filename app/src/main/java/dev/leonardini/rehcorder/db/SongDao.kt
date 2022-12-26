@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import dev.leonardini.rehcorder.adapters.UiModel
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SongDao {
@@ -22,7 +23,10 @@ interface SongDao {
     suspend fun getAllSorted(): List<Song>
 
     @Query("SELECT * FROM song WHERE uid=:id LIMIT 1")
-    suspend fun getSong(id: Long): Song?
+    fun getSong(id: Long): Flow<Song?>
+
+    @Query("SELECT * FROM song WHERE uid=:id LIMIT 1")
+    suspend fun getSongAsync(id: Long): Song?
 
     @Insert
     suspend fun insert(songs: Song): Long

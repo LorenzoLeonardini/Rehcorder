@@ -1,52 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/card"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="?attr/selectableItemBackground"
-    android:clickable="true"
-    android:focusable="true"
-    android:paddingHorizontal="8dp">
+    android:layout_height="80dp"
+    android:layout_marginHorizontal="4dp"
+    android:layout_marginBottom="10dp">
 
     <androidx.appcompat.widget.LinearLayoutCompat
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_row="1"
-        android:layout_column="1"
-        android:layout_columnWeight="1"
-        android:orientation="vertical"
-        android:paddingTop="8dp"
-        android:paddingBottom="10dp">
+        android:orientation="horizontal"
+        android:weightSum="1">
 
-        <TextView
-            android:id="@+id/song_title"
-            style="@style/TextAppearance.Material3.TitleLarge"
+        <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="6dp"
-            android:text="June, 11th 2022"
-            tools:ignore="HardcodedText" />
+            android:layout_height="48dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/song_versions"
-            style="@style/TextAppearance.Material3.BodyMedium"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="10 Songs"
-            tools:ignore="HardcodedText" />
+            <TextView
+                android:id="@+id/song_title"
+                style="@style/TextAppearance.Material3.TitleMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp"
+                android:text="June, 11th 2022"
+                tools:ignore="HardcodedText" />
+
+            <TextView
+                android:id="@+id/song_versions"
+                style="@style/TextAppearance.Material3.BodyMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="10 Songs"
+                tools:ignore="HardcodedText" />
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:background="@color/material_dynamic_tertiary90"
+            android:contentDescription="Song cover"
+            android:scaleType="centerCrop" />
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/song_edit_button"
-        style="@style/Widget.App.Button.List.IconOnly"
-        android:layout_row="1"
-        android:layout_column="2"
-        android:layout_gravity="center"
-        android:contentDescription="@string/edit"
-        android:textAlignment="center"
-        app:icon="@drawable/ic_edit_circle" />
-
-</GridLayout>
+</com.google.android.material.card.MaterialCardView>

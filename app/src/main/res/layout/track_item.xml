@@ -4,10 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginVertical="4dp"
     android:background="?attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true"
-    android:paddingHorizontal="8dp">
+    android:paddingHorizontal="5dp">
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="0dp"
@@ -16,12 +17,11 @@
         android:layout_column="1"
         android:layout_columnWeight="1"
         android:orientation="vertical"
-        android:paddingTop="8dp"
-        android:paddingBottom="10dp">
+        android:paddingVertical="9dp">
 
         <TextView
             android:id="@+id/track_title"
-            style="@style/TextAppearance.Material3.TitleLarge"
+            style="@style/TextAppearance.Material3.TitleMedium"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="6dp"
@@ -38,14 +38,72 @@
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/track_share_button"
-        style="@style/Widget.App.Button.List.IconOnly"
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_row="1"
         android:layout_column="2"
         android:layout_gravity="center"
-        android:contentDescription="@string/share"
-        android:textAlignment="center"
-        app:icon="@drawable/ic_share_circle" />
+        android:orientation="horizontal">
+
+        <!--        <LinearLayout-->
+        <!--            android:id="@+id/track_notes_button"-->
+        <!--            android:layout_width="44dp"-->
+        <!--            android:layout_height="44dp"-->
+        <!--            android:background="@drawable/rounded_view_ripple"-->
+        <!--            android:clickable="true"-->
+        <!--            android:contentDescription="@string/notes"-->
+        <!--            android:focusable="true"-->
+        <!--            android:gravity="center">-->
+
+        <!--            <com.google.android.material.button.MaterialButton-->
+        <!--                style="@style/Widget.App.Button.List.IconOnly"-->
+        <!--                android:layout_width="wrap_content"-->
+        <!--                android:layout_height="wrap_content"-->
+        <!--                android:clickable="false"-->
+        <!--                android:focusable="false"-->
+        <!--                app:icon="@drawable/ic_text_snippet" />-->
+        <!--        </LinearLayout>-->
+
+        <LinearLayout
+            android:id="@+id/track_share_button"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@drawable/rounded_view_ripple"
+            android:clickable="true"
+            android:contentDescription="@string/share"
+            android:focusable="true"
+            android:gravity="center">
+
+            <com.google.android.material.button.MaterialButton
+                style="@style/Widget.App.Button.List.IconOnly"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:focusable="false"
+                app:icon="@drawable/ic_share" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/track_play_button"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@drawable/rounded_view_ripple"
+            android:clickable="true"
+            android:contentDescription="@string/share"
+            android:focusable="true"
+            android:gravity="center">
+
+            <com.google.android.material.button.MaterialButton
+                style="@style/Widget.App.Button.List.FilledIconOnly"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:contentDescription="@string/play"
+                android:focusable="false"
+                app:icon="@drawable/ic_play" />
+        </LinearLayout>
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
 
 </GridLayout>
