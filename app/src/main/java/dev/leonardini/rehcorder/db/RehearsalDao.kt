@@ -22,6 +22,10 @@ interface RehearsalDao {
     @Query("SELECT * FROM rehearsal WHERE status = ${Rehearsal.NORMALIZED} LIMIT 1")
     fun getUnprocessedRehearsal(): Flow<Rehearsal?>
 
+    // Used while migrating to Works, to recover crashed normalizations
+    @Query("SELECT * FROM rehearsal WHERE status = ${Rehearsal.RECORDED} AND worker = FALSE")
+    suspend fun getStuckRehearsals(): List<Rehearsal>
+
     @Query("SELECT * FROM rehearsal WHERE uid=:id")
     suspend fun getRehearsal(id: Long): Rehearsal
 

@@ -95,7 +95,8 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemReselectedList
     }
 
     private var permissionToRecordAccepted: Boolean = false
-    private var permissions = arrayOf(Manifest.permission.RECORD_AUDIO)
+    private var permissions =
+        arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.POST_NOTIFICATIONS)
 
     private fun recordingPermissionsGranted() = permissions.all {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED

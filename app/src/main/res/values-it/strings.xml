@@ -28,6 +28,8 @@
     <string name="settings_sample_rate_summary">Seleziona il sample rate da utilizzare per le registrazioni audio</string>
     <string name="settings_storage_title">Elimina registrazioni processate</string>
     <string name="settings_storage_summary">Elimina le registrazioni complete dopo averle processate per risparmiare spazio sul dispositivo</string>
+    <string name="settings_repair_title">Ripara le registrazioni</string>
+    <string name="settings_repair_summary">Nel caso in cui una registrazione sia bloccata in uno stato di normalizzazione, quest\'opzione può ripararla</string>
     <string name="settings_about">About</string>
     <string name="settings_source_code">Codice sorgente</string>
     <string name="settings_feedback_title">Invia feedback</string>
@@ -76,6 +78,8 @@
     <string name="dialog_confirm_exit_message">Se esci ora perderai tutto il tuo progresso e dovrai ricominciare a dividere la registrazione da capo.</string>
     <string name="dialog_delete_song_title">Vuoi confermare?</string>
     <string name="dialog_delete_song_message">Stai per cancellare definitivamente un brano con tutte le sue versioni, non sarai in grado di recuperare le registrazioni cancellate.</string>
+    <string name="dialog_repair_title">Vuoi confermare?</string>
+    <string name="dialog_repair_message">Quest\'operazione proverà a rinormalizzare tutte le registrazioni. Potrebbe volerci un po\'.</string>
 
     <!-- Process -->
     <string name="begin_song">Inizio brano</string>

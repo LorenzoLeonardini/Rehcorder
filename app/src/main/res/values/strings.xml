@@ -28,6 +28,8 @@
     <string name="settings_sample_rate_summary">Select sample rate to be used for the audio recording</string>
     <string name="settings_storage_title">Delete processed recordings</string>
     <string name="settings_storage_summary">Delete full recording after processing to save space</string>
+    <string name="settings_repair_title">Repair recordings state</string>
+    <string name="settings_repair_summary">In case you keep getting prompted your recordings are being normalized, this can fix it</string>
     <string name="settings_about">About</string>
     <string name="settings_source_code">Source code</string>
     <string name="settings_feedback_title">Send feedback</string>
@@ -82,6 +84,8 @@
     <string name="dialog_confirm_exit_message">If you exit now you will lose all your progress and will have to start splitting the audio from scratch.</string>
     <string name="dialog_delete_song_title">Are you sure?</string>
     <string name="dialog_delete_song_message">You are going to completely delete a song and all its versions, you won\'t be able to recover the recordings.</string>
+    <string name="dialog_repair_title">Are you sure?</string>
+    <string name="dialog_repair_message">This will try to re-normalize all the broken recordings. It might take a while.</string>
 
     <!-- Process -->
     <string name="begin_song">Begin song</string>

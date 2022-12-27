@@ -40,8 +40,4 @@ class RehearsalsViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    suspend fun getRehearsalStatus(id: Long): Int {
-        return database.rehearsalDao().getRehearsal(id).status
-    }
-
 }

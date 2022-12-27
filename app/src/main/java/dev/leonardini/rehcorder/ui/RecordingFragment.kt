@@ -50,7 +50,6 @@ class RecordingFragment : Fragment(), Runnable {
         // Recover state
         stopTimestamp = savedInstanceState?.getLong("stopTimestamp", -1) ?: -1
         isRecording = savedInstanceState?.getBoolean("isRecording", false) ?: true
-        Log.i("TEST", "$isRecording")
         if (stopTimestamp > 0 || isRecording) {
             startTimestamp =
                 savedInstanceState?.getLong("startTimestamp") ?: arguments?.getLong("timestamp")

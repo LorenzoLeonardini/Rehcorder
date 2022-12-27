@@ -27,6 +27,12 @@
             android:summary="@string/settings_storage_summary"
             android:title="@string/settings_storage_title" />
 
+        <androidx.preference.Preference
+            android:icon="@drawable/ic_repair"
+            android:key="repair"
+            android:summary="@string/settings_repair_summary"
+            android:title="@string/settings_repair_title" />
+
     </androidx.preference.PreferenceCategory>
 
     <androidx.preference.PreferenceCategory

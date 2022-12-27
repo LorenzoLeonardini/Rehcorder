@@ -2,10 +2,21 @@ package dev.leonardini.rehcorder.ui
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.view.View
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.preference.*
+import androidx.work.*
 import dev.leonardini.rehcorder.R
+import dev.leonardini.rehcorder.Utils
+import dev.leonardini.rehcorder.db.Database
+import dev.leonardini.rehcorder.ui.dialogs.MaterialDialogFragment
+import dev.leonardini.rehcorder.workers.WorkerUtils
+import kotlinx.coroutines.launch
+
 
 class SettingsFragment : PreferenceFragmentCompat() {
 
@@ -14,11 +25,47 @@ class SettingsFragment : PreferenceFragmentCompat() {
         const val SAMPLE_RATE = "sample_rate"
         const val DELETE_RECORDING = "delete_recording"
         private const val DIALOG_FRAGMENT_TAG = "androidx.preference.PreferenceFragment.DIALOG"
+
+        private const val CONFIRM_REPAIR_DIALOG = "ConfirmRepairDialog"
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        requireActivity().supportFragmentManager.setFragmentResultListener(
+            CONFIRM_REPAIR_DIALOG,
+            this
+        ) { _, bundle ->
+            val which = bundle.getInt("which")
+            if (which != AlertDialog.BUTTON_NEGATIVE) {
+                lifecycleScope.launch {
+                    val database = Database.getInstance(requireActivity().applicationContext)
+                    val rehearsals = database.rehearsalDao().getStuckRehearsals()
+                    for (rehearsal in rehearsals) {
+                        val (_, baseDir) = Utils.getPreferredStorageLocation(requireActivity().applicationContext)
+                        WorkerUtils.enqueueNormalization(
+                            rehearsal.uid,
+                            Utils.getRecordingPath(baseDir, rehearsal.fileName),
+                            requireActivity().applicationContext
+                        )
+                    }
+                    findNavController().navigateUp()
+                }
+            }
+        }
+    }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences, rootKey)
+
+        val myPref = findPreference("repair") as Preference?
+        myPref!!.setOnPreferenceClickListener {
+            MaterialDialogFragment(
+                R.string.dialog_repair_title,
+                R.string.dialog_repair_message
+            ).show(requireActivity().supportFragmentManager, CONFIRM_REPAIR_DIALOG)
+            true
+        }
     }
 
     @SuppressLint("RestrictedApi")
