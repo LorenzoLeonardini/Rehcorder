@@ -14,12 +14,14 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
+import dev.leonardini.rehcorder.Constants
 import dev.leonardini.rehcorder.MainActivity
 import dev.leonardini.rehcorder.R
 import dev.leonardini.rehcorder.Utils
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
 import dev.leonardini.rehcorder.ui.SettingsFragment
+import dev.leonardini.rehcorder.workers.WorkerUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -96,7 +98,7 @@ class RecorderService : Service() {
             (if (Build.VERSION.SDK_INT >= 23) PendingIntent.FLAG_IMMUTABLE else 0) or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        var notificationBuilder = NotificationCompat.Builder(this, "dev.leonardini.rehcorder")
+        var notificationBuilder = NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL)
             .setContentTitle(resources.getString(R.string.notification_recorder_title))
             .setSmallIcon(R.drawable.ic_mic)
             .setContentText(resources.getString(R.string.notification_recorder_text))
@@ -165,14 +167,7 @@ class RecorderService : Service() {
             }
 
             // Start normalizer service
-            val intent = Intent(this@RecorderService, NormalizerService::class.java)
-            intent.putExtra("id", id)
-            intent.putExtra("file", fileName)
-            if (Build.VERSION.SDK_INT >= 26) {
-                startForegroundService(intent)
-            } else {
-                startService(intent)
-            }
+            WorkerUtils.enqueueNormalization(id, fileName!!, applicationContext)
         }
 
         fileName = null

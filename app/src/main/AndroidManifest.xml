@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".RehcorderApplication"
@@ -21,14 +22,6 @@
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="microphone" />
-        <service
-            android:name=".services.NormalizerService"
-            android:enabled="true"
-            android:exported="false" />
-        <service
-            android:name=".services.SplitterService"
-            android:enabled="true"
-            android:exported="false" />
 
         <activity
             android:name=".SplitterActivity"

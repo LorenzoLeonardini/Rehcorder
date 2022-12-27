@@ -52,7 +52,8 @@ class RehearsalInfoViewModel(application: Application, private val rehearsalId: 
                     )
                 ).delete()
 
-                for (song in database.songRecordingDao().getRehearsalSongsRecordingsFromRehearsal(rehearsalId)) {
+                for (song in database.songRecordingDao()
+                    .getRehearsalSongsRecordingsFromRehearsal(rehearsalId)) {
                     val fileName: String = song.fileName
                     val externalStorage: Boolean = song.externalStorage
 

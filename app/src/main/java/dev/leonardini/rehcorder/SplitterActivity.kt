@@ -1,11 +1,9 @@
 package dev.leonardini.rehcorder
 
 import android.content.Context
-import android.content.Intent
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.SeekBar
@@ -21,10 +19,10 @@ import dev.leonardini.rehcorder.db.AppDatabase
 import dev.leonardini.rehcorder.db.Database
 import dev.leonardini.rehcorder.db.Rehearsal
 import dev.leonardini.rehcorder.db.Song
-import dev.leonardini.rehcorder.services.SplitterService
 import dev.leonardini.rehcorder.ui.dialogs.MaterialDialogFragment
 import dev.leonardini.rehcorder.ui.dialogs.MaterialInfoDialogFragment
 import dev.leonardini.rehcorder.ui.dialogs.SongPickerDialogFragment
+import dev.leonardini.rehcorder.workers.WorkerUtils
 import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.math.floor
@@ -288,19 +286,27 @@ class SplitterActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeL
             } else {
                 val baseDir =
                     if (externalStorage) getExternalFilesDir(null) ?: filesDir else filesDir
-                val intent = Intent(this, SplitterService::class.java)
-                intent.putExtra("id", rehearsalId)
-                intent.putExtra("file", Utils.getRecordingPath(baseDir, fileName))
-                intent.putExtra("regions", songRegions)
+
+                val regions: ArrayList<Triple<Long, Long, Long>> = ArrayList(songRegions.size / 3)
+                for (i in 0 until songRegions.size / 3) {
+                    regions.add(
+                        Triple(
+                            songRegions[i * 3 + 2],
+                            songRegions[i * 3],
+                            songRegions[i * 3 + 1]
+                        )
+                    )
+                }
 
                 lifecycleScope.launch {
                     Database.getInstance(applicationContext).rehearsalDao()
                         .updateStatus(rehearsalId, Rehearsal.PROCESSING)
-                    if (Build.VERSION.SDK_INT >= 26) {
-                        startForegroundService(intent)
-                    } else {
-                        startService(intent)
-                    }
+                    WorkerUtils.enqueueSplitting(
+                        rehearsalId,
+                        Utils.getRecordingPath(baseDir, fileName),
+                        regions,
+                        applicationContext
+                    )
                     finish()
                 }
             }

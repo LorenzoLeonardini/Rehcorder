@@ -10,7 +10,8 @@ import dev.leonardini.rehcorder.Utils
 data class Rehearsal(
     @ColumnInfo(name = "date") val date: Long,
     @ColumnInfo(name = "file_name") val fileName: String,
-    @ColumnInfo(name = "external_storage") val externalStorage: Boolean
+    @ColumnInfo(name = "external_storage") val externalStorage: Boolean,
+    @ColumnInfo(name = "worker", defaultValue = "0") var worker: Boolean
 ) {
     companion object {
         const val CREATED = 1
@@ -29,7 +30,8 @@ data class Rehearsal(
                 Rehearsal(
                     date = timestamp,
                     fileName = fileName,
-                    externalStorage = externalStorage
+                    externalStorage = externalStorage,
+                    worker = true
                 )
             )
 
