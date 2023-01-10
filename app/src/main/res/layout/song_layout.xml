@@ -45,8 +45,11 @@
             android:id="@+id/image"
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:background="@color/material_dynamic_tertiary90"
+            android:background="?colorTertiaryContainer"
             android:contentDescription="Song cover"
+            android:foreground="@drawable/bg_note"
+            android:foregroundTint="?colorOnTertiaryContainer"
+            android:foregroundGravity="center"
             android:scaleType="centerCrop" />
 
     </androidx.appcompat.widget.LinearLayoutCompat>

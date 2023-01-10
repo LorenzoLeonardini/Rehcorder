@@ -1,14 +1,17 @@
 package dev.leonardini.rehcorder
 
 import android.os.Bundle
+import android.text.TextUtils
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuProvider
 import androidx.core.view.WindowCompat
+import androidx.core.view.children
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -48,6 +51,16 @@ class SongInfoActivity : AppCompatActivity(), SongInfoAdapter.OnTrackButtonClick
         setSupportActionBar(binding.toolbar)
         binding.toolbar.setNavigationOnClickListener { finish() }
         addMenuProvider(this)
+
+        for (child in binding.toolbar.children) {
+            if (child is TextView) {
+                child.ellipsize = TextUtils.TruncateAt.MARQUEE
+                child.postDelayed({
+                    child.isSelected = true
+                }, 1000)
+                child.marqueeRepeatLimit = -1
+            }
+        }
 
         if (!intent.hasExtra("songId")) {
             finish()
