@@ -10,6 +10,7 @@
     <string name="loading">Caricamento…</string>
     <string name="edit">Modifica</string>
     <string name="share">Condividi</string>
+    <string name="cut">Ritaglia</string>
     <string name="seek_back">Indietro</string>
     <string name="seek_forward">Avanti</string>
     <string name="play">Play</string>

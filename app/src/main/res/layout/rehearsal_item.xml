@@ -4,10 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginVertical="4dp"
     android:background="?attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true"
-    android:paddingHorizontal="8dp">
+    android:paddingHorizontal="5dp">
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="0dp"
@@ -16,12 +17,11 @@
         android:layout_column="1"
         android:layout_columnWeight="1"
         android:orientation="vertical"
-        android:paddingTop="8dp"
-        android:paddingBottom="10dp">
+        android:paddingVertical="9dp">
 
         <TextView
             android:id="@+id/rehearsal_title"
-            style="@style/TextAppearance.Material3.TitleLarge"
+            style="@style/TextAppearance.Material3.TitleMedium"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="6dp"
@@ -42,7 +42,7 @@
                 tools:ignore="HardcodedText" />
 
             <TextView
-                style="@style/TextAppearance.Material3.BodySmall"
+                style="@style/TextAppearance.Material3.BodyMedium"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="6dp"
@@ -61,26 +61,34 @@
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 
-    <LinearLayout
-        android:id="@+id/rehearsal_edit_button"
-        android:layout_width="44dp"
-        android:layout_height="44dp"
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_row="1"
         android:layout_column="2"
         android:layout_gravity="center"
-        android:background="@drawable/rounded_view_ripple"
-        android:clickable="true"
-        android:contentDescription="@string/edit"
-        android:focusable="true"
-        android:gravity="center">
+        android:orientation="horizontal">
 
-        <com.google.android.material.button.MaterialButton
-            style="@style/Widget.App.Button.List.IconOnly"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clickable="false"
-            android:focusable="false"
-            app:icon="@drawable/ic_edit" />
-    </LinearLayout>
+        <LinearLayout
+            android:id="@+id/rehearsal_edit_button"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_gravity="center"
+            android:background="@drawable/rounded_view_ripple"
+            android:clickable="true"
+            android:contentDescription="@string/edit"
+            android:focusable="true"
+            android:gravity="center">
 
+            <com.google.android.material.button.MaterialButton
+                style="@style/Widget.App.Button.List.IconOnly"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:focusable="false"
+                app:icon="@drawable/ic_edit" />
+
+        </LinearLayout>
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
 </GridLayout>

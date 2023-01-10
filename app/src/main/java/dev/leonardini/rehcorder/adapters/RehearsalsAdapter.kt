@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import dev.leonardini.rehcorder.R
 import dev.leonardini.rehcorder.databinding.RehearsalHeaderBinding
-import dev.leonardini.rehcorder.databinding.RehearsalLayoutBinding
+import dev.leonardini.rehcorder.databinding.RehearsalItemBinding
 import dev.leonardini.rehcorder.db.RehearsalWithSongsCount
 import java.text.DateFormat
 import java.util.*
@@ -58,7 +58,7 @@ class RehearsalsAdapter(
             UiModelType.ITEM -> {
                 val v =
                     LayoutInflater.from(parent.context)
-                        .inflate(R.layout.rehearsal_layout, parent, false)
+                        .inflate(R.layout.rehearsal_item, parent, false)
                 RehearsalViewHolder(v, editElementListener, itemClickListener)
             }
             UiModelType.HEADER -> {
@@ -107,7 +107,7 @@ class RehearsalsAdapter(
     ) :
         RecyclerView.ViewHolder(itemView), View.OnClickListener {
 
-        val binding: RehearsalLayoutBinding = RehearsalLayoutBinding.bind(itemView)
+        val binding: RehearsalItemBinding = RehearsalItemBinding.bind(itemView)
         var id: Long = -1
         var name: String? = null
         var formattedDate: String? = null
