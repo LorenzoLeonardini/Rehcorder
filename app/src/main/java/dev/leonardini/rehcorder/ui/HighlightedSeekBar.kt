@@ -50,7 +50,7 @@ class HighlightedSeekBar : AppCompatSeekBar {
 
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         val width = measuredWidth - paddingLeft - paddingRight
         val height = measuredHeight - paddingTop - paddingBottom
@@ -60,7 +60,7 @@ class HighlightedSeekBar : AppCompatSeekBar {
         val top = (height - barHeight) / 2f
 
         for (region in regions) {
-            canvas?.drawRect(
+            canvas.drawRect(
                 paddingLeft + region.first * width,
                 top,
                 paddingLeft + region.second * width,
@@ -69,7 +69,7 @@ class HighlightedSeekBar : AppCompatSeekBar {
             )
         }
 
-        drawThumb(canvas!!)
+        drawThumb(canvas)
     }
 
     // Copied from AbsSeekBar implementation (up two superclasses)

@@ -266,9 +266,9 @@ class SplitterActivity : AppCompatActivity(), Runnable, SeekBar.OnSeekBarChangeL
 
         } else if (v == binding.content.undo) {
             if (songRegions.size > 0) {
-                songRegions.removeLast()
+                songRegions.removeAt(songRegions.size - 1)
                 if (songRegions.size % 3 == 2) {
-                    songRegions.removeLast()
+                    songRegions.removeAt(songRegions.size - 1)
                 }
                 if (songRegions.size == 0) {
                     binding.content.undo.isEnabled = false

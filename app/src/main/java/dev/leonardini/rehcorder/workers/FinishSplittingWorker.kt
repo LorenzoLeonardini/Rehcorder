@@ -1,7 +1,6 @@
 package dev.leonardini.rehcorder.workers
 
 import android.content.Context
-import android.util.Log
 import androidx.preference.PreferenceManager
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters

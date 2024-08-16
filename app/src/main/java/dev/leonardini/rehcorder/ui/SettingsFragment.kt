@@ -9,7 +9,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.preference.*
-import androidx.work.*
 import dev.leonardini.rehcorder.R
 import dev.leonardini.rehcorder.Utils
 import dev.leonardini.rehcorder.db.Database

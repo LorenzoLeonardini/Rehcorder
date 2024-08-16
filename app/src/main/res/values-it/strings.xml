@@ -47,6 +47,7 @@
     <plurals name="s_versions">
         <item quantity="one">%1$d Versione</item>
         <item quantity="other">%1$d Versioni</item>
+        <item quantity="many">%1$d Versioni</item>
     </plurals>
 
     <!-- Rehearsals -->
@@ -58,6 +59,7 @@
     <plurals name="r_count">
         <item quantity="one">%1$d Brano</item>
         <item quantity="other">%1$d Brani</item>
+        <item quantity="many">%1$d Brani</item>
     </plurals>
     <string name="r_no_recordings">Ancora nessuna registrazione, premi il pulsante per iniziare!</string>
 

@@ -26,7 +26,7 @@ object WorkerUtils {
         regions: List<Triple<Long, Long, Long>>,
         context: Context
     ) {
-        val splitRequests: ArrayList<OneTimeWorkRequest> = ArrayList<OneTimeWorkRequest>(20)
+        val splitRequests: ArrayList<OneTimeWorkRequest> = ArrayList(20)
         for (region in regions) {
             splitRequests.add(
                 OneTimeWorkRequestBuilder<SplitterWorker>()

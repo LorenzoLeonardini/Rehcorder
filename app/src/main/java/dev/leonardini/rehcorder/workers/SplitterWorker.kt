@@ -128,7 +128,7 @@ class SplitterWorker(context: Context, parameters: WorkerParameters) :
                 .setSilent(true)
                 .build()
 
-        return ForegroundInfo(Companion.NOTIFICATION_ID, notification)
+        return ForegroundInfo(NOTIFICATION_ID, notification)
     }
 
 }
